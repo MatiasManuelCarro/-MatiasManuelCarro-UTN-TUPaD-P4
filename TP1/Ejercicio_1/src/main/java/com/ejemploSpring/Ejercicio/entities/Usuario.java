@@ -1,5 +1,6 @@
 package com.ejemploSpring.Ejercicio.entities;
 
+import com.ejemploSpring.Ejercicio.enums.Rol;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
