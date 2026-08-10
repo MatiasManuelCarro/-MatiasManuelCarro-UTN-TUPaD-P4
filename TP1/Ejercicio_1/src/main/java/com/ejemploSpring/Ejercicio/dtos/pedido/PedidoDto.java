@@ -12,8 +12,8 @@ public record PedidoDto(
         LocalDate fecha,
         Estado estado,
         BigDecimal total,
-        FormaPago formapago,
-        String usuarioNombre
+        FormaPago formapago
+/*        String usuarioNombre*/
 ) {
 
     public static PedidoDto toDto(Pedido pedido) {
@@ -22,7 +22,7 @@ public record PedidoDto(
                 pedido.getFecha(),
                 pedido.getEstado(),
                 pedido.getTotal(),
-                pedido.getFormapago(),
-                pedido.getUsuario().getNombre());
+                pedido.getFormapago());
+                /*pedido.getUsuario().getNombre());*/
     }
 }

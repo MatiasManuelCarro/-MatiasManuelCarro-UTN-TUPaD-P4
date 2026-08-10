@@ -13,8 +13,8 @@ public record ProductoDto(
     String descripcion,
     int stock,
     String imagen,
-    Boolean disponible,
-    CategoriaDto categoriaDto
+    Boolean disponible
+/*    CategoriaDto categoriaDto*/
 ){
     public static ProductoDto toDto(Producto producto){
         return new ProductoDto(
@@ -24,10 +24,10 @@ public record ProductoDto(
                 producto.getDescripcion(),
                 producto.getStock(),
                 producto.getImagen(),
-                producto.isDisponible(),
+                producto.isDisponible());
                 //  Si producto.getCategoria es nulo, se devuelve nulo
-                producto.getCategoria() != null ? CategoriaDto.toDto(producto.getCategoria()) : null
-        );
+/*                producto.getCategoria() != null ? CategoriaDto.toDto(producto.getCategoria()) : null*/
+
     }
 }
 
