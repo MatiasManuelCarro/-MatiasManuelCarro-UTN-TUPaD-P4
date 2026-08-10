@@ -24,9 +24,10 @@ public class DetallePedido extends Base {
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Producto producto;
-    @ManyToOne
+    //Se elimina para cumplir con la direccionalidad
+/*    @ManyToOne
     @JoinColumn(name = "pedido_id", nullable = false)
-    private Pedido pedido;
+    private Pedido pedido;*/
 
     public DetallePedido(int cantidad, BigDecimal subtotal) {
         this.cantidad = cantidad;

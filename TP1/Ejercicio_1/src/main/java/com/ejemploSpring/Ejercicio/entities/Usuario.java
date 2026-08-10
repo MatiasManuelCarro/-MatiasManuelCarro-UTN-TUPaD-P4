@@ -33,7 +33,10 @@ public class Usuario extends Base {
 
 
     @Builder.Default
-    @OneToMany(mappedBy = "usuario")
+    //se elimina por correccion
+/*    @OneToMany(mappedBy = "usuario")*/
+    @OneToMany
+    @JoinColumn(name = "usuario_id") // FK en pedido
     private Set<Pedido> pedidos = new HashSet<>();
     public void addPedido(Pedido pedido) {
         pedidos.add(pedido);
