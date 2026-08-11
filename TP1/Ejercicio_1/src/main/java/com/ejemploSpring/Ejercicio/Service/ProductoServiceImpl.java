@@ -61,4 +61,10 @@ public class ProductoServiceImpl implements ProductoService {
         productoRepository.save(producto);
 
     }
+
+    @Override
+    public Producto findEntityById(Long id) {
+        return productoRepository.findById(id)
+                .orElseThrow(() -> new NullPointerException("No se encontró producto con id " + id));
+    }
 }

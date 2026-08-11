@@ -42,13 +42,21 @@ public class EjercicioApplication {
             // 1) USUARIOS
             // ============================
             var u1 = usuarioService.save(new UsuarioCreate(
-                    "Matías", "Carro", "matias@mail.com",
-                    "1155555555", Rol.USUARIO, "123456"
+                    "Matías",
+                    "Carro",
+                    "matias@mail.com",
+                    "1155555555",
+                    "123456",       // contrasenia
+                    Rol.USUARIO     // rol
             ));
 
             var u2 = usuarioService.save(new UsuarioCreate(
-                    "Ana", "Gómez", "ana@mail.com",
-                    "1144444444", Rol.ADMIN, "admin123"
+                    "Ana",
+                    "Gómez",
+                    "ana@mail.com",
+                    "1144444444",
+                    "admin123",     // contrasenia
+                    Rol.ADMIN       // rol
             ));
 
             // ============================

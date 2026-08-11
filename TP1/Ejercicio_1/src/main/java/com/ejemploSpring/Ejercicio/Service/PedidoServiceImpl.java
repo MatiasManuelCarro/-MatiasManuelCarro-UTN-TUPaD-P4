@@ -23,12 +23,12 @@ public class PedidoServiceImpl implements PedidoService {
         Pedido pedido = Pedido.builder()
                 .fecha(pedidoEdit.fecha())
                 .estado(pedidoEdit.estado())
-                .formapago(pedidoEdit.formaPago())
+                .formapago(pedidoEdit.formapago())
                 .build();
 
         // Agregar detalles
         for (DetallePedidoCreate d : detalles) {
-            Producto producto = productoService.findById(d.productoId());
+            Producto producto = productoService.findEntityById(d.productoId());
 
             pedido.addDetallePedido(d.cantidad(), producto);
         }
@@ -56,7 +56,7 @@ public class PedidoServiceImpl implements PedidoService {
 
         pedido.setFecha(pedidoEdit.fecha());
         pedido.setEstado(pedidoEdit.estado());
-        pedido.setFormapago(pedidoEdit.formaPago());
+        pedido.setFormapago(pedidoEdit.formapago());
 
         pedido.calcularTotal();
 

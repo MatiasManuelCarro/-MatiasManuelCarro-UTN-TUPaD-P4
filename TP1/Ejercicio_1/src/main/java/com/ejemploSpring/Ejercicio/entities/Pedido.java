@@ -36,6 +36,7 @@ public class Pedido extends Base implements Calculable {
     //se elimina para corregir direccion de relacion
 /*    @Builder.Default
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)*/
+    @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "pedido_id") // FK en detallePedido
     private Set<DetallePedido> detallePedidos = new HashSet<>();

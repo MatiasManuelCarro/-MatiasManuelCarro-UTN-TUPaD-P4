@@ -21,6 +21,7 @@ public class DetallePedido extends Base {
 
     private int cantidad;
     private BigDecimal subtotal;
+
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Producto producto;
