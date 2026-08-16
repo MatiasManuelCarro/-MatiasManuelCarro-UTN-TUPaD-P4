@@ -1,4 +1,4 @@
-package com.ejemploSpring.Ejercicio.Service;
+package com.ejemploSpring.Ejercicio.service;
 
 import com.ejemploSpring.Ejercicio.dtos.producto.ProductoCreate;
 import com.ejemploSpring.Ejercicio.dtos.producto.ProductoDto;

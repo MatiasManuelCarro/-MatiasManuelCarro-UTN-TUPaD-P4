@@ -1,9 +1,10 @@
 package com.ejemploSpring.Ejercicio;
 
-import com.ejemploSpring.Ejercicio.Service.CategoriaService;
-import com.ejemploSpring.Ejercicio.Service.PedidoService;
-import com.ejemploSpring.Ejercicio.Service.ProductoService;
-import com.ejemploSpring.Ejercicio.Service.UsuarioService;
+import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioDto;
+import com.ejemploSpring.Ejercicio.service.CategoriaService;
+import com.ejemploSpring.Ejercicio.service.PedidoService;
+import com.ejemploSpring.Ejercicio.service.ProductoService;
+import com.ejemploSpring.Ejercicio.service.UsuarioService;
 import com.ejemploSpring.Ejercicio.dtos.categoria.CategoriaCreate;
 import com.ejemploSpring.Ejercicio.dtos.detallePedido.DetallePedidoCreate;
 import com.ejemploSpring.Ejercicio.dtos.pedido.PedidoEdit;
@@ -41,7 +42,7 @@ public class EjercicioApplication {
             // ============================
             // 1) USUARIOS
             // ============================
-            var u1 = usuarioService.save(new UsuarioCreate(
+            UsuarioDto u1 = usuarioService.save(new UsuarioCreate(
                     "Matías",
                     "Carro",
                     "matias@mail.com",

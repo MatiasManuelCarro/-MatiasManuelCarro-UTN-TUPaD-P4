@@ -1,4 +1,4 @@
-package com.ejemploSpring.Ejercicio.Service;
+package com.ejemploSpring.Ejercicio.service;
 
 import com.ejemploSpring.Ejercicio.dtos.producto.ProductoCreate;
 import com.ejemploSpring.Ejercicio.dtos.producto.ProductoDto;
@@ -7,20 +7,22 @@ import com.ejemploSpring.Ejercicio.entities.Categoria;
 import com.ejemploSpring.Ejercicio.entities.Producto;
 import com.ejemploSpring.Ejercicio.repository.CategoriaRepository;
 import com.ejemploSpring.Ejercicio.repository.ProductoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor //reemplaza el productoserviceimpl
 public class ProductoServiceImpl implements ProductoService {
 
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
 
-    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
+/*    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
-    }
+    }*/
 
     @Override
     public ProductoDto save(ProductoCreate productoCreate) {
