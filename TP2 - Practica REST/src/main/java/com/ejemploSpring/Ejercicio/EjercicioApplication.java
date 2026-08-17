@@ -33,7 +33,6 @@ public class EjercicioApplication {
         SpringApplication.run(EjercicioApplication.class, args);
     }
 
-
     @Bean
     public CommandLineRunner initData(
             UsuarioService usuarioService,
@@ -44,109 +43,149 @@ public class EjercicioApplication {
         return args -> {
 
             // ============================
-            // 1) USUARIOS
+            // 1) USUARIOS (5)
             // ============================
             UsuarioDto u1 = usuarioService.save(new UsuarioCreate(
-                    "Matías",
-                    "Carro",
-                    "matias@mail.com",
-                    "1155555555",
-                    "123456",       // contrasenia
-                    Rol.USUARIO     // rol
+                    "Matías", "Carro", "matias@mail.com", "1155555555", "123456", Rol.USUARIO
             ));
 
-/*
-            var u2 = usuarioService.save(new UsuarioCreate(
-                    "Ana",
-                    "Gómez",
-                    "ana@mail.com",
-                    "1144444444",
-                    "admin123",     // contrasenia
-                    Rol.ADMIN       // rol
+            UsuarioDto u2 = usuarioService.save(new UsuarioCreate(
+                    "Ana", "Gómez", "ana@mail.com", "1144444444", "abc123", Rol.USUARIO
             ));
-*/
+
+            UsuarioDto u3 = usuarioService.save(new UsuarioCreate(
+                    "Luis", "Pérez", "luis@mail.com", "1133333333", "pass123", Rol.USUARIO
+            ));
+
+            UsuarioDto u4 = usuarioService.save(new UsuarioCreate(
+                    "Carla", "Sosa", "carla@mail.com", "1122222222", "qwerty", Rol.USUARIO
+            ));
+
+            UsuarioDto u5 = usuarioService.save(new UsuarioCreate(
+                    "Jorge", "Ramírez", "jorge@mail.com", "1111111111", "jorgepass", Rol.ADMIN
+            ));
+
 
             // ============================
-            // 2) CATEGORÍAS
+            // 2) CATEGORÍAS (insumos de computación)
             // ============================
             var c1 = categoriaService.save(new CategoriaCreate(
-                    "Bebidas", "Gaseosas, jugos y agua"
+                    "Periféricos", "Teclados, mouse, auriculares"
             ));
 
             var c2 = categoriaService.save(new CategoriaCreate(
-                    "Snacks", "Papas, maní y otros"
+                    "Almacenamiento", "Discos SSD, HDD, memorias"
             ));
 
             var c3 = categoriaService.save(new CategoriaCreate(
-                    "Lácteos", "Productos derivados de la leche"
+                    "Componentes", "Placas de video, motherboards, procesadores"
             ));
+
+            var c4 = categoriaService.save(new CategoriaCreate(
+                    "Monitores", "Pantallas LED, IPS, 144Hz"
+            ));
+
+            var c5 = categoriaService.save(new CategoriaCreate(
+                    "Accesorios", "Cables, adaptadores, soportes"
+            ));
+
 
             // ============================
             // 3) PRODUCTOS (10)
             // ============================
-            productoService.save(new ProductoCreate("Coca Cola", new BigDecimal("1200"), "Gaseosa 1.5L", 50, "coca.jpg", true, c1.id()));
-            productoService.save(new ProductoCreate("Pepsi", new BigDecimal("1100"), "Gaseosa 1.5L", 40, "pepsi.jpg", true, c1.id()));
-            productoService.save(new ProductoCreate("Agua Mineral", new BigDecimal("800"), "Agua 2L", 60, "agua.jpg", true, c1.id()));
+            productoService.save(new ProductoCreate("Teclado Mecánico Redragon", new BigDecimal("25000"), "Switch Red", 30, "teclado.jpg", true, c1.id()));
+            productoService.save(new ProductoCreate("Mouse Logitech G203", new BigDecimal("18000"), "RGB 8000 DPI", 40, "mouse.jpg", true, c1.id()));
+            productoService.save(new ProductoCreate("Auriculares HyperX Cloud II", new BigDecimal("45000"), "Sonido 7.1", 20, "auriculares.jpg", true, c1.id()));
 
-            productoService.save(new ProductoCreate("Papas Lays", new BigDecimal("900"), "Papas clásicas", 30, "lays.jpg", true, c2.id()));
-            productoService.save(new ProductoCreate("Maní Salado", new BigDecimal("700"), "Maní 200g", 25, "mani.jpg", true, c2.id()));
-            productoService.save(new ProductoCreate("Doritos", new BigDecimal("950"), "Nachos queso", 20, "doritos.jpg", true, c2.id()));
+            productoService.save(new ProductoCreate("SSD Kingston 480GB", new BigDecimal("32000"), "SATA 3", 50, "ssd.jpg", true, c2.id()));
+            productoService.save(new ProductoCreate("Memoria RAM 16GB DDR4", new BigDecimal("28000"), "3200MHz", 35, "ram.jpg", true, c2.id()));
 
-            productoService.save(new ProductoCreate("Leche Entera", new BigDecimal("1000"), "Leche 1L", 45, "leche.jpg", true, c3.id()));
-            productoService.save(new ProductoCreate("Yogur Frutilla", new BigDecimal("850"), "Yogur 200g", 35, "yogur.jpg", true, c3.id()));
-            productoService.save(new ProductoCreate("Queso Cremoso", new BigDecimal("1800"), "Queso 500g", 15, "queso.jpg", true, c3.id()));
-            productoService.save(new ProductoCreate("Manteca", new BigDecimal("950"), "Manteca 200g", 20, "manteca.jpg", true, c3.id()));
+            productoService.save(new ProductoCreate("Motherboard ASUS B450", new BigDecimal("65000"), "AM4", 15, "mother.jpg", true, c3.id()));
+            productoService.save(new ProductoCreate("Placa de Video GTX 1660", new BigDecimal("180000"), "6GB GDDR5", 10, "gtx1660.jpg", true, c3.id()));
+
+            productoService.save(new ProductoCreate("Monitor Samsung 24\"", new BigDecimal("90000"), "IPS 75Hz", 25, "monitor.jpg", true, c4.id()));
+            productoService.save(new ProductoCreate("Cable HDMI 2.0", new BigDecimal("5000"), "1.8m", 100, "hdmi.jpg", true, c5.id()));
+            productoService.save(new ProductoCreate("Soporte para Notebook", new BigDecimal("15000"), "Ajustable", 60, "soporte.jpg", true, c5.id()));
+
 
             // ============================
-            // 4) PEDIDOS (3)
+            // 4) PEDIDOS (10)
             // ============================
 
-            // Pedido 1 - usuario 1
-/*            var pedido1 = pedidoService.save(
-                    new PedidoEdit(LocalDate.now(), Estado.PENDIENTE, FormaPago.EFECTIVO, u1.id()),
-                    List.of(
-                            new DetallePedidoCreate(2, 1L), // Coca Cola
-                            new DetallePedidoCreate(1, 4L)  // Lays
-                    )
-            );*/
-
-// Pedido 1 - usuario 1
-/*            Usuario u1 = usuarioService.findEntityById(u1Dto.id());*/
-
-            Pedido p1 = pedidoService.save(
-                    new PedidoCreate(
-                            LocalDate.now(),
-                            Estado.PENDIENTE,
-                            FormaPago.EFECTIVO,
-                            List.of(
-                                    new DetallePedidoCreate(2, 1L),
-                                    new DetallePedidoCreate(1, 4L)
-                            )
-                    )
-            );
-
+            // Pedido 1 - Usuario 1
+            Pedido p1 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.EFECTIVO,
+                    List.of(new DetallePedidoCreate(1, 1L), new DetallePedidoCreate(1, 4L))
+            ));
             pedidoService.asignarPedido(u1.id(), p1);
 
+            // Pedido 2 - Usuario 2
+            Pedido p2 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.TARJETA,
+                    List.of(new DetallePedidoCreate(2, 2L))
+            ));
+            pedidoService.asignarPedido(u2.id(), p2);
 
-            // Pedido 2 - usuario 1
-/*            var pedido2 = pedidoService.save(
-                    new PedidoEdit(LocalDate.now().minusDays(1), Estado.CONFIRMADO, FormaPago.TARJETA, u1.id()),
-                    List.of(
-                            new DetallePedidoCreate(3, 7L), // Leche
-                            new DetallePedidoCreate(2, 8L)  // Yogur
-                    )
-            );
+            // Pedido 3 - Usuario 3
+            Pedido p3 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.TRANSFERENCIA,
+                    List.of(new DetallePedidoCreate(1, 3L), new DetallePedidoCreate(1, 5L))
+            ));
+            pedidoService.asignarPedido(u3.id(), p3);
 
-            // Pedido 3 - usuario 2
-            var pedido3 = pedidoService.save(
-                    new PedidoEdit(LocalDate.now().minusDays(2), Estado.TERMINADO, FormaPago.TRANSFERENCIA, u2.id()),
-                    List.of(
-                            new DetallePedidoCreate(1, 9L), // Queso
-                            new DetallePedidoCreate(2, 10L) // Manteca
-                    )
-            );*/
+            // Pedido 4 - Usuario 4
+            Pedido p4 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.EFECTIVO,
+                    List.of(new DetallePedidoCreate(1, 6L))
+            ));
+            pedidoService.asignarPedido(u4.id(), p4);
+
+            // Pedido 5 - Usuario 5
+            Pedido p5 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.TARJETA,
+                    List.of(new DetallePedidoCreate(1, 7L))
+            ));
+            pedidoService.asignarPedido(u5.id(), p5);
+
+            // Pedido 6 - Usuario 1
+            Pedido p6 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.TRANSFERENCIA,
+                    List.of(new DetallePedidoCreate(2, 8L))
+            ));
+            pedidoService.asignarPedido(u1.id(), p6);
+
+            // Pedido 7 - Usuario 2
+            Pedido p7 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.EFECTIVO,
+                    List.of(new DetallePedidoCreate(3, 9L))
+            ));
+            pedidoService.asignarPedido(u2.id(), p7);
+
+            // Pedido 8 - Usuario 3
+            Pedido p8 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.TARJETA,
+                    List.of(new DetallePedidoCreate(1, 10L))
+            ));
+            pedidoService.asignarPedido(u3.id(), p8);
+
+            // Pedido 9 - Usuario 4
+            Pedido p9 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.TRANSFERENCIA,
+                    List.of(new DetallePedidoCreate(1, 2L), new DetallePedidoCreate(1, 5L))
+            ));
+            pedidoService.asignarPedido(u4.id(), p9);
+
+            // Pedido 10 - Usuario 5
+            Pedido p10 = pedidoService.save(new PedidoCreate(
+                    LocalDate.now(), Estado.PENDIENTE, FormaPago.EFECTIVO,
+                    List.of(new DetallePedidoCreate(2, 1L), new DetallePedidoCreate(1, 7L))
+            ));
+            pedidoService.asignarPedido(u5.id(), p10);
+
 
             System.out.println(">>> Datos iniciales cargados correctamente.");
         };
     }
+
+
 }
