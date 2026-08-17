@@ -60,4 +60,9 @@ public class UsuarioController {
         usuarioService.deleteById(id);
     }
 
+    @GetMapping("/mail/{mail}")
+    public UsuarioDto getByEmail(@PathVariable String mail) {
+        return usuarioService.findByMail(mail);
+    }
+
 }

@@ -10,8 +10,8 @@ import java.time.LocalDate;
 public record PedidoEdit(
         LocalDate fecha,
         Estado estado,
-        FormaPago formapago,
-        Long usuarioId
+        FormaPago formapago
+
 ) {
 
     public void applyTo(Pedido pedido, Usuario usuario) {

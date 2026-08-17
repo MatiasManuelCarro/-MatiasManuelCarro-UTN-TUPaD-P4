@@ -4,10 +4,12 @@ import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioCreate;
 import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioDto;
 import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioEdit;
 import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioNombreDto;
+import com.ejemploSpring.Ejercicio.entities.Pedido;
 import com.ejemploSpring.Ejercicio.entities.Usuario;
 import com.ejemploSpring.Ejercicio.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -69,6 +71,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    public UsuarioDto findByMail(String mail) {
+        Usuario usuario = usuarioRepository.findByMail(mail)
+                .orElseThrow(() -> new NullPointerException("No se encontró usuario con email " + mail));
+
+        return UsuarioDto.toDto(usuario);
+    }
+
+    @Override
     public UsuarioNombreDto getNombreApellido(Long id) {
 
         Usuario usuario = usuarioRepository.findById(id)
@@ -76,4 +86,6 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         return UsuarioNombreDto.toDto(usuario);
     }
+
+
 }

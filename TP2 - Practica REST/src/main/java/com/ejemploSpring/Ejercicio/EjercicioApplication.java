@@ -1,6 +1,9 @@
 package com.ejemploSpring.Ejercicio;
 
+import com.ejemploSpring.Ejercicio.dtos.pedido.PedidoCreate;
 import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioDto;
+import com.ejemploSpring.Ejercicio.entities.Pedido;
+import com.ejemploSpring.Ejercicio.entities.Usuario;
 import com.ejemploSpring.Ejercicio.service.CategoriaService;
 import com.ejemploSpring.Ejercicio.service.PedidoService;
 import com.ejemploSpring.Ejercicio.service.ProductoService;
@@ -17,6 +20,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -51,6 +55,7 @@ public class EjercicioApplication {
                     Rol.USUARIO     // rol
             ));
 
+/*
             var u2 = usuarioService.save(new UsuarioCreate(
                     "Ana",
                     "Gómez",
@@ -59,6 +64,7 @@ public class EjercicioApplication {
                     "admin123",     // contrasenia
                     Rol.ADMIN       // rol
             ));
+*/
 
             // ============================
             // 2) CATEGORÍAS
@@ -96,16 +102,34 @@ public class EjercicioApplication {
             // ============================
 
             // Pedido 1 - usuario 1
-            var pedido1 = pedidoService.save(
+/*            var pedido1 = pedidoService.save(
                     new PedidoEdit(LocalDate.now(), Estado.PENDIENTE, FormaPago.EFECTIVO, u1.id()),
                     List.of(
                             new DetallePedidoCreate(2, 1L), // Coca Cola
                             new DetallePedidoCreate(1, 4L)  // Lays
                     )
+            );*/
+
+// Pedido 1 - usuario 1
+/*            Usuario u1 = usuarioService.findEntityById(u1Dto.id());*/
+
+            Pedido p1 = pedidoService.save(
+                    new PedidoCreate(
+                            LocalDate.now(),
+                            Estado.PENDIENTE,
+                            FormaPago.EFECTIVO,
+                            List.of(
+                                    new DetallePedidoCreate(2, 1L),
+                                    new DetallePedidoCreate(1, 4L)
+                            )
+                    )
             );
 
+            pedidoService.asignarPedido(u1.id(), p1);
+
+
             // Pedido 2 - usuario 1
-            var pedido2 = pedidoService.save(
+/*            var pedido2 = pedidoService.save(
                     new PedidoEdit(LocalDate.now().minusDays(1), Estado.CONFIRMADO, FormaPago.TARJETA, u1.id()),
                     List.of(
                             new DetallePedidoCreate(3, 7L), // Leche
@@ -120,7 +144,7 @@ public class EjercicioApplication {
                             new DetallePedidoCreate(1, 9L), // Queso
                             new DetallePedidoCreate(2, 10L) // Manteca
                     )
-            );
+            );*/
 
             System.out.println(">>> Datos iniciales cargados correctamente.");
         };

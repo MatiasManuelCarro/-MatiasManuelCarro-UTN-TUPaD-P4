@@ -61,20 +61,6 @@ public class Pedido extends Base implements Calculable {
 
     }
 
-    //Buscar detalle por producto
-    public DetallePedido findDetallePedidoByProducto(Producto producto) {
-        return detallePedidos.stream()
-                .filter(detallePedido -> detallePedido.getProducto().equals(producto))
-                .findFirst()
-                .orElse(null);
-    }
-
-
-    //Eliminar detalle por producto
-    public void deleteDetalleByProducto(Producto producto) {
-        detallePedidos.removeIf(d -> d.getProducto().equals(producto));
-    }
-
 
     @Override
     public void calcularTotal() {
@@ -82,7 +68,6 @@ public class Pedido extends Base implements Calculable {
                 .map(DetallePedido::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         this.total = totalFinal;
-        System.out.println("Total del pedido: " + totalFinal);
     }
 
 

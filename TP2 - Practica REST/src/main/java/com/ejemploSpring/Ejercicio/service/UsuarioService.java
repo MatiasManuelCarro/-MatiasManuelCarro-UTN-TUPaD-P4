@@ -4,6 +4,8 @@ import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioCreate;
 import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioDto;
 import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioEdit;
 import com.ejemploSpring.Ejercicio.dtos.usuario.UsuarioNombreDto;
+import com.ejemploSpring.Ejercicio.entities.Pedido;
+import com.ejemploSpring.Ejercicio.entities.Usuario;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ public interface UsuarioService {
     public UsuarioDto update(UsuarioEdit usuarioEdit, Long idUsuario);
 
     public void deleteById(Long id);
+
+    public UsuarioDto findByMail(String email);
 
     public UsuarioNombreDto getNombreApellido(Long id);
 
