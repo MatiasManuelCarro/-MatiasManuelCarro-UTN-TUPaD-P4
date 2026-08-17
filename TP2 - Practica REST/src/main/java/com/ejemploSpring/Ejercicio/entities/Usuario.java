@@ -1,0 +1,47 @@
+package com.ejemploSpring.Ejercicio.entities;
+
+import com.ejemploSpring.Ejercicio.enums.Rol;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "usuarios")
+@Getter
+@Setter
+
+@ToString(callSuper = true, exclude = "contrasenia")
+@EqualsAndHashCode(callSuper = false, of = {"mail"})
+
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Usuario extends Base {
+    private String nombre;
+    private String apellido;
+    @Column(unique = true)
+    private String mail;
+    private String celular;
+    private String contrasenia;
+    @Enumerated(EnumType.STRING)
+    private Rol rol;
+
+    //sets de pedidos
+
+
+    @Builder.Default
+    //se elimina por correccion
+/*    @OneToMany(mappedBy = "usuario")*/
+    @OneToMany
+    @JoinColumn(name = "usuario_id") // FK en pedido
+    private Set<Pedido> pedidos = new HashSet<>();
+    public void addPedido(Pedido pedido) {
+        pedidos.add(pedido);
+    }
+
+
+
+}
