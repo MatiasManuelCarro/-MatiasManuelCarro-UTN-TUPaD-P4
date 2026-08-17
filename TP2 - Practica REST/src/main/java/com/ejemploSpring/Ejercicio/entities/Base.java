@@ -24,7 +24,7 @@ public abstract class Base {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Builder.Default
-    protected boolean eliminado = false;
+    protected Boolean eliminado = false;
     @Builder.Default
     protected LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -26,8 +26,10 @@ public class Categoria extends Base {
 @JoinColumn(name = "categoria_id") // FK en producto
     @Builder.Default
     private Set<Producto> productos = new HashSet<>();
+/*
     @Builder.Default
     private Boolean eliminado = false; //valor por defecto
+*/
 
 
     //helper para mantener la bidireccionalidad - eliminado para cumplir la relacion

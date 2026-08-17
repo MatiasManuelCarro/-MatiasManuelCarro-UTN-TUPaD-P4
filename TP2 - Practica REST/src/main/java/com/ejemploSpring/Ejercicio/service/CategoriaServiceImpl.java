@@ -34,8 +34,8 @@ public class CategoriaServiceImpl implements CategoriaService{
 
     @Override
     public List<CategoriaDto> findAll() {
-        return categoriaRepository.findAll().stream()
-                .filter(c -> !Boolean.TRUE.equals(c.getEliminado())) // solo activas
+        return categoriaRepository.findAllByEliminadoFalse()
+                .stream()
                 .map(CategoriaDto::toDto)
                 .toList();
     }
@@ -50,7 +50,8 @@ public class CategoriaServiceImpl implements CategoriaService{
 
     @Override
     public void deleteById(Long id) {
-        Categoria categoria = categoriaRepository.findById(id).orElseThrow(() -> new NullPointerException("No se contro categoria con el id" + id));
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new NullPointerException("No se contro categoria con el id " + id));
         categoria.setEliminado(true);
         categoriaRepository.save(categoria);
     }
