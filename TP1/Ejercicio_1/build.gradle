@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.6'
+	id 'org.springframework.boot' version '3.5.6'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -18,21 +18,32 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
+	// JPA + Spring Data
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-	/*Levanta web en 8080*/
+	// Base de datos H2
+	implementation 'com.h2database:h2'
+
+	// Para crear endpoints REST
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	runtimeOnly 'com.h2database:h2'
+	// Para validaciones con anotaciones (@NotBlank, @Email, etc.)
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+	// Para generar getters/setters automáticamente
+	implementation 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// Herramientas útiles durante desarrollo (reinicio rápido, etc.)
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// Dependencias de test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
 }
+
+
 
 tasks.named('test') {
 	useJUnitPlatform()

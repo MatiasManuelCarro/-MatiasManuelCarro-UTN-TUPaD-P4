@@ -19,10 +19,6 @@ public class ProductoServiceImpl implements ProductoService {
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
 
-/*    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
-        this.productoRepository = productoRepository;
-        this.categoriaRepository = categoriaRepository;
-    }*/
 
     @Override
     public ProductoDto save(ProductoCreate productoCreate) {

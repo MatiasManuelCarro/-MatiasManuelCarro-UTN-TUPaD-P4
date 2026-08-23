@@ -29,12 +29,9 @@ public class Usuario extends Base {
     @Enumerated(EnumType.STRING)
     private Rol rol;
 
-    //sets de pedidos
-
 
     @Builder.Default
-    //se elimina por correccion
-/*    @OneToMany(mappedBy = "usuario")*/
+
     @OneToMany
     @JoinColumn(name = "usuario_id") // FK en pedido
     private Set<Pedido> pedidos = new HashSet<>();

@@ -23,6 +23,5 @@ public record PedidoDto(
                 pedido.getEstado(),
                 pedido.getTotal(),
                 pedido.getFormapago());
-                /*pedido.getUsuario().getNombre());*/
     }
 }

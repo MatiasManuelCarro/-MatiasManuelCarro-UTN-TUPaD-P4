@@ -20,8 +20,7 @@ public class Categoria extends Base {
     @Column(unique = true)
     private String nombre;
     private String descripcion;
-    //Eliminado para complir las relaciones
-/*    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, orphanRemoval = true)*/
+
 @OneToMany
 @JoinColumn(name = "categoria_id") // FK en producto
     @Builder.Default
@@ -30,11 +29,6 @@ public class Categoria extends Base {
     private Boolean eliminado = false; //valor por defecto
 
 
-    //helper para mantener la bidireccionalidad - eliminado para cumplir la relacion
-/*    public void addProducto(Producto producto) {
-        productos.add(producto);
-        producto.setCategoria(this);
-    }*/
 }
 
 

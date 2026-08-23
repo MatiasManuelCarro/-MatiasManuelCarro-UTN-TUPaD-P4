@@ -47,14 +47,14 @@ public class EjercicioApplication {
                     "Carro",
                     "matias@mail.com",
                     "1155555555",
-                    "123456",       // contrasenia
+                    "123456",
                     Rol.USUARIO     // rol
             ));
 
             var u2 = usuarioService.save(new UsuarioCreate(
-                    "Ana",
+                    "David",
                     "Gómez",
-                    "ana@mail.com",
+                    "david@mail.com",
                     "1144444444",
                     "admin123",     // contrasenia
                     Rol.ADMIN       // rol
@@ -64,65 +64,66 @@ public class EjercicioApplication {
             // 2) CATEGORÍAS
             // ============================
             var c1 = categoriaService.save(new CategoriaCreate(
-                    "Bebidas", "Gaseosas, jugos y agua"
+                    "Procesadores", "CPUs de distintas gamas"
             ));
 
             var c2 = categoriaService.save(new CategoriaCreate(
-                    "Snacks", "Papas, maní y otros"
+                    "Placas de Video", "GPUs para gaming y diseño"
             ));
 
             var c3 = categoriaService.save(new CategoriaCreate(
-                    "Lácteos", "Productos derivados de la leche"
+                    "Memorias RAM", "DDR4 y DDR5"
             ));
 
             // ============================
-            // 3) PRODUCTOS (10)
+            // 3) PRODUCTOS
             // ============================
-            productoService.save(new ProductoCreate("Coca Cola", new BigDecimal("1200"), "Gaseosa 1.5L", 50, "coca.jpg", true, c1.id()));
-            productoService.save(new ProductoCreate("Pepsi", new BigDecimal("1100"), "Gaseosa 1.5L", 40, "pepsi.jpg", true, c1.id()));
-            productoService.save(new ProductoCreate("Agua Mineral", new BigDecimal("800"), "Agua 2L", 60, "agua.jpg", true, c1.id()));
+            productoService.save(new ProductoCreate("Intel Core i5 12400F", new BigDecimal("150000"), "6 núcleos", 20, "i5.jpg", true, c1.id()));
+            productoService.save(new ProductoCreate("Intel Core i7 13700K", new BigDecimal("350000"), "16 núcleos", 15, "i7.jpg", true, c1.id()));
+            productoService.save(new ProductoCreate("AMD Ryzen 5 5600X", new BigDecimal("180000"), "6 núcleos", 25, "r5600x.jpg", true, c1.id()));
 
-            productoService.save(new ProductoCreate("Papas Lays", new BigDecimal("900"), "Papas clásicas", 30, "lays.jpg", true, c2.id()));
-            productoService.save(new ProductoCreate("Maní Salado", new BigDecimal("700"), "Maní 200g", 25, "mani.jpg", true, c2.id()));
-            productoService.save(new ProductoCreate("Doritos", new BigDecimal("950"), "Nachos queso", 20, "doritos.jpg", true, c2.id()));
+            productoService.save(new ProductoCreate("NVIDIA RTX 4060", new BigDecimal("450000"), "8GB GDDR6", 10, "rtx4060.jpg", true, c2.id()));
+            productoService.save(new ProductoCreate("NVIDIA RTX 4070", new BigDecimal("650000"), "12GB GDDR6X", 8, "rtx4070.jpg", true, c2.id()));
+            productoService.save(new ProductoCreate("AMD RX 6600", new BigDecimal("300000"), "8GB GDDR6", 12, "rx6600.jpg", true, c2.id()));
 
-            productoService.save(new ProductoCreate("Leche Entera", new BigDecimal("1000"), "Leche 1L", 45, "leche.jpg", true, c3.id()));
-            productoService.save(new ProductoCreate("Yogur Frutilla", new BigDecimal("850"), "Yogur 200g", 35, "yogur.jpg", true, c3.id()));
-            productoService.save(new ProductoCreate("Queso Cremoso", new BigDecimal("1800"), "Queso 500g", 15, "queso.jpg", true, c3.id()));
-            productoService.save(new ProductoCreate("Manteca", new BigDecimal("950"), "Manteca 200g", 20, "manteca.jpg", true, c3.id()));
+            productoService.save(new ProductoCreate("Corsair Vengeance 16GB DDR4", new BigDecimal("80000"), "3200MHz", 30, "ram16.jpg", true, c3.id()));
+            productoService.save(new ProductoCreate("Kingston Fury 32GB DDR5", new BigDecimal("150000"), "5600MHz", 20, "ram32.jpg", true, c3.id()));
+            productoService.save(new ProductoCreate("G.Skill Trident Z 16GB DDR5", new BigDecimal("140000"), "6000MHz", 18, "tridentz.jpg", true, c3.id()));
+            productoService.save(new ProductoCreate("Patriot Viper 8GB DDR4", new BigDecimal("40000"), "3000MHz", 40, "viper8.jpg", true, c3.id()));
+
 
             // ============================
-            // 4) PEDIDOS (3)
+            // 4) PEDIDOS
             // ============================
 
             // Pedido 1 - usuario 1
-            var pedido1 = pedidoService.save(
+            pedidoService.save(
                     new PedidoEdit(LocalDate.now(), Estado.PENDIENTE, FormaPago.EFECTIVO, u1.id()),
                     List.of(
-                            new DetallePedidoCreate(2, 1L), // Coca Cola
-                            new DetallePedidoCreate(1, 4L)  // Lays
+                            new DetallePedidoCreate(1, 1L), // Intel i5
+                            new DetallePedidoCreate(1, 4L)  // RTX 4060
                     )
             );
 
             // Pedido 2 - usuario 1
-            var pedido2 = pedidoService.save(
+            pedidoService.save(
                     new PedidoEdit(LocalDate.now().minusDays(1), Estado.CONFIRMADO, FormaPago.TARJETA, u1.id()),
                     List.of(
-                            new DetallePedidoCreate(3, 7L), // Leche
-                            new DetallePedidoCreate(2, 8L)  // Yogur
+                            new DetallePedidoCreate(2, 7L), // Corsair 16GB DDR4
+                            new DetallePedidoCreate(1, 2L)  // Intel i7
                     )
             );
 
             // Pedido 3 - usuario 2
-            var pedido3 = pedidoService.save(
+            pedidoService.save(
                     new PedidoEdit(LocalDate.now().minusDays(2), Estado.TERMINADO, FormaPago.TRANSFERENCIA, u2.id()),
                     List.of(
-                            new DetallePedidoCreate(1, 9L), // Queso
-                            new DetallePedidoCreate(2, 10L) // Manteca
+                            new DetallePedidoCreate(1, 5L), // RTX 4070
+                            new DetallePedidoCreate(2, 10L) // Patriot 8GB DDR4
                     )
             );
 
-            System.out.println(">>> Datos iniciales cargados correctamente.");
+            System.out.println(">>> Datos iniciales cargados correctamente (Hardware).");
         };
     }
 }

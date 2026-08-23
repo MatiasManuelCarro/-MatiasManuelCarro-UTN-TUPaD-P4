@@ -28,9 +28,6 @@ public record PedidoEdit(
             pedido.setFormapago(this.formapago);
         }
 
-/*        if (this.usuarioId != null && usuario != null) {
-            pedido.setUsuario(usuario);
-        }*/
     }
 
 

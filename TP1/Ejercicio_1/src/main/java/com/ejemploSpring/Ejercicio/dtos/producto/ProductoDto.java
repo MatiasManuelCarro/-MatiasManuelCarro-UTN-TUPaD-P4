@@ -25,8 +25,6 @@ public record ProductoDto(
                 producto.getStock(),
                 producto.getImagen(),
                 producto.isDisponible());
-                //  Si producto.getCategoria es nulo, se devuelve nulo
-/*                producto.getCategoria() != null ? CategoriaDto.toDto(producto.getCategoria()) : null*/
 
     }
 }
