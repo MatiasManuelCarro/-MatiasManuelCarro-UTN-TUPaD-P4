@@ -64,7 +64,7 @@ public class EjercicioApplication {
             // 2) CATEGORÍAS
             // ============================
             var c1 = categoriaService.save(new CategoriaCreate(
-                    "Procesadores", "CPUs de distintas gamas"
+                    "Procesadores", "CPUs Intel y AMD"
             ));
 
             var c2 = categoriaService.save(new CategoriaCreate(

@@ -50,15 +50,15 @@ public class EjercicioApplication {
             ));
 
             UsuarioDto u2 = usuarioService.save(new UsuarioCreate(
-                    "Ana", "Gómez", "ana@mail.com", "1144444444", "abc123", Rol.USUARIO
+                    "Gisel", "Castro", "gisel@mail.com", "1144444444", "abc123", Rol.USUARIO
             ));
 
             UsuarioDto u3 = usuarioService.save(new UsuarioCreate(
-                    "Luis", "Pérez", "luis@mail.com", "1133333333", "pass123", Rol.USUARIO
+                    "Luis", "Gomez", "luis@mail.com", "1133333333", "pass123", Rol.USUARIO
             ));
 
             UsuarioDto u4 = usuarioService.save(new UsuarioCreate(
-                    "Carla", "Sosa", "carla@mail.com", "1122222222", "qwerty", Rol.USUARIO
+                    "German", "Ruiz", "german@mail.com", "1122222222", "qwerty", Rol.USUARIO
             ));
 
             UsuarioDto u5 = usuarioService.save(new UsuarioCreate(
