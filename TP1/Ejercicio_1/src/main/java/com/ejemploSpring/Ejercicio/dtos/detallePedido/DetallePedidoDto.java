@@ -10,7 +10,6 @@ public record DetallePedidoDto(
         BigDecimal subtotal,
         Long productoId,
         String productoNombre
-/*        Long pedidoId*/
 ) {
 
 

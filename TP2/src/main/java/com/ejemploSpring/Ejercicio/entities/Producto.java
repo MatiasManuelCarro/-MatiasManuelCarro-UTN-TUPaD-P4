@@ -23,16 +23,6 @@ public class Producto extends Base {
     private int stock;
     private String imagen;
     private boolean disponible;
-    //Eliminado para cumplir las relaciones
-/*    @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private Categoria categoria;
 
-    //Redundante
-    @Column(name = "ELIMINADO")
-    @Builder.Default
-    private Boolean eliminado = false; //valor por defecto
-
- */
 
 }

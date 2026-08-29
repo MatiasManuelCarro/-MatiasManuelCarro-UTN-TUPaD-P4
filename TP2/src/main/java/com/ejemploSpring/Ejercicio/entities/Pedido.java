@@ -27,15 +27,6 @@ public class Pedido extends Base implements Calculable {
     private BigDecimal total;
     @Enumerated(EnumType.STRING)
     private FormaPago formapago;
-    //se elimina por correccion
-/*    @ManyToOne
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;*/
-
-
-    //se elimina para corregir direccion de relacion
-/*    @Builder.Default
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)*/
     @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "pedido_id") // FK en detallePedido
@@ -53,8 +44,6 @@ public class Pedido extends Base implements Calculable {
                 .cantidad(cantidad)
                 .producto(producto)
                 .subtotal(producto.getPrecio().multiply(BigDecimal.valueOf(cantidad)))
-                //.pedido(this)
-                //se elimina pedido por correccion
                 .build();
 
         detallePedidos.add(detallePedido);

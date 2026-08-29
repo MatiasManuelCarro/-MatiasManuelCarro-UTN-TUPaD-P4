@@ -7,7 +7,6 @@ public record CategoriaCreate(
 
 
     public Categoria toEntity(){
-//        return new Categoria(this.nombre,this.descripcion);
             return Categoria.builder()
                     .nombre(this.nombre)
                     .descripcion(this.descripcion)

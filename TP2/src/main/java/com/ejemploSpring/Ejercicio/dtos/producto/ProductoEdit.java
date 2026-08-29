@@ -33,8 +33,6 @@ public record ProductoEdit(
         if (this.disponible != null) {
             producto.setDisponible(this.disponible);
         }
-/*        if (categoria != null) {
-            producto.setCategoria(categoria);
-        }*/
+
     }
 }

@@ -14,7 +14,6 @@ public record ProductoDto(
     int stock,
     String imagen,
     Boolean disponible
-/*    CategoriaDto categoriaDto*/
 ){
     public static ProductoDto toDto(Producto producto){
         return new ProductoDto(

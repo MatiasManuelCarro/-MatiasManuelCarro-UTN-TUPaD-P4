@@ -10,7 +10,6 @@ public record DetallePedidoDto(
         BigDecimal subtotal,
         Long productoId,
         String productoNombre
-/*        Long pedidoId*/
 ) {
 
 
@@ -21,7 +20,6 @@ public record DetallePedidoDto(
                 detalle.getSubtotal(),
                 detalle.getProducto().getId(),
                 detalle.getProducto().getNombre());
-/*                detalle.getPedido().getId()*/
 
     }
 }

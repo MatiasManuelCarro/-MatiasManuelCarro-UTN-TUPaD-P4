@@ -17,9 +17,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = {"id"})
 public abstract class Base {
 
-//    protected static long idCounter = 0;
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

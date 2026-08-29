@@ -22,7 +22,6 @@ public record ProductoCreate(
                 .stock(this.stock)
                 .imagen(this.imagen)
                 .disponible(this.disponible != null ? this.disponible : false)
-                /*.categoria(categoria)*/
                 .build();
     }
 }

@@ -13,7 +13,7 @@ import java.util.Map;
 public class AdviceController {
 
 
-    // 1) Validaciones @Valid
+    // 1) Validaciones
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -27,7 +27,7 @@ public class AdviceController {
     }
 
 
-    // 2) No encontrado (NullPointerException)
+    // 2) No encontrado
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(NullPointerException ex) {

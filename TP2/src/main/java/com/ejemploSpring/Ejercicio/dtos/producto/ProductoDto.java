@@ -14,7 +14,6 @@ public record ProductoDto(
     int stock,
     String imagen,
     Boolean disponible
-/*    CategoriaDto categoriaDto*/
 ){
     public static ProductoDto toDto(Producto producto){
         return new ProductoDto(
@@ -25,9 +24,6 @@ public record ProductoDto(
                 producto.getStock(),
                 producto.getImagen(),
                 producto.isDisponible());
-                //  Si producto.getCategoria es nulo, se devuelve nulo
-/*                producto.getCategoria() != null ? CategoriaDto.toDto(producto.getCategoria()) : null*/
-
     }
 }
 

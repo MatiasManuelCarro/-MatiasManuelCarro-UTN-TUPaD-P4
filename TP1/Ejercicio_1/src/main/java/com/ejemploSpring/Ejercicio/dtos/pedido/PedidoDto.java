@@ -13,7 +13,6 @@ public record PedidoDto(
         Estado estado,
         BigDecimal total,
         FormaPago formapago
-/*        String usuarioNombre*/
 ) {
 
     public static PedidoDto toDto(Pedido pedido) {
