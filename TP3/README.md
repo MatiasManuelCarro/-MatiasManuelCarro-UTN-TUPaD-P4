@@ -341,3 +341,80 @@ Intentando asignar valor negativo (lado.longitud = -10.0)...
 Excepción capturada con éxito: La longitud debe ser estrictamente positiva.
 El valor se mantuvo protegido en su último estado válido: 25.5
 ```
+---
+
+# Parte 2 - elaciones estructurales 
+
+## Relaciones Estructurales y Diferenciación en el Código
+
+En Python, la sintaxis para almacenar un atributo siempre es la misma (`self._algo = algo`). Por ende, la distinción entre **Asociación**, **Agregación** y **Composición** no está en la asignación, sino en:
+
+1. **La dependencia de existencia y ciclo de vida** entre las partes.
+2. **Quién es responsable de instanciar el objeto.**
+3. **El grado de acoplamiento e independencia que expone la firma de la interfaz.**
+
+A continuación se analiza cada relación señalando la **línea exacta que la delata**:
+
+
+### 1. Lado — Etiqueta: Asociación (0..1)
+
+* **Concepto:** Relación débil y opcional entre dos entidades independientes. Un `Lado` puede existir con o sin una `Etiqueta`, y la etiqueta no determina la existencia del lado.
+* **Líneas exactas que lo delatan:**  
+  En la cabecera del constructor:
+  ```python
+  def __init__(self, longitud: float, etiqueta: Etiqueta | None = None) -> None:
+  ```
+  y en su asignación:
+  ```python
+  self.etiqueta: Etiqueta | None = etiqueta
+  ```
+* **Por qué lo delata:** El uso del type hint de unión `Etiqueta | None` junto con el valor por defecto `= None`. Revela explícitamente la multiplicidad `0..1`: el objeto colaborador es prescindible para la construcción y vida de la instancia receptora.
+
+
+### 2. Taller — Poligono: Agregación (0..*)
+
+* **Concepto:** Relación todo/parte débil. El `Taller` contiene polígonos que no fueron fabricados por él, sino que le fueron provistos ya creados desde un ámbito externo. Si el `Taller` es destruido o eliminado de memoria, los polígonos continúan existiendo de manera autónoma.
+* **Líneas exactas que lo delatan:**  
+  En la firma y asignación del constructor:
+  ```python
+  self._inventario: list[Poligono] = list(poligonos) if poligonos is not None else []
+  ```
+  y en el método de incorporación:
+  ```python
+  def recibir(self, poligono: Poligono) -> None:
+      self._inventario.append(poligono)
+  ```
+* **Por qué lo delata:** En ningún punto dentro de `Taller` se ejecuta `Poligono(...)`. La clase se limita a recibir instancias vivas inyectadas por parámetro y agruparlas en su colección interna. El ciclo de vida de los polígonos es completamente ajeno al del taller.
+
+
+### 3. Poligono — Lado: Composición (3..*)
+
+* **Concepto:** Relación todo/parte fuerte y existencia condicionada por contrato. Un `Poligono` no puede definirse geométricamente sin sus lados; estos constituyen su estructura física esencial.
+* **Líneas exactas que lo delatan:**  
+  En el constructor con la copia defensiva obligatoria:
+  ```python
+  self._lados = list(lados) if lados is not None else []
+  ```
+  combinado con el método abstracto:
+  ```python
+  @abstractmethod
+  def lados_esperados(self) -> int:
+  ```
+  y la exposición blindada en la salida:
+  ```python
+  def lados(self) -> tuple[Lado, ...]:
+      return tuple(self._lados)
+  ```
+* **Por qué lo delata:** Aunque los lados puedan suministrarse externamente en la construcción, el `Poligono` se apropia de la estructura:
+  * **Aislamiento defensivo:** Al hacer `list(lados)` en la entrada y `tuple(self._lados)` en la salida, el polígono se independiza del exterior y se convierte en el único custodio de la colección.
+  * **Invariante de dominio:** A través de `lados_esperados()`, cada subclase (`Triangulo` con 3, `Cuadrado` con 4) impone que el objeto no es semánticamente válido sin esa cantidad exacta de componentes. Si el polígono deja de existir, sus lados pierden propósito estructural en el sistema.
+
+
+### Resumen Comparativo de Ciclo de Vida
+
+| Relación | Tipo | ¿Quién instancia el objeto? | Ciclo de vida / Dependencia |
+| :--- | :--- | :--- | :--- |
+| **Lado — Etiqueta** | Asociación (`0..1`) | Ámbito externo. | Totalmente desacoplados (`Etiqueta \| None = None`). |
+| **Taller — Poligono** | Agregación (`0..*`) | Ámbito externo. | Débil: entran por `recibir()` o `__init__`; si muere el Taller, los Polígonos sobreviven. |
+| **Poligono — Lado** | Composición (`3..*`) | Gestionado por el Polígono. | Fuerte: el Polígono encapsula y aísla sus partes con copias defensivas y valida su cantidad. |
+
