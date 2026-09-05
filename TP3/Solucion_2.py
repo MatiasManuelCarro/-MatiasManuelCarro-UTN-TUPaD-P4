@@ -12,7 +12,7 @@ class Figura(ABC):
     @abstractmethod
     def area(self) -> float:
         """Contrato formal: cada figura concreta debe calcular su propia área."""
-        pass
+        
 
 
 class Lado:
@@ -31,7 +31,13 @@ class Lado:
 
 
 class Poligono(Figura):
-    def __init__(self, nombre: str, color: str, lados: list[Lado] | None = None, observaciones: list[str] | None = None) -> None:
+    def __init__(
+        self,
+        nombre: str,
+        color: str,
+        lados: list[Lado] | None = None,
+        observaciones: list[str] | None = None,
+    ) -> None:
         super().__init__(nombre, color)
         # Evitamos default mutable y aliasing creando copias defensivas
         self._lados = list(lados) if lados is not None else []
@@ -57,7 +63,12 @@ class Poligono(Figura):
 
 
 class Triangulo(Poligono):
-    def __init__(self, nombre: str = "triángulo", color: str = "negro", lados: list[Lado] | None = None) -> None:
+    def __init__(
+        self,
+        nombre: str = "triángulo",
+        color: str = "negro",
+        lados: list[Lado] | None = None,
+    ) -> None:
         super().__init__(nombre, color, lados)
 
     def lados_esperados(self) -> int:
@@ -65,7 +76,12 @@ class Triangulo(Poligono):
 
 
 class Cuadrado(Poligono):
-    def __init__(self, nombre: str = "cuadrado", color: str = "negro", lados: list[Lado] | None = None) -> None:
+    def __init__(
+        self,
+        nombre: str = "cuadrado",
+        color: str = "negro",
+        lados: list[Lado] | None = None,
+    ) -> None:
         super().__init__(nombre, color, lados)
 
     def lados_esperados(self) -> int:
