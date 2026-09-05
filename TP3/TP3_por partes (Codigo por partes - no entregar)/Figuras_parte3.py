@@ -2,41 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
 
-# =====================================================================
-# Parte 4: Protocolo Exportable (Subtipado Estructural / Duck Typing)
-# =====================================================================
-
-@runtime_checkable
-class Exportable(Protocol):
-
-    def exportar(self) -> str:
-        """Contrato estructural: exige un método exportar sin requerir herencia."""
-        ...
-
-
-# =====================================================================
-# Parte 2: Etiqueta (Inmutable)
-# =====================================================================
-
-
-@dataclass(frozen=True)
-class Etiqueta:
-    texto: str
-
-def exportar_todo(items: list[Exportable]) -> list[str]:
-    """Procesa polimórficamente cualquier objeto que cumpla con el protocolo Exportable.
-
-    Acepta tanto figuras del dominio propio como clases de librerías externas
-    (PlanoCAD).
-    """
-    return [item.exportar() for item in items]
-
-
-# =====================================================================
-# Parte 1: Figura Base (ABC)
-# ====================================================
 
 class Figura(ABC):
     def __init__(self, nombre: str, color: str) -> None:
@@ -49,10 +15,9 @@ class Figura(ABC):
         """Contrato formal: cada figura concreta debe calcular su propia área."""
         
 
-# =====================================================================
-# Partes 1 y 2: Lado (@property + Asociación 0..1)
-# =====================================================================
-
+@dataclass(frozen=True)
+class Etiqueta:
+    texto: str
 
 class Lado:
     def __init__(
@@ -75,9 +40,7 @@ class Lado:
         tag = f", etiqueta='{self.etiqueta.texto}'" if self.etiqueta else ""
         return f"Lado({self.longitud}{tag})"
     
-# =====================================================================
-# Partes 1, 2, 3 y 4: Poligono (ABC, Composición, Fall-Fast y Exportable)
-# =====================================================================
+
 
 class Poligono(Figura, ABC):
     def __init__(
@@ -119,18 +82,7 @@ class Poligono(Figura, ABC):
             return False
         primera_longitud = self._lados[0].longitud
         return all(lado.longitud == primera_longitud for lado in self._lados)
-    
-    def exportar(self) -> str:
-        """Satisface estructuralmente el protocolo Exportable."""
-        return (
-            f"[{self.__class__.__name__.upper()}] nombre='{self.nombre}', "
-            f"color='{self.color}', lados={len(self._lados)}, perimetro={self.perimetro():.2f}"
-        )
 
-
-# =====================================================================
-# Parte 3: Subclases Concretas
-# =====================================================================
 
 class Triangulo(Poligono):
     def __init__(
@@ -219,10 +171,6 @@ class Taller:
         self._inventario: list[Poligono] = (
             list(poligonos) if poligonos is not None else []
         )
-        
-# =====================================================================
-# Parte 2: Taller (Agregación 0..* con Poligono)
-# =====================================================================
 
     def recibir(self, poligono: Poligono) -> None:
         """Incorpora un polígono existente."""

@@ -418,3 +418,367 @@ A continuación se analiza cada relación señalando la **línea exacta que la d
 | **Taller — Poligono** | Agregación (`0..*`) | Ámbito externo. | Débil: entran por `recibir()` o `__init__`; si muere el Taller, los Polígonos sobreviven. |
 | **Poligono — Lado** | Composición (`3..*`) | Gestionado por el Polígono. | Fuerte: el Polígono encapsula y aísla sus partes con copias defensivas y valida su cantidad. |
 
+## Copia Defensiva en Multiplicidades 
+
+Para evitar efectos colaterales no deseados (*aliasing* y fuga de encapsulamiento), se implementó **copia defensiva bidireccional** (tanto al recibir colecciones como al exponerlas) en las multiplicidades `*`:
+
+### 1. En la salida (Consulta de colecciones)
+
+Ni `Poligono` ni `Taller` exponen su lista interna mutable. En su lugar, retornan una **tupla inmutable**, garantizando que el llamador no pueda alterar el estado interno con métodos como `.clear()`, `.pop()` o `.append()`.
+
+* **`Poligono.lados()` (Composición `3..*`):**
+  ```python
+  def lados(self) -> tuple[Lado, ...]:
+      # Retorna una tupla inmutable en lugar de la lista interna
+      return tuple(self._lados)
+  ```
+
+* **`Taller.inventario()` (Agregación `0..*`):**
+  ```python
+  def inventario(self) -> tuple[Poligono, ...]:
+      # Retorna una tupla inmutable que blinda el inventario
+      return tuple(self._inventario)
+  ```
+
+### 2. En la entrada (Construcción e Ingesta)
+
+Al recibir listas desde el cliente, los constructores crean una copia superficial nueva usando `list(...)`. Esto asegura que mutaciones posteriores sobre la lista externa no repercutan en la instancia:
+
+* **En `Poligono.__init__`:**
+  ```python
+  self._lados = list(lados) if lados is not None else []
+  ```
+
+* **En `Taller.__init__`:**
+  ```python
+  self._inventario = list(poligonos) if poligonos is not None else []
+  ```
+
+
+## PARTE 3: Herencia justificada por dominio y decisión sobre PoligonoRegular
+
+### 1. Justificación de la Jerarquía de Herencia («es-un»)
+
+* `Poligono` hereda de `Figura` y se declara como clase abstracta (`ABC`). Define el contrato obligatorio `@abstractmethod def lados_esperados(self) -> int`.
+* Las subclases `Triangulo` (3), `Cuadrado` (4), `Pentagono` (5) y `Hexagono` (6) cumplen genuinamente la relación **«es-un» polígono** y validan en su construcción que la lista de lados coincida estrictamente con su invariante geométrica.
+* **Falla temprana (*Fail-Fast*):** Si se intenta instanciar `Poligono` directamente o una subclase incompleta que no implemente `lados_esperados()`, Python impide la creación arrojando un `TypeError` en tiempo de instanciación. Asimismo, si a un `Pentagono` se le intentan pasar 4 lados, el constructor arroja un `ValueError` inmediatamente.
+
+---
+
+### 2. Decisión obligatoria: ¿Qué hacemos con `PoligonoRegular`?
+
+#### Decisión: Se descarta la herencia y se rediseña el modelo.
+
+En el código inicial, `PoligonoRegular` existía como una clase intermedia de la que debían heredar las figuras regulares. Esta decisión responde a un **vicio de diseño arrastrado del compilador estático de Java**, donde se crean tipos e interfaces exclusivamente para que una colección (`List<PoligonoRegular>`) restrinja tipos en tiempo de compilación.
+
+#### Justificación conceptual:
+
+1. **La regularidad no es un tipo ontológico («es-un»), sino un estado geométrico:**  
+   Un triángulo equilátero no es una clase conceptualmente ajena a un triángulo; es simplemente un triángulo cuyos lados miden lo mismo. Modelar `PoligonoRegular` mediante herencia genera duplicación jerárquica artificial (`Triangulo` vs `TrianguloRegular`, `Pentagono` vs `PentagonoRegular`) o deriva en problemas de herencia múltiple innecesaria.
+2. **Innecesario en Python:**  
+   Python cuenta con tipado dinámico y *Duck Typing*. No se necesita una clase abstracta vacía para agrupar polígonos que compartan propiedades de longitud uniforme.
+
+#### Con qué se reemplazó en el código:
+
+1. **Consulta de estado vía método semántico:**  
+   Se agregó en la clase base `Poligono` el método `es_regular() -> bool`:
+   ```python
+   def es_regular(self) -> bool:
+       if not self._lados:
+           return False
+       primera = self._lados[0].longitud
+       return all(lado.longitud == primera for lado in self._lados)
+   ```
+   Cualquier figura del dominio (`Triangulo`, `Hexagono`, etc.) puede responder polimórficamente si es regular en base al estado real de sus componentes.
+
+2. **Constructores semánticos alternativos:**  
+   En cada subclase se proveyó un `@classmethod regular(cls, nombre, color, longitud_lado)` que fabrica cómodamente figuras con lados de idéntica longitud sin requerir subclases adicionales.
+
+## PARTE 4: ABC vs. Protocol (Subtipado Nominal vs. Subtipado Estructural)
+
+### 1. Por qué una ABC no hubiera servido para PlanoCAD sin modificarla
+
+Una **ABC (Abstract Base Class)** implementa un esquema de **subtipado nominal**: para que una clase sea considerada subtipo de una ABC, debe declarar formal y explícitamente esa relación en su cabecera (`class Hijo(Padre)`).
+
+Para que `PlanoCAD` satisficiera una ABC llamada `Exportable`, se hubiese requerido:
+1. **Modificar el código fuente de `libreria_externa.py`** para añadir la herencia (`class PlanoCAD(Exportable):`), lo cual rompe la premisa de diseño de no alterar paquetes de terceros ni SDKs cerrados.
+2. O bien recurrir al registro dinámico en tiempo de ejecución (`Exportable.register(PlanoCAD)`), una práctica imperativa que introduce dependencias artificiales en el arranque y suele ser ignorada por analizadores estáticos de código (*mypy*, linters e IDEs).
+
+Por el contrario, **`typing.Protocol` provee subtipado estructural (*Duck Typing* estático)**: cualquier clase que implemente un método con la firma coincidente `exportar(self) -> str` satisface el contrato en tiempo de diseño y ejecución de forma automática, sin conocer la existencia del protocolo ni importar nada del proyecto.
+
+
+### 2. Pregunta de cierre: ¿La elección entre ABC y Protocol la decide el lenguaje o la decide el dominio?
+
+**La decide el dominio; las herramientas del lenguaje son simplemente el medio para materializarla.**
+
+Las Partes 3 y 4 abordan la misma decisión arquitectónica desde dos frentes distintos (el diagrama de clases y la interoperabilidad con librerías), pero ambas se resuelven bajo el mismo principio rector: **la distinción semántica entre Identidad ontológica («Es-un») y Capacidad circunstancial («Sabe-hacer»)**.
+
+| Criterio de Decisión | ABC (Subtipado Nominal) | Protocol (Subtipado Estructural) |
+| :--- | :--- | :--- |
+| **Pregunta de Dominio** | ¿Qué **es** la entidad? (Identidad, esencia compartida) | ¿Qué **sabe hacer** la entidad? (Capacidad, rol transversal) |
+| **Vínculo Semántico** | Relación estricta de **«Es-un»** | Relación de **«Comporta-como»** o **«Capaz-de»** |
+| **Resolución en el TP** | **`Poligono` es una ABC:**<br>Las figuras geométricas concretas (`Triangulo`, `Cuadrado`, etc.) **son polígonos**. Comparten invariantes de construcción, ciclo de vida, atributos base (`nombre`, `color`), cálculo de perímetro y el contrato formal `lados_esperados()`. | **`Exportable` es un Protocol:**<br>Un `PlanoCAD` y un `Triangulo` provienen de mundos ajenos y no tienen lazo de parentesco; únicamente coinciden en que ambos **saben emitir un texto representativo**. Forzar una jerarquía común habría sido un acoplamiento artificial. |
+
+#### Justificación unificada de las Partes 3 y 4:
+* **En la Parte 3 (el diagrama):** Se eliminó `PoligonoRegular` como clase de herencia porque la regularidad en el dominio no es una identidad («es-un»), sino un estado geométrico mutable de los lados. Forzar una clase abstracta para regularidad respondía a una necesidad estática del compilador de Java, no a una entidad real del modelo.
+* **En la Parte 4 (el lenguaje):** Se descartó la ABC para `Exportable` porque la exportación no define lo que una entidad es, sino un comportamiento que ofrece a terceros. El `Protocol` permite desacoplar los dominios manteniendo tipado estricto y polimorfismo limpio sin invadir código ajeno.
+
+
+# Diagrama UML
+
+# Modelo de Dominio — Diagrama de Clases UML
+
+El siguiente diagrama modela la arquitectura final del sistema implementada en `figuras.py` y su interoperabilidad con `libreria_externa.py`.
+
+```
+classDiagram
+    direction TB
+
+    %% ==========================================
+    %% Contratos e Interfaces
+    %% ==========================================
+    class Exportable {
+        <<Protocol>>
+        +exportar() str
+    }
+
+    class Figura {
+        <<Abstract>>
+        +str nombre
+        +str color
+        #bool _construida
+        +area()* float
+    }
+
+    class Poligono {
+        <<Abstract>>
+        #list~Lado~ _lados
+        #list~str~ _observaciones
+        +lados_esperados()* int
+        +perimetro() float
+        +area() float
+        +agregar_observacion(texto: str) None
+        +observaciones() tuple~str, ...~
+        +lados() tuple~Lado, ...~
+        +es_regular() bool
+        +exportar() str
+    }
+
+    %% ==========================================
+    %% Subclases Concretas de Poligono
+    %% ==========================================
+    class Triangulo {
+        +lados_esperados() int
+        +regular(nombre, color, longitud)$ Triangulo
+    }
+
+    class Cuadrado {
+        +lados_esperados() int
+        +regular(nombre, color, longitud)$ Cuadrado
+    }
+
+    class Pentagono {
+        +lados_esperados() int
+        +regular(nombre, color, longitud)$ Pentagono
+    }
+
+    class Hexagono {
+        +lados_esperados() int
+        +regular(nombre, color, longitud)$ Hexagono
+    }
+
+    %% ==========================================
+    %% Componentes Estructurales
+    %% ==========================================
+    class Etiqueta {
+        <<dataclass, frozen>>
+        +str texto
+    }
+
+    class Lado {
+        -float _longitud
+        +Etiqueta etiqueta
+        +longitud float
+    }
+
+    class Taller {
+        #list~Poligono~ _inventario
+        +recibir(poligono: Poligono) None
+        +restaurar_todos() None
+        +inventario() tuple~Poligono, ...~
+    }
+
+    %% ==========================================
+    %% Clase Externa (SDK Tercero)
+    %% ==========================================
+    class PlanoCAD {
+        +str identificador
+        +str escala
+        +exportar() str
+    }
+
+    %% ==========================================
+    %% Jerarquía de Herencia (Generalización)
+    %% ==========================================
+    Figura <|-- Poligono
+    Poligono <|-- Triangulo
+    Poligono <|-- Cuadrado
+    Poligono <|-- Pentagono
+    Poligono <|-- Hexagono
+
+    %% ==========================================
+    %% Cumplimiento Estructural de Protocolo (Duck Typing)
+    %% ==========================================
+    Exportable <|.. Poligono : satisface estructuralmente
+    Exportable <|.. PlanoCAD : satisface estructuralmente
+
+    %% ==========================================
+    %% Relaciones y Multiplicidades
+    %% ==========================================
+    %% Composición: Poligono posee de 3 a N lados
+    Poligono "1" *-- "3..*" Lado : composición
+
+    %% Asociación: Un Lado puede tener opcionalmente 0 o 1 Etiqueta
+    Lado "1" --> "0..1" Etiqueta : asociación
+
+    %% Agregación: Un Taller contiene de 0 a N Poligonos externos
+    Taller "1" o-- "0..*" Poligono : agregación
+```
+
+```mermaid
+classDiagram
+    direction TB
+
+    %% ==========================================
+    %% Contratos e Interfaces
+    %% ==========================================
+    class Exportable {
+        <<Protocol>>
+        +exportar() str
+    }
+
+    class Figura {
+        <<Abstract>>
+        +str nombre
+        +str color
+        #bool _construida
+        +area()* float
+    }
+
+    class Poligono {
+        <<Abstract>>
+        #list~Lado~ _lados
+        #list~str~ _observaciones
+        +lados_esperados()* int
+        +perimetro() float
+        +area() float
+        +agregar_observacion(texto: str) None
+        +observaciones() tuple~str, ...~
+        +lados() tuple~Lado, ...~
+        +es_regular() bool
+        +exportar() str
+    }
+
+    %% ==========================================
+    %% Subclases Concretas de Poligono
+    %% ==========================================
+    class Triangulo {
+        +lados_esperados() int
+        +regular(nombre, color, longitud)$ Triangulo
+    }
+
+    class Cuadrado {
+        +lados_esperados() int
+        +regular(nombre, color, longitud)$ Cuadrado
+    }
+
+    class Pentagono {
+        +lados_esperados() int
+        +regular(nombre, color, longitud)$ Pentagono
+    }
+
+    class Hexagono {
+        +lados_esperados() int
+        +regular(nombre, color, longitud)$ Hexagono
+    }
+
+    %% ==========================================
+    %% Componentes Estructurales
+    %% ==========================================
+    class Etiqueta {
+        <<dataclass, frozen>>
+        +str texto
+    }
+
+    class Lado {
+        -float _longitud
+        +Etiqueta etiqueta
+        +longitud float
+    }
+
+    class Taller {
+        #list~Poligono~ _inventario
+        +recibir(poligono: Poligono) None
+        +restaurar_todos() None
+        +inventario() tuple~Poligono, ...~
+    }
+
+    %% ==========================================
+    %% Clase Externa (SDK Tercero)
+    %% ==========================================
+    class PlanoCAD {
+        +str identificador
+        +str escala
+        +exportar() str
+    }
+
+    %% ==========================================
+    %% Jerarquía de Herencia (Generalización)
+    %% ==========================================
+    Figura <|-- Poligono
+    Poligono <|-- Triangulo
+    Poligono <|-- Cuadrado
+    Poligono <|-- Pentagono
+    Poligono <|-- Hexagono
+
+    %% ==========================================
+    %% Cumplimiento Estructural de Protocolo (Duck Typing)
+    %% ==========================================
+    Exportable <|.. Poligono : satisface estructuralmente
+    Exportable <|.. PlanoCAD : satisface estructuralmente
+
+    %% ==========================================
+    %% Relaciones y Multiplicidades
+    %% ==========================================
+    %% Composición: Poligono posee de 3 a N lados
+    Poligono "1" *-- "3..*" Lado : composición
+
+    %% Asociación: Un Lado puede tener opcionalmente 0 o 1 Etiqueta
+    Lado "1" --> "0..1" Etiqueta : asociación
+
+    %% Agregación: Un Taller contiene de 0 a N Poligonos externos
+    Taller "1" o-- "0..*" Poligono : agregación
+```
+
+---
+
+## Detalle de Notación y Relaciones del Modelo
+
+1. **Composición (`Poligono *-- Lado` / Multiplicidad `3..*`)**:
+   * Indica pertenencia fuerte e indivisible. El polígono gestiona el ciclo de vida y la integridad estructural de sus lados.
+   * Se refleja en la copia defensiva bidireccional (`list()` de entrada y `tuple()` de salida) y en la validación contra `lados_esperados()`.
+
+2. **Agregación (`Taller o-- Poligono` / Multiplicidad `0..*`)**:
+   * Indica relación de contenedor débil. Los polígonos son suministrados desde el exterior mediante `__init__` o el método `recibir()`.
+   * Si el `Taller` es destruido, los polígonos subsisten de forma autónoma.
+
+3. **Asociación unívoca (`Lado --> Etiqueta` / Multiplicidad `0..1`)**:
+   * Un lado conoce opcionalmente a su etiqueta colaboradora (`Etiqueta | None = None`). La etiqueta no conoce al lado.
+
+4. **Subtipado Estructural (`Exportable <|.. Poligono` y `Exportable <|.. PlanoCAD`)**:
+   * Modela el contrato mediante `typing.Protocol`.
+   * `PlanoCAD` satisface la firma de `Exportable` sin heredar explícitamente de él ni depender de las clases de nuestro dominio.
+
+5. **Decisión de diseño sobre `PoligonoRegular`**:
+   * No figura como clase de herencia.
+   * La regularidad se modela mediante la propiedad de consulta de estado `es_regular() -> bool` en `Poligono`, acompañada de los métodos de clase constructores semánticos `.regular(...)` en cada subclase concreta.
