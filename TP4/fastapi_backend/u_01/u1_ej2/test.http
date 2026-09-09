@@ -1,9 +1,19 @@
 ###
-curl -X 'GET' \
-  'http://127.0.0.1:8000/items/me' \
-  -H 'accept: application/json'
-###
-curl -X 'GET' \
-  'http://127.0.0.1:8000/items/me' \
-  -H 'accept: application/json'
+GET http://127.0.0.1:8000/user/me
+Accept: application/json
 
+###
+GET http://127.0.0.1:8000/user/matias
+Accept: application/json
+
+###
+GET http://127.0.0.1:8000/item/5
+Accept: application/json
+
+### Prueba Exitosa (Opción permitida)
+GET http://127.0.0.1:8000/models/alexnet
+Accept: application/json
+
+### Prueba Fallida (Opción NO permitida - FastAPI la rechaza)
+GET http://127.0.0.1:8000/models/supernet
+Accept: application/json

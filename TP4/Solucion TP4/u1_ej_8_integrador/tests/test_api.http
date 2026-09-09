@@ -96,3 +96,105 @@ Content-Type: application/json
   "stock_minimo": 5,
   "activo": true
 }
+
+### ==========================================
+### MÓDULO: PROVEEDORES
+### ==========================================
+
+
+### 1. ALTA DE PROVEEDOR (POST)
+
+### 1.1 Funcionamiento ok: Crear proveedor correctamente (201 Created)
+POST {{baseUrl}}/proveedor/
+Content-Type: application/json
+
+{
+  "codigo": "PROV-04",
+  "razon_social": "Ferretería Industrial del Plata SRL",
+  "cuit": "30712345678",
+  "email": "ventas@delplatasrl.com.ar",
+  "telefono": "1147896521",
+  "activo": true
+}
+
+### 1.2 Escenario Error: Falla validación de Pydantic (422 Unprocessable Entity)
+# Razón social menor a 3 caracteres y CUIT menor a 11
+POST {{baseUrl}}/proveedor/
+Content-Type: application/json
+
+{
+  "codigo": "PROV-05",
+  "razon_social": "A", 
+  "cuit": "123",
+  "email": "mal@correo.com",
+  "telefono": "123456",
+  "activo": true
+}
+
+
+### 2. OBTENER PROVEEDORES (GET)
+
+
+### 2.1 Escenario Feliz: Listar todos (200 OK)
+GET {{baseUrl}}/proveedor/
+
+### 2.2 Escenario Feliz: Filtrar solo ACTIVOS (200 OK)
+GET {{baseUrl}}/proveedor/?activo=true
+
+### 2.3 Escenario Feliz: Filtrar solo INACTIVOS (200 OK)
+GET {{baseUrl}}/?activo=false
+
+### 2.4 Escenario Feliz: Paginación (200 OK)
+# Saltea el primero y trae un máximo de 2
+GET {{baseUrl}}/proveedor/?skip=1&limit=2
+
+
+### 3. DETALLE DE PROVEEDOR (GET /{id})
+
+### 3.1 Escenario Feliz: Obtener proveedor existente (200 OK)
+GET {{baseUrl}}/proveedor/1
+
+### 3.2 Escenario Error: Proveedor inexistente (404 Not Found)
+GET {{baseUrl}}/proveedor/999
+
+
+### 4. ACTUALIZACIÓN TOTAL (PUT /{id})
+
+### 4.1 Escenario Feliz: Actualizar proveedor (200 OK)
+PUT {{baseUrl}}/proveedor/1
+Content-Type: application/json
+
+{
+  "codigo": "PROV-01-MOD",
+  "razon_social": "Desillas Modificado SA",
+  "cuit": "27865565882",
+  "email": "nuevo.email@desillas.com",
+  "telefono": "1165238469",
+  "activo": true
+}
+
+### 4.2 Escenario Error: Actualizar proveedor inexistente (404 Not Found)
+PUT {{baseUrl}}/proveedor/999
+Content-Type: application/json
+
+{
+  "codigo": "FANTASMA",
+  "razon_social": "No Existo",
+  "cuit": "11111111111",
+  "email": "",
+  "telefono": "",
+  "activo": true
+}
+
+
+### 5. BORRADO LÓGICO (PUT /{id}/desactivar)
+
+### 5.1 Escenario Feliz: Desactivar proveedor (200 OK)
+# Debería devolver el proveedor 2 con el campo activo en false
+PUT {{baseUrl}}/proveedor/2/desactivar
+
+### Prueba - mostrar activos para verificar que se elimino 
+GET {{baseUrl}}/proveedor/?activo=true
+
+### 5.2 Escenario Error: Desactivar proveedor inexistente (404 Not Found)
+PUT {{baseUrl}}/proveedor/999/desactivar

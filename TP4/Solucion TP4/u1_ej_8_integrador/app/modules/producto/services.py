@@ -18,14 +18,14 @@ def obtener_todos(skip: int, limit: int) -> List[ProductoRead]:
     return db_productos[skip : skip + limit]
 
 
-def obtener_por_id(id: int) -> Optional[ProductoRead]:
+def obtener_por_id(id: int) -> ProductoRead | None:
     for p in db_productos:
         if p.id == id:
             return p
     return None
 
 
-def actualizar_total(id: int, data: ProductoCreate) -> Optional[ProductoRead]:
+def actualizar_total(id: int, data: ProductoCreate) -> ProductoRead | None:
     # Reemplazo total: Requiere todos los campos validables (ProductoCreate)
     for index, p in enumerate(db_productos):
         if p.id == id:
@@ -35,7 +35,7 @@ def actualizar_total(id: int, data: ProductoCreate) -> Optional[ProductoRead]:
     return None
 
 
-def desactivar(id: int) -> Optional[ProductoRead]:
+def desactivar(id: int) -> ProductoRead | None:
     # Borrado lógico: Solo altera el estado 'activo'
     for index, p in enumerate(db_productos):
         if p.id == id:

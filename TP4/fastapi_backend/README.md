@@ -62,7 +62,7 @@ Para mantener el proyecto organizado y asegurar que todos los miembros del equip
 1. **Crear el archivo:** En la raíz del proyecto, crea un archivo llamado `requirements.txt`.
 2. **Agregar los paquetes:** Abre el archivo y escribe los nombres de las librerías que necesitamos (una por línea). Por ejemplo:
    ```text
-   fastapi
+   fastapi[standard]
    uvicorn
    ```
 3. **Instalar dependencias:** En la terminal (con el entorno virtual activado), ejecuta el siguiente comando para que Python lea el archivo e instale todo automáticamente:
@@ -202,7 +202,7 @@ connection: close
 
 ## 🔗 Conceptos Clave: URLs y Parámetros
 
-### Paso 9: Anatomía de una URL y Recursos
+### Anatomía de una URL y Recursos
 Antes de agregar más rutas, es importante entender cómo se estructuran las direcciones a las que hacemos peticiones en una API REST.
 
 Una **URL** (Uniform Resource Locator) es la "dirección" que indica cómo (mediante un protocolo) y dónde (en qué host) localizar un recurso específico.
@@ -215,3 +215,111 @@ La estructura general es:
 
 *   **Recurso:** Es cualquier cosa identificable por una URL (por ejemplo: un usuario específico, un ítem en un carrito, un archivo de texto).
 *   **Representación:** Es el formato en que el servidor decide entregar ese recurso: JSON (lo más común en APIs), HTML, una imagen (PNG/JPG), un video (MP4), un documento PDF, etc.
+
+### Parámetros de Ruta y Orden de Ejecución
+
+**1. Variables Dinámicas (Path Parameters)**
+En FastAPI, puedes capturar valores directamente desde la URL utilizando llaves `{}`. Por ejemplo, en la ruta `/items/{user_id}`, el framework tomará el valor que el usuario escriba en esa posición y lo inyectará en la función como la variable `user_id`.
+
+**2. La Regla del Orden (De arriba hacia abajo)**
+FastAPI evalúa las rutas en el código línea por línea. En cuanto encuentra la primera coincidencia con la URL solicitada, la ejecuta y deja de buscar. Por este motivo, **las rutas estáticas siempre deben definirse antes que las dinámicas**.
+
+**Ejemplo Práctico:**
+
+```python
+# ⚠️ IMPORTANTE: El orden de las rutas importa en FastAPI
+
+# 1. Ruta estática (Debe ir primero)
+@app.get("/user/me")
+async def read_user_me():
+    return {"user": "current"}
+
+# 2. Ruta dinámica (Debe ir después)
+@app.get("/user/{user_id}")
+async def read_user(user_id: str):
+    return {"user_id": user_id}
+```
+
+2. **Prueba el resultado:**
+   * Si vas a `http://127.0.0.1:8000/items/matias`, la ruta dinámica lo atrapa y devuelve `{"user_id": "matias"}`.
+   * Si vas a `http://127.0.0.1:8000/items/me`, la ruta estática lo atrapa primero y devuelve `{"user": "current"}`.
+
+> **¿Qué pasa si las invertimos?** Si la ruta `/{user_id}` estuviera arriba, al pedir `/items/me`, FastAPI pensaría que la palabra "me" es un ID de usuario y nunca llegaría a ejecutar la función `read_user_me`.
+
+### Parámetros de Ruta con Validación de Tipos (Type Hints)
+Hasta ahora, nuestros parámetros de ruta recibían cualquier cosa como texto (String). Pero, ¿qué pasa si queremos que un ID sea estrictamente un número entero? 
+
+En FastAPI, usamos los **Type Hints** de Python para definir el tipo de dato.
+
+1. Modifica tu archivo `main.py` con este código:
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+# Le indicamos a Python que item_id DEBE ser un entero (int)
+@app.get("/items/{item_id}")
+async def read_item(item_id: int):
+    return {"item_id": item_id}
+```
+
+**¿Qué magia hace FastAPI por detrás cuando agregamos `: int`?**
+* **Conversión automática (Parsing):** Aunque todo lo que viaja por la URL es texto, FastAPI agarra el `"22"` de la URL y lo convierte automáticamente en el número entero `22` dentro de Python.
+* **Validación automática:** Si un usuario intenta enviar texto en lugar de un número, FastAPI bloqueará la petición antes de que llegue a tu función y le devolverá un error claro, evitando que tu código se rompa.
+
+**Prueba en tu archivo `.http` (o REST Client):**
+
+Copia y ejecuta estas dos peticiones para ver la diferencia:
+
+```http
+### 1. Prueba Exitosa (Enviando un número)
+GET [http://127.0.0.1:8000/items/22](http://127.0.0.1:8000/items/22)
+Accept: application/json
+
+### 2. Prueba Fallida (Enviando texto - FastAPI lanza un error 422)
+GET [http://127.0.0.1:8000/items/matias](http://127.0.0.1:8000/items/matias)
+Accept: application/json
+```
+
+Si ejecutas la segunda prueba, verás que la API te responde automáticamente con un mensaje detallado explicando que el valor no es un entero válido (Unprocessable Entity). ¡Todo esto sin que nosotros hayamos escrito ni un solo `if`!
+
+### Valores Predefinidos en Rutas (Enum)
+A veces no solo queremos validar el tipo de dato (que sea texto o número), sino que queremos **restringir las opciones** a una lista específica permitida. Para esto, Python nos ofrece la clase `Enum`.
+
+1. Abre `main.py`, importa la librería `Enum` en la parte superior y agrega este código:
+
+```python
+from enum import Enum
+from fastapi import FastAPI
+
+app = FastAPI()
+
+# 1. Creamos una clase que hereda de str y de Enum
+class ModelName(str, Enum):
+    alexnet = "alexnet"
+    resnet = "resnet"
+    lenet = "lenet"
+
+# 2. Usamos nuestra clase como Type Hint
+@app.get("/models/{model_name}")
+async def get_model(model_name: ModelName):
+    # FastAPI ya validó que model_name solo puede ser uno de los 3 permitidos
+    return {"model_name": model_name}
+```
+
+**¿Por qué esto es tan útil?**
+* **Validación estricta:** Si el usuario escribe `/models/alexnet`, la API responde con éxito. Si inventa algo como `/models/mi_modelo`, FastAPI lo rechaza automáticamente con un error 422.
+* **Documentación Automática (Swagger):** Si entras a `http://127.0.0.1:8000/docs`, verás que FastAPI leyó tu `Enum` y convirtió ese campo de texto en un **menú desplegable**, haciendo que la API sea facilísima de usar para otros desarrolladores.
+
+**Prueba en tu archivo `.http`:**
+
+```http
+### Prueba Exitosa (Opción permitida)
+GET [http://127.0.0.1:8000/models/alexnet](http://127.0.0.1:8000/models/alexnet)
+Accept: application/json
+
+### Prueba Fallida (Opción NO permitida - FastAPI la rechaza)
+GET [http://127.0.0.1:8000/models/supernet](http://127.0.0.1:8000/models/supernet)
+Accept: application/json
+```

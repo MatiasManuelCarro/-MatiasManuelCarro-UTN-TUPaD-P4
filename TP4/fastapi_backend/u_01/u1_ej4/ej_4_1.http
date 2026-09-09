@@ -2,6 +2,7 @@
 GET http://127.0.0.1:8000/items/
 Accept: application/json
 
+
 ### Obtener ítems con parámetros de consulta (Query Params)
 GET http://127.0.0.1:8000/items/?skip=1&limit=1
 Accept: application/json

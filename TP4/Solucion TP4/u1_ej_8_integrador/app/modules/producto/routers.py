@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Path, Query, status
-from typing import List
+
 from . import schemas, services
+
 
 router = APIRouter(prefix="/productos", tags=["Productos"])
 
@@ -18,7 +19,7 @@ def alta_producto(producto: schemas.ProductoCreate):
 
 # (Extra) LISTAR PRODUCTOS
 @router.get(
-    "/", response_model=List[schemas.ProductoRead], status_code=status.HTTP_200_OK
+    "/", response_model=list[schemas.ProductoRead], status_code=status.HTTP_200_OK
 )
 def listar_productos(skip: int = Query(0, ge=0), limit: int = Query(10, le=50)):
     return services.obtener_todos(skip, limit)
