@@ -129,3 +129,117 @@ class Producto(ABC):
                 return vinculo.categoria
         raise RuntimeError("No hay categoría principal")
 
+class ProductoSimple(Producto):
+    def __init__(
+        self,
+        nombre: str,
+        precio_base: float,
+        stock_cantidad: float,
+        unidad_venta: UnidadMedida | None,
+        categoria_principal: Categoria,
+        habilitado: bool = True,
+    ) -> None:
+
+        # ProductoSimple: precio_base debe ser entero y >= 1
+        if precio_base < 1 or precio_base != int(precio_base):
+            raise DomainError(
+                "precio_base debe ser entero y no puede ser negativo en ProductoSimple"
+            )
+
+        super().__init__(
+            nombre,
+            precio_base,
+            stock_cantidad,
+            unidad_venta,
+            categoria_principal,
+            habilitado,
+        )
+
+    def precio_final(self, cantidad: float) -> float:
+        return self._precio_base * cantidad
+
+class ProductoPorPeso(Producto):
+    def __init__(
+        self,
+        nombre: str,
+        precio_base: float,
+        stock_cantidad: float,
+        unidad_venta: UnidadMedida | None,
+        categoria_principal: Categoria,
+        habilitado: bool = True,
+    ) -> None:
+
+        # ProductoPorPeso: precio_base > 0 y admite decimales
+        if precio_base <= 0:
+            raise DomainError(
+                "precio_base debe ser > 0 para ProductoPorPeso"
+            )
+
+        super().__init__(
+            nombre,
+            precio_base,
+            stock_cantidad,
+            unidad_venta,
+            categoria_principal,
+            habilitado,
+        )
+
+    def precio_final(self, cantidad: float) -> float:
+        #ProductoPorPeso redondea a 2 decimales
+        return round(self._precio_base * cantidad, 2)
+
+
+class ProductoCombo(Producto):
+    def __init__(
+        self,
+        nombre: str,
+        componentes: list[Producto],
+        descuento: float,
+        precio_base: float,
+        stock_cantidad: float,
+        unidad_venta: UnidadMedida | None,
+        categoria_principal: Categoria,
+        habilitado: bool = True,
+    ) -> None:
+
+        # Validación: mínimo 2 componentes
+        if len(componentes) < 2:
+            raise DomainError("Un ProductoCombo debe tener al menos 2 componentes")
+
+        # Validación: todos deben ser Productos
+        for comp in componentes:
+            if not isinstance(comp, Producto):
+                raise DomainError("Todos los componentes deben ser instancias de Producto")
+
+        # Validación: descuento en [0, 1)
+        if not (0 <= descuento < 1):
+            raise DomainError("El descuento debe estar en el rango [0, 1)")
+
+        # Validación: precio_base del combo (decisión obligatoria)
+        if precio_base < 0:
+            raise DomainError("precio_base del combo debe ser >= 0")
+
+        super().__init__(
+            nombre,
+            precio_base,
+            stock_cantidad,
+            unidad_venta,
+            categoria_principal,
+            habilitado,
+        )
+
+        self._componentes: list[Producto] = componentes
+        self._descuento: float = descuento
+
+    @property
+    def componentes(self) -> tuple[Producto, ...]:
+        return tuple(self._componentes)
+
+    def precio_final(self, cantidad: float) -> float:
+        if cantidad < 1 or cantidad != int(cantidad):
+            raise DomainError("La cantidad debe ser un entero >= 1 para ProductoCombo")
+
+        subtotal = sum(p.precio_final(1) for p in self._componentes)
+        total_con_descuento = subtotal * (1 - self._descuento)
+        return total_con_descuento * cantidad
+
