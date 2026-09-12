@@ -91,6 +91,26 @@ class Producto(ABC):
     @property
     def disponible(self) -> bool:
         return self._habilitado and self._stock_cantidad > 0
+    
+    @abstractmethod
+    def precio_final(self, cantidad: float) -> float:
+        raise NotImplementedError
+    
+    def habilitar(self) -> None:
+        self._habilitado = True
+
+    def deshabilitar(self) -> None:
+        self._habilitado = False
+
+    #TODO Revisar esta logica
+    def clasificar_en(self, categoria: Categoria, es_principal: bool = False) -> None:
+        if es_principal:
+            actual = next((v for v in self._clasificaciones if v.es_principal), None)
+            if actual:
+                actual._es_principal = False
+
+        nuevo = ProductoCategoria(self, categoria, es_principal)
+        self._clasificaciones.append(nuevo)
 
     @property
     def precio_publicado(self) -> str:
@@ -108,3 +128,4 @@ class Producto(ABC):
             if vinculo.es_principal:
                 return vinculo.categoria
         raise RuntimeError("No hay categoría principal")
+
