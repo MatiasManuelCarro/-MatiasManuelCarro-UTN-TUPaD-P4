@@ -145,336 +145,108 @@ Reglas del PDF:
 
 ---
 
-# 🍕 ProductoCombo — Diseño, decisiones y justificación completa
 
-`ProductoCombo` es la tercera subclase concreta de `Producto` en el catálogo de Food Store.  
-Representa un **producto del catálogo** que agrupa otros productos ya existentes y aplica un descuento sobre la suma de sus precios.
+# 🧺 6. ProductoCombo — **Decisión de diseño clave del parcial**
 
-Este README explica **todas las decisiones de diseño**, **por qué se tomaron**, y **cómo se justifican** según el PDF del parcial, el UML y el criterio de dominio.
+El PDF exige decidir:
 
+> *“Si el precio_base y el stock del combo se reciben como datos o se derivan de sus componentes.”*
 
-## 🧩 1. Rol en el dominio
+La implementación final **deriva ambos valores dinámicamente**, porque es la opción más coherente con el dominio:
 
-Un combo **es-un Producto** del catálogo.  
-Por lo tanto:
+### ✔ Precio base derivado
+El combo no tiene precio propio.  
+Su precio base es la **suma de los precios base de sus componentes**.
 
-- aparece en el menú,
-- tiene nombre propio,
-- tiene categoría principal,
-- tiene stock propio,
-- puede estar habilitado o deshabilitado,
-- tiene precio publicado,
-- se exporta al punto de venta igual que cualquier producto.
+### ✔ Disponibilidad derivada
+Un combo está disponible **solo si todos sus componentes lo están**.
 
-Los productos que agrupa **no desaparecen** ni cambian su ciclo de vida:  
-esto es **agregación**, no composición.
+### ✔ Justificación
+- Si un componente cambia de precio → el combo se actualiza automáticamente.  
+- Si un componente se queda sin stock → el combo deja de estar disponible.  
+- Evita inconsistencias como combos con stock “999” cuando un componente está agotado.  
+- Responde exactamente la pregunta conceptual del parcial.
 
-
-
-## 🧩 2. Constructor y parámetros
-
-```python
-class ProductoCombo(Producto):
-    def __init__(
-        self,
-        nombre: str,
-        componentes: list[Producto],
-        descuento: float,
-        precio_base: float,
-        stock_cantidad: float,
-        unidad_venta: UnidadMedida | None,
-        categoria_principal: Categoria,
-        habilitado: bool = True,
-    ) -> None:
-```
-
-A continuación se explica **por qué** el combo recibe cada uno de estos parámetros.
-
-
-
-## ✔ nombre: str  
-El combo es un **Producto del catálogo**, por lo tanto tiene nombre propio.  
-Ejemplos reales: “Combo Almuerzo”, “Combo Familiar”.
-
-
-
-## ✔ componentes: list[Producto]  
-Los componentes:
-
-- **se reciben ya construidos**,  
-- **existen antes y después del combo**,  
-- pueden ser **ProductoSimple**, **ProductoPorPeso** o **ProductoCombo** (combos anidados).
-
-Esto cumple exactamente el PDF:
-
-> “Agregación — ProductoCombo y sus componentes (1 a 2..*).  
-> Se reciben ya construidos y existen antes y después del combo.”
-
-
-
-## ✔ descuento: float  
-El descuento es **propiedad del combo**, no de los componentes.
-
-Regla del PDF:
-
-> “El descuento se fija al construir y debe estar en [0, 1).”
-
-
-## ✔ precio_base: float  
-### **Decisión tomada (correcta y defendible):**  
-**El precio_base del combo se recibe como dato de catálogo.  
-No se deriva de los componentes.  
-No participa del cálculo del precio final.**
-
-¿Por qué?
-
-1. Producto exige tener `precio_base` y mostrar `precio_publicado`.  
-2. El cálculo del combo **NO usa precio_base**, usa `precio_final(1)` de cada componente.  
-3. precio_base del combo es un **precio de referencia** para el catálogo.
-
-PDF:
-
-> “Decidí si lo recibís como dato de catálogo o lo derivás de sus componentes,  
-> e implementalo de forma coherente con precio_publicado.”
-
-
-
-## ✔ stock_cantidad: float  
-### **Decisión tomada (correcta y defendible):**  
-**El combo tiene stock propio.  
-No depende del stock de los componentes.**
-
-¿Por qué?
-
-1. Producto exige tener stock y calcular `disponible`.  
-2. En el dominio real, un combo es un producto prearmado:  
-   - si el local arma 10 combos por día → stock = 10  
-   - aunque haya 100 aguas y 50 jamones.
-3. Derivar stock del combo desde los componentes rompe la agregación.
-
-PDF:
-
-> “Decidí si un combo tiene stock propio o si su disponibilidad se deriva de la de sus componentes.”
-
-
-## ✔ unidad_venta: UnidadMedida | None  
-Hereda la asociación 0..1 de Producto.  
-Un combo puede tener unidad (“u”) o ninguna unidad.
-
-
-
-## ✔ categoria_principal: Categoria  
-El combo aparece en el menú bajo una categoría (“Combos”, “Promociones”, etc.).  
-Producto crea internamente el vínculo principal.
-
-
-## ✔ habilitado: bool  
-Hereda la lógica de disponibilidad de Producto:
-
-```
-disponible = habilitado and stock_cantidad > 0
-```
-
-
-## 🧩 3. Regla de cálculo del precio final
-
-Regla exacta del PDF:
-
-```
-precio_final(cantidad) =
-    (suma de componente.precio_final(1))
-    × (1 - descuento)
-    × cantidad
-```
-
-### ✔ No usa precio_base del combo  
-### ✔ No redondea (solo ProductoPorPeso redondea)  
-### ✔ Respeta polimorfismo  
-### ✔ Funciona con combos anidados
-
-
-## 🧩 4. Validaciones obligatorias
-
-- Mínimo **2 componentes**.  
-- Todos los componentes deben ser instancias de `Producto`.  
-- Descuento en **[0, 1)**.  
-- Cantidad entero y **>= 1**.  
-- precio_base >= 0 (dato de catálogo).  
-- Stock >= 0.
-
-
-## 🧩 5. Relación estructural: Agregación
-
-- Los componentes **no se crean** dentro del combo.  
-- Los componentes **sobreviven** si el combo se elimina.  
-- El combo **no es dueño** del ciclo de vida de los componentes.  
-- `componentes()` devuelve una **tupla**, no la lista interna.
-
-Esto cumple el PDF
-
-## RESPUESTA PARA EL VIDEO
-
-## 🧩 Agregación — ProductoCombo y sus componentes  
-
-## ✔ ¿Qué miro en mi propio código para saber que implementé AGREGACIÓN?
-
-La **línea exacta** que delata la agregación es:
-
-```python
-self._componentes: list[Producto] = componentes
-```
-
-## ✔ ¿Por qué esta línea demuestra agregación?
-
-- Los componentes **se reciben ya construidos**.  
-- El combo **solo guarda referencias** a objetos externos.  
-- El combo **no crea** los componentes.  
-- El combo **no controla** el ciclo de vida de los componentes.  
-- Los componentes **existen antes y después** del combo.
-
-Esto cumple exactamente lo que pide el PDF:
-
-“Se reciben ya construidos y existen antes y después del combo.”
-
-
-## ✔ ¿Qué le pasa a la parte cuando el todo deja de existir?
-
-En **agregación**, la parte **sobrevive** al todo.
-
-Ejemplo conceptual:
-
-```
-agua = ProductoSimple(...)
-jamon = ProductoPorPeso(...)
-
-combo = ProductoCombo(componentes=[agua, jamon], ...)
-del combo
-```
-
-Después de `del combo`:
-
-- `agua` sigue existiendo  
-- `jamon` sigue existiendo  
-- sus precios siguen intactos  
-- su stock sigue intacto  
-- su categoría sigue intacta  
-
-El combo **no destruye ni modifica** a sus componentes.
-
-
-## ✔ Frase perfecta para tu defensa oral
-
-“En mi código, la agregación se ve en la línea `self._componentes = componentes`.  
-Eso demuestra que el combo recibe productos ya construidos y solo guarda referencias.  
-Los componentes existen antes y después del combo, y si el combo desaparece, los componentes siguen existiendo.  
-El combo no controla el ciclo de vida de los componentes, por eso es agregación y no composición.”
-
-
-### Nota
-
-```
-“Este modelo no busca representar un sistema real de stock o ventas.
-Busca demostrar relaciones estructurales del dominio: composición, agregación y asociación.
-En un sistema real, muchas de estas relaciones serían bidireccionales o incluso modeladas de otra forma,
-pero en este parcial el objetivo es demostrar diseño orientado a objetos, no construir un sistema de producción.”
-```
-
+### ✔ Constructor corregido
+El combo ya **no recibe** precio_base ni stock_cantidad.  
+Se sobrescriben las properties para derivarlos.
 ---
-# 🧩 Producto destacado
 
-ProductoDestacado **se mantiene como subclase de Producto** porque cumple plenamente el criterio **«es‑un»** dentro del dominio.
+# 🟨 Rediseño de `ProductoDestacado` — Justificación completa
 
-Un ProductoDestacado:
+## 🟦 Reemplazo de la herencia
+El diseño original asumía que *ProductoDestacado es‑un Producto*, pero destacar un producto **no modifica** su precio_final, stock, unidad_venta, categorías ni comportamiento.  
+Solo agrega **información de presentación** (orden en la vidriera).  
+Por lo tanto, **no corresponde usar herencia**.
 
-- tiene nombre → como cualquier Producto  
-- tiene precio_base → como cualquier Producto  
-- tiene stock_cantidad → como cualquier Producto  
-- tiene unidad_venta → como cualquier Producto  
-- tiene categoría principal → como cualquier Producto  
-- tiene habilitado/disponible → como cualquier Producto  
-- se exporta en el catálogo → como cualquier Producto  
+La herencia se reemplaza por **composición**:  
+`ProductoDestacado` ahora **envuelve** a un `Producto` existente.
 
-La única diferencia es que agrega **orden_vidriera**, un atributo que afecta **solo la presentación** del catálogo, sin modificar comportamiento funcional.
+### Implementación
 
-Por lo tanto:
+```python
+class ProductoDestacado:
+    def __init__(self, producto: Producto, orden_vidriera: int) -> None:
+        self._producto = producto
+        self._orden_vidriera = orden_vidriera
 
-### ✔ ProductoDestacado **es‑un Producto**  
-### ✔ La herencia es pertinente y se conserva  
-### ✔ La especialización es semántica (presentación), no funcional  
+    @property
+    def orden_vidriera(self) -> int:
+        return self._orden_vidriera
 
-## 🧠 Frase para la defensa oral
+    @property
+    def producto(self) -> Producto:
+        return self._producto
 
-“ProductoDestacado cumple el criterio es‑un Producto.  
-Comparte todo el comportamiento de Producto y solo agrega un atributo de presentación llamado orden_vidriera.  
-No altera precio, stock, disponibilidad ni categorías, por lo que la herencia es pertinente y se mantiene como una especialización semántica del dominio.”
-
-## ⭐ ProductoDestacado — Resumen de las dos decisiones faltantes del Requerimiento 3
-
-## ✔ 1) Regla de `precio_final(cantidad)` en un ProductoDestacado
-ProductoDestacado **no redefine** `precio_final`.  
-Su especialización es **solo de presentación**, por lo que:
-
-- mantiene exactamente la misma regla de precio que la subclase concreta de Producto de la que proviene.
-- si es simple → usa la regla de ProductoSimple  
-- si es por peso → usa la regla de ProductoPorPeso  
-- si es combo → usa la regla de ProductoCombo  
-
-**Justificación:**  
-ProductoDestacado agrega únicamente `orden_vidriera`, que no afecta precio, stock ni disponibilidad.  
-Por eso **no introduce comportamiento nuevo**, solo presentación.
+    def exportar(self) -> str:
+        return f"DEST|{self._producto.nombre}|{self._orden_vidriera}"
+```
 
 
-## ✔ 2) ¿Cómo se destaca un ProductoPorPeso o un ProductoCombo?
-ProductoDestacado **no reemplaza** a las otras subclases.  
-Es un **rol opcional** del dominio que se aplica a cualquier Producto.
+## 🟩 Dónde vive `orden_vidriera`
+`orden_vidriera` **no pertenece al producto**, sino a la **forma en que se muestra** en la vidriera.  
+Por eso vive en el **envoltorio** `ProductoDestacado` y no en el producto original.
 
-Para destacar un producto:
+Esto respeta el principio de responsabilidad única:  
+el producto mantiene su lógica de negocio, y el destacado maneja la presentación.
 
-- se instancia un ProductoDestacado con los mismos datos del producto original  
-- se agrega `orden_vidriera`  
-- el cálculo de precio y el comportamiento funcional siguen siendo los de la clase concreta original
 
-## Justificación:
 
-La herencia se mantiene porque ProductoDestacado **es‑un Producto**, y su especialización es semántica (presentación), no funcional.
+## 🟪 Qué productos pueden destacarse
+Con la versión anterior (herencia), solo podían destacarse los productos que heredaban de `ProductoDestacado`.
 
-**Justificación integrada en el código (lo que exige HU‑P1‑05)**
-1) La herencia se mantiene
-class ProductoDestacado(Producto)  
-Cumple el criterio es‑un.
+Con la nueva versión (composición), pueden destacarse **todos los productos del catálogo**, porque el envoltorio recibe:
 
-1) Regla de precio_final explícita
-ProductoDestacado no altera la regla:
-return self._precio_base * cantidad  
-Es la misma que ProductoSimple y ProductoPorPeso.
-Coherente con “solo presentación”.
+producto: Producto
 
-1) Cómo se destaca un producto por peso o un combo
-Se instancia ProductoDestacado con los mismos datos del producto original.
-El cálculo de precio sigue siendo el de la clase concreta.
+Esto permite destacar:
 
-1) orden_vidriera vive en ProductoDestacado
-self._orden_vidriera = orden_vidriera
+- ProductoSimple  
+- ProductoPorPeso  
+- ProductoCombo  
+- Cualquier otro tipo futuro  
 
-1) No se fuerza el modelo del catálogo
-ProductoDestacado no toca stock, categorías, combos, ni disponibilidad.
+Sin duplicar ni recrear productos.
 
-1) UML, código y defensa coinciden
-La herencia se mantiene.
-El atributo está en la subclase.
-La regla de precio está explícita.
-El rol es opcional.
 
-## 🧠 Frase para la defensa oral
 
-“ProductoDestacado no redefine precio_final porque su especialización es solo de presentación.  
-Para destacar un ProductoSimple, un ProductoPorPeso o un ProductoCombo, simplemente instancio ProductoDestacado con los mismos datos y agrego orden_vidriera.  
-El comportamiento funcional sigue siendo el de la subclase concreta de Producto.”
+## 🟫 Compatibilidad con el Protocol
+`ProductoDestacado` sigue cumpliendo el Protocol `exportar()`:
 
-“ProductoDestacado no diferencia si el producto era por unidad o por peso.
-Usa la misma fórmula precio_base × cantidad.
-La diferencia está en qué representa cantidad según el producto original: unidades para ProductoSimple, kilos/litros para ProductoPorPeso.
-Así se cumple el polimorfismo sin if/elif ni isinstance().”
+DEST|{nombre_del_producto}|{orden_vidriera}
+
+No necesita heredar de `Producto` ni de `Exportable`.  
+Cumple por **conformidad estructural**, tal como exige el Requerimiento 4.
+
+
+
+## 🟧 Resumen para defensa oral
+Rediseñé `ProductoDestacado` porque no cumple el criterio es‑un Producto.  
+No modifica precio_final, stock, unidad_venta ni categorías.  
+Solo agrega un atributo de presentación llamado `orden_vidriera`.  
+Por eso reemplazo la herencia por composición: `ProductoDestacado` envuelve a un `Producto` existente.  
+Así cualquier producto del catálogo puede destacarse sin duplicarlo, y `orden_vidriera` vive en el envoltorio, no en el producto.  
+El diseño queda más limpio, más flexible y más alineado con el dominio.
 
 ---
 
@@ -585,4 +357,197 @@ Por eso las otras subclases no necesitan redondear.
 
 ---
 
+# UML
 
+```mermaid
+classDiagram
+direction LR
+
+%% ============================
+%% Protocol
+%% ============================
+class Exportable {
+    <<protocol>>
+    +exportar() str
+}
+
+%% ============================
+%% Clases del dominio
+%% ============================
+class Producto {
+    <<abstract>>
+    -nombre: str
+    -precio_base: float
+    -stock_cantidad: float
+    -unidad_venta: UnidadMedida
+    -categoria_principal: Categoria
+    +precio_final(cantidad: float) float
+    +exportar() str
+}
+
+class ProductoSimple {
+    +precio_final(cantidad: float) float
+    +exportar() str
+}
+
+class ProductoPorPeso {
+    +precio_final(kg: float) float
+    +exportar() str
+}
+
+class ProductoCombo {
+    -componentes: list~Producto~
+    -descuento: float
+    +precio_final(cantidad: float) float
+    +exportar() str
+}
+
+class ProductoDestacado {
+    -orden_vidriera: int
+    +precio_final(cantidad: float) float
+    +exportar() str
+}
+
+class Categoria {
+    -nombre: str
+}
+
+class UnidadMedida {
+    -nombre: str
+    -simbolo: str
+    -tipo: str
+}
+
+%% ============================
+%% Clase externa
+%% ============================
+class FichaPuntoDeVenta {
+    -_codigo: str
+    -_detalle: str
+    +exportar() str
+}
+
+%% ============================
+%% Relaciones
+%% ============================
+
+%% Herencia
+Producto <|-- ProductoSimple
+Producto <|-- ProductoPorPeso
+Producto <|-- ProductoCombo
+Producto <|-- ProductoDestacado
+
+%% Composición (Combo contiene Productos)
+ProductoCombo *-- Producto : componentes 1..*
+
+%% Agregación (Producto tiene Categoria y UnidadMedida)
+Producto o-- Categoria : 1
+Producto o-- UnidadMedida : 0..1
+
+%% Conformidad estructural con Protocol
+ProductoSimple ..|> Exportable
+ProductoPorPeso ..|> Exportable
+ProductoCombo ..|> Exportable
+ProductoDestacado ..|> Exportable
+FichaPuntoDeVenta ..|> Exportable
+```
+
+
+---
+
+# ✅ **2. UML en PlantUML (para exportar PNG)**
+
+```markdown
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+
+' ============================
+' Protocol
+' ============================
+class Exportable <<protocol>> {
+    +exportar(): String
+}
+
+' ============================
+' Clases del dominio
+' ============================
+abstract class Producto {
+    -nombre: String
+    -precio_base: float
+    -stock_cantidad: float
+    -unidad_venta: UnidadMedida
+    -categoria_principal: Categoria
+    +precio_final(cantidad: float): float
+    +exportar(): String
+}
+
+class ProductoSimple {
+    +precio_final(cantidad: float): float
+    +exportar(): String
+}
+
+class ProductoPorPeso {
+    +precio_final(kg: float): float
+    +exportar(): String
+}
+
+class ProductoCombo {
+    -componentes: List<Producto>
+    -descuento: float
+    +precio_final(cantidad: float): float
+    +exportar(): String
+}
+
+class ProductoDestacado {
+    -orden_vidriera: int
+    +precio_final(cantidad: float): float
+    +exportar(): String
+}
+
+class Categoria {
+    -nombre: String
+}
+
+class UnidadMedida {
+    -nombre: String
+    -simbolo: String
+    -tipo: String
+}
+
+' ============================
+' Clase externa
+' ============================
+class FichaPuntoDeVenta {
+    -_codigo: String
+    -_detalle: String
+    +exportar(): String
+}
+
+' ============================
+' Relaciones
+' ============================
+
+' Herencia
+Producto <|-- ProductoSimple
+Producto <|-- ProductoPorPeso
+Producto <|-- ProductoCombo
+Producto <|-- ProductoDestacado
+
+' Composición
+ProductoCombo *-- Producto : componentes 1..*
+
+' Agregación
+Producto o-- Categoria : 1
+Producto o-- UnidadMedida : 0..1
+
+' Conformidad estructural con Protocol
+ProductoSimple ..|> Exportable
+ProductoPorPeso ..|> Exportable
+ProductoCombo ..|> Exportable
+ProductoDestacado ..|> Exportable
+FichaPuntoDeVenta ..|> Exportable
+
+@enduml
+```
+```

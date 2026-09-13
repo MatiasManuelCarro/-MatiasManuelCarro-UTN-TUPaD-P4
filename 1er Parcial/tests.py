@@ -1,6 +1,6 @@
-from libreria_externa import FichaPuntoDeVenta
-from productos import (
+from catalogo import (
     Categoria,
+    DomainError,
     Producto,
     ProductoCombo,
     ProductoDestacado,
@@ -8,6 +8,7 @@ from productos import (
     ProductoSimple,
     UnidadMedida,
 )
+from libreria_externa import FichaPuntoDeVenta
 
 # ============================
 # PRUEBAS COMPLETAS DEL MODELO
@@ -177,9 +178,34 @@ items = [
     combo_A,     # combos dentro de combos también exportan
 ]
 
-from productos import exportar_catalogo  # donde definiste el Protocol y la función
+from catalogo import exportar_catalogo  # donde definiste el Protocol y la función
 
 resultado = exportar_catalogo(items)
 
 for linea in resultado:
     print(linea)
+
+print("\n=== PRUEBA 13: categoria duplicada ===")
+
+def test_clasificacion_duplicada():
+    print("\n=== TEST: Clasificación duplicada ===")
+
+    # Categoría y unidad
+    cat_golosinas = Categoria("Golosinas")
+    u_unidad = UnidadMedida("Unidad", "u", "unidad")
+
+    # Producto
+    p = ProductoSimple("Alfajor", 500, 100, u_unidad, cat_golosinas)
+
+    # Primera clasificación (válida)
+    p.clasificar_en(Categoria("Promo"))  # categoría distinta
+
+    # Segunda clasificación duplicada → debe fallar
+    try:
+        p.clasificar_en(cat_golosinas)  # misma categoría principal
+        print("ERROR: No lanzó DomainError")
+    except DomainError as e:
+        print("OK:", e)
+
+if __name__ == "__main__":
+    test_clasificacion_duplicada()

@@ -8,12 +8,15 @@ from typing import Protocol
 class DomainError(ValueError):  # Clase de excepcion propia - Hereda de Value error
     pass
 
+
 class Exportable(Protocol):
     def exportar(self) -> str:
         pass
 
+
 def exportar_catalogo(items: list[Exportable]) -> list[str]:
     return [item.exportar() for item in items]
+
 
 @dataclass(frozen=True)
 class UnidadMedida:
@@ -57,6 +60,10 @@ class ProductoCategoria:
     @property
     def es_principal(self) -> bool:
         return self._es_principal
+    
+    # TODO revisar logica
+    def _marcar_principal(self, valor: bool) -> None:
+        self._es_principal = valor
 
 
 class Producto(ABC):
@@ -70,6 +77,16 @@ class Producto(ABC):
         habilitado: bool = True,
     ) -> None:
 
+        # Validaciones 
+        if not nombre.strip():
+            raise DomainError("El nombre del producto no puede estar vacío")
+
+        if precio_base < 0:
+            raise DomainError("El precio base no puede ser negativo")
+
+        if stock_cantidad < 0:
+            raise DomainError("El stock no puede ser negativo")
+        
         # Atributos internos
         self._nombre = nombre
         self._precio_base = precio_base
@@ -113,10 +130,16 @@ class Producto(ABC):
 
     # TODO Revisar esta logica
     def clasificar_en(self, categoria: Categoria, es_principal: bool = False) -> None:
+        
+        # No se puede clasificar dos veces en la misma categoría
+        for vinculo in self._clasificaciones:
+            if vinculo.categoria is categoria:
+                raise DomainError("El producto ya está clasificado en esta categoría")
+        
         if es_principal:
             actual = next((v for v in self._clasificaciones if v.es_principal), None)
             if actual:
-                actual._es_principal = False
+                actual._marcar_principal(False)
 
         nuevo = ProductoCategoria(self, categoria, es_principal)
         self._clasificaciones.append(nuevo)
@@ -204,49 +227,117 @@ class ProductoPorPeso(Producto):
         return f"PROD_PESO|{self.nombre}|{self.precio_base}|{self.unidad_venta.simbolo}"
 
 
+# class ProductoCombo(Producto):
+#     def __init__(
+#         self,
+#         nombre: str,
+#         componentes: list[Producto],
+#         descuento: float,
+#         precio_base: float,
+#         stock_cantidad: float,
+#         unidad_venta: UnidadMedida | None,
+#         categoria_principal: Categoria,
+#         habilitado: bool = True,
+#     ) -> None:
+
+#         # Validación: mínimo 2 componentes
+#         if len(componentes) < 2:
+#             raise DomainError("Un ProductoCombo debe tener al menos 2 componentes")
+
+#         # Validación: todos deben ser Productos
+#         for comp in componentes:
+#             if not isinstance(comp, Producto):
+#                 raise DomainError(
+#                     "Todos los componentes deben ser instancias de Producto"
+#                 )
+
+#         # Validación: descuento en [0, 1)
+#         if not (0 <= descuento < 1):
+#             raise DomainError("El descuento debe estar en el rango [0, 1)")
+
+#         # Validación: precio_base del combo (decisión obligatoria)
+#         if precio_base < 0:
+#             raise DomainError("precio_base del combo debe ser >= 0")
+
+#         super().__init__(
+#             nombre,
+#             precio_base,
+#             stock_cantidad,
+#             unidad_venta,
+#             categoria_principal,
+#             habilitado,
+#         )
+
+#         self._componentes: list[Producto] = componentes
+#         self._descuento: float = descuento
+
+#     @property
+#     def componentes(self) -> tuple[Producto, ...]:
+#         return tuple(self._componentes)
+
+#     def precio_final(self, cantidad: float) -> float:
+#         if cantidad < 1 or cantidad != int(cantidad):
+#             raise DomainError("La cantidad debe ser un entero >= 1 para ProductoCombo")
+
+#         subtotal = sum(p.precio_final(1) for p in self._componentes)
+#         total_con_descuento = subtotal * (1 - self._descuento)
+#         return total_con_descuento * cantidad
+
+#     def exportar(self) -> str:
+#         return f"COMBO|{self.nombre}|{len(self._componentes)}"
+
 class ProductoCombo(Producto):
     def __init__(
         self,
         nombre: str,
         componentes: list[Producto],
         descuento: float,
-        precio_base: float,
-        stock_cantidad: float,
         unidad_venta: UnidadMedida | None,
         categoria_principal: Categoria,
         habilitado: bool = True,
     ) -> None:
 
-        # Validación: mínimo 2 componentes
         if len(componentes) < 2:
             raise DomainError("Un ProductoCombo debe tener al menos 2 componentes")
 
-        # Validación: todos deben ser Productos
         for comp in componentes:
             if not isinstance(comp, Producto):
-                raise DomainError(
-                    "Todos los componentes deben ser instancias de Producto"
-                )
+                raise DomainError("Todos los componentes deben ser instancias de Producto")
 
-        # Validación: descuento en [0, 1)
         if not (0 <= descuento < 1):
             raise DomainError("El descuento debe estar en el rango [0, 1)")
 
-        # Validación: precio_base del combo (decisión obligatoria)
-        if precio_base < 0:
-            raise DomainError("precio_base del combo debe ser >= 0")
-
+        # Inicializamos la clase padre.
+        # Le pasamos 0 al precio_base y stock_cantidad base porque 
+        # vamos a sobreescribir cómo se comportan más abajo.
         super().__init__(
             nombre,
-            precio_base,
-            stock_cantidad,
-            unidad_venta,
-            categoria_principal,
-            habilitado,
+            precio_base=0.0, 
+            stock_cantidad=0.0, 
+            unidad_venta=unidad_venta,
+            categoria_principal=categoria_principal,
+            habilitado=habilitado,
         )
 
         self._componentes: list[Producto] = componentes
         self._descuento: float = descuento
+
+    # --- DECISIÓN DE DISEÑO EXPLICADA ---
+    # Decisión: El precio_base y la disponibilidad de un Combo no son datos estáticos.
+    # Se derivan dinámicamente de sus componentes. Así, si un componente agota su stock
+    # o cambia su precio, el combo se actualiza automáticamente.
+
+    @property
+    def precio_base(self) -> float:
+        # El precio base del combo es la suma estricta de los precios base de sus componentes
+        return sum(comp.precio_base for comp in self._componentes)
+
+    @property
+    def disponible(self) -> bool:
+        # Un combo solo está disponible si el combo en sí está habilitado 
+        # y TODOS sus componentes están disponibles.
+        componentes_disponibles = all(comp.disponible for comp in self._componentes)
+        return self._habilitado and componentes_disponibles
 
     @property
     def componentes(self) -> tuple[Producto, ...]:
@@ -264,36 +355,53 @@ class ProductoCombo(Producto):
         return f"COMBO|{self.nombre}|{len(self._componentes)}"
 
 
-class ProductoDestacado(Producto):
-    def __init__(
-        self,
-        nombre: str,
-        precio_base: float,
-        stock_cantidad: float,
-        unidad_venta: str | None,
-        categoria_principal: str,
-        orden_vidriera: int,
-        habilitado: bool = True,
-    ) -> None:
-        super().__init__(
-            nombre,
-            precio_base,
-            stock_cantidad,
-            unidad_venta,
-            categoria_principal,
-            habilitado,
-        )
+class ProductoDestacado: # Ya no hereda de Producto
+    def __init__(self, producto: Producto, orden_vidriera: int) -> None:
+        self._producto = producto
         self._orden_vidriera = orden_vidriera
 
     @property
     def orden_vidriera(self) -> int:
         return self._orden_vidriera
 
-    def precio_final(self, cantidad: float) -> float:
-        if cantidad <= 0:
-            raise ValueError("Cantidad inválida, no puede ser negativa")
-        return self._precio_base * cantidad
+    @property
+    def producto(self) -> Producto:
+        return self._producto
 
     def exportar(self) -> str:
-        return f"DEST|{self.nombre}|{self.orden_vidriera}"
+        # Exporta como Destacado pero delega los datos al producto que envuelve
+        return f"DEST|{self._producto.nombre}|{self._orden_vidriera}"
 
+# * DEPRECATED - REVISAR MAS TARDE
+# class ProductoDestacado(Producto):
+#     def __init__(
+#         self,
+#         nombre: str,
+#         precio_base: float,
+#         stock_cantidad: float,
+#         unidad_venta: str | None,
+#         categoria_principal: str,
+#         orden_vidriera: int,
+#         habilitado: bool = True,
+#     ) -> None:
+#         super().__init__(
+#             nombre,
+#             precio_base,
+#             stock_cantidad,
+#             unidad_venta,
+#             categoria_principal,
+#             habilitado,
+#         )
+#         self._orden_vidriera = orden_vidriera
+
+#     @property
+#     def orden_vidriera(self) -> int:
+#         return self._orden_vidriera
+
+#     def precio_final(self, cantidad: float) -> float:
+#         if cantidad <= 0:
+#             raise ValueError("Cantidad inválida, no puede ser negativa")
+#         return self._precio_base * cantidad
+
+#     def exportar(self) -> str:
+#         return f"DEST|{self.nombre}|{self.orden_vidriera}"
