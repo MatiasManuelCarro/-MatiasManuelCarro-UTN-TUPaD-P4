@@ -2,11 +2,18 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Protocol
 
 
 class DomainError(ValueError):  # Clase de excepcion propia - Hereda de Value error
     pass
 
+class Exportable(Protocol):
+    def exportar(self) -> str:
+        pass
+
+def exportar_catalogo(items: list[Exportable]) -> list[str]:
+    return [item.exportar() for item in items]
 
 @dataclass(frozen=True)
 class UnidadMedida:
@@ -161,6 +168,9 @@ class ProductoSimple(Producto):
     def precio_final(self, cantidad: float) -> float:
         return self._precio_base * cantidad
 
+    def exportar(self) -> str:
+        return f"PROD|{self.nombre}|{self.precio_base}"
+
 
 class ProductoPorPeso(Producto):
     def __init__(
@@ -189,6 +199,9 @@ class ProductoPorPeso(Producto):
     def precio_final(self, cantidad: float) -> float:
         # ProductoPorPeso redondea a 2 decimales
         return round(self._precio_base * cantidad, 2)
+
+    def exportar(self) -> str:
+        return f"PROD_PESO|{self.nombre}|{self.precio_base}|{self.unidad_venta.simbolo}"
 
 
 class ProductoCombo(Producto):
@@ -247,6 +260,9 @@ class ProductoCombo(Producto):
         total_con_descuento = subtotal * (1 - self._descuento)
         return total_con_descuento * cantidad
 
+    def exportar(self) -> str:
+        return f"COMBO|{self.nombre}|{len(self._componentes)}"
+
 
 class ProductoDestacado(Producto):
     def __init__(
@@ -277,3 +293,7 @@ class ProductoDestacado(Producto):
         if cantidad <= 0:
             raise ValueError("Cantidad inválida, no puede ser negativa")
         return self._precio_base * cantidad
+
+    def exportar(self) -> str:
+        return f"DEST|{self.nombre}|{self.orden_vidriera}"
+

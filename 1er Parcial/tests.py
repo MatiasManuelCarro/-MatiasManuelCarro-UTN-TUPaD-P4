@@ -1,6 +1,6 @@
+from libreria_externa import FichaPuntoDeVenta
 from productos import (
     Categoria,
-    DomainError,
     Producto,
     ProductoCombo,
     ProductoDestacado,
@@ -151,3 +151,35 @@ combo_C = ProductoCombo(
 )
 
 print(f"Precio Combo C (1 unidad): {combo_C.precio_final(1):.2f}") # ! SIEMPRE REDONDEAR SALIDA DE COMBOS, SI NO PUEDE DAR .99999
+
+print("\n=== PRUEBA 10: Exportación de productos ===")
+
+print("Exportar ProductoSimple:", p_simple.exportar())
+print("Exportar ProductoPorPeso:", p_peso.exportar())
+print("Exportar ProductoCombo:", combo.exportar())
+print("Exportar ProductoDestacado:", dest.exportar())
+
+
+print("\n=== PRUEBA 11: Exportación de ficha externa ===")
+
+ficha = FichaPuntoDeVenta("A12", "Pago en caja")
+print("Exportar FichaPuntoDeVenta:", ficha.exportar())
+
+
+print("\n=== PRUEBA 12: exportar_catalogo con productos y fichas mezclados ===")
+
+items = [
+    p_simple,
+    p_peso,
+    combo,
+    dest,
+    ficha,       # mezcla con clase externa
+    combo_A,     # combos dentro de combos también exportan
+]
+
+from productos import exportar_catalogo  # donde definiste el Protocol y la función
+
+resultado = exportar_catalogo(items)
+
+for linea in resultado:
+    print(linea)

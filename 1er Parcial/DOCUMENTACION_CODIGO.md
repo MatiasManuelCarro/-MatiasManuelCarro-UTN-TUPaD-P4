@@ -479,6 +479,90 @@ Así se cumple el polimorfismo sin if/elif ni isinstance().”
 ---
 
 
+# 📦 Requerimiento 4 — Exportación con Protocol  
+### Integración con librería externa y polimorfismo estructural
+
+Este módulo implementa un mecanismo de exportación común para **productos del catálogo** y **fichas externas del punto de venta**, cumpliendo el requerimiento de usar **Protocol** en lugar de herencia clásica.
+
+---
+
+## 🧩 1. Contrato Exportable (Protocol)
+
+Se define un contrato llamado **Exportable**, que exige únicamente el método:
+
+`exportar(self) -> str`
+
+Este contrato **no se hereda**.  
+Las clases lo cumplen **por tener el método**, siguiendo el principio de **conformidad estructural** (duck typing).
+
+Esto permite integrar objetos de terceros sin modificar su código.
+
+
+## 🔌 2. Integración con la librería externa
+
+La librería externa provee la clase:
+
+`FichaPuntoDeVenta`
+
+Esta clase ya implementa `exportar()`, por lo que **automáticamente cumple el contrato Exportable**, sin heredar nada y sin requerir adaptadores.
+
+Esto demuestra que el diseño es flexible y desacoplado.
+
+
+## 🔄 3. Implementación de exportar() en los productos
+
+Cada clase concreta del catálogo implementa su propia versión de `exportar()`:
+
+- ProductoSimple  
+- ProductoPorPeso  
+- ProductoCombo  
+- ProductoDestacado  
+
+El formato de la cadena es **de diseño libre**, ya que el parcial evalúa únicamente:
+
+- que devuelva `str`  
+- que cumpla el contrato  
+- que funcione junto con la clase externa  
+
+
+## 📤 4. Función exportar_catalogo(items)
+
+Se implementa:
+
+`exportar_catalogo(items: list[Exportable]) -> list[str]`
+
+Esta función recibe **productos y fichas externas mezclados** en la misma lista y exporta todos los elementos mediante polimorfismo estructural:
+
+- sin `isinstance()`  
+- sin `if/elif`  
+- sin herencia forzada  
+- sin modificar la librería externa  
+
+Solo llama:
+
+`item.exportar()`
+
+
+## 🧪 5. Pruebas realizadas
+
+Se verificó:
+
+- Exportación individual de cada tipo de producto  
+- Exportación de la clase externa FichaPuntoDeVenta  
+- Exportación de listas mixtas (productos + fichas)  
+- Exportación de combos anidados  
+- Polimorfismo estructural funcionando en runtime  
+
+Todas las pruebas pasaron correctamente.
+
+
+## 🎯 Cierre (versión corta)
+
+El sistema de exportación quedó simple y flexible: definí un Protocol y cualquier objeto que tenga `exportar()` entra sin pedir permiso. Los productos y la ficha externa trabajan juntos sin herencia, sin instanceof y sin tocar código de terceros. Con eso, el requerimiento queda completamente cumplido y el diseño queda limpio, desacoplado y fácil de extender.
+
+
+---
+
 
 # 🧩 Decisiones globales del modelo
 
