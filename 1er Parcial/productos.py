@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 
-class DomainError(ValueError): # Clase de excepcion propia - Hereda de Value error
+class DomainError(ValueError):  # Clase de excepcion propia - Hereda de Value error
     pass
 
 
@@ -63,13 +63,15 @@ class Producto(ABC):
         habilitado: bool = True,
     ) -> None:
 
-        # Atributos internos 
+        # Atributos internos
         self._nombre = nombre
         self._precio_base = precio_base
         self._stock_cantidad = stock_cantidad
         self._habilitado = habilitado
         self._unidad_venta = unidad_venta
-        self._clasificaciones: list[ProductoCategoria] = [] # * es una lista con las categorias
+        self._clasificaciones: list[
+            ProductoCategoria
+        ] = []  # * es una lista con las categorias
 
         # ! Crea la clasificación principal (composición)
         principal = ProductoCategoria(self, categoria_principal, es_principal=True)
@@ -91,18 +93,18 @@ class Producto(ABC):
     @property
     def disponible(self) -> bool:
         return self._habilitado and self._stock_cantidad > 0
-    
+
     @abstractmethod
     def precio_final(self, cantidad: float) -> float:
         raise NotImplementedError
-    
+
     def habilitar(self) -> None:
         self._habilitado = True
 
     def deshabilitar(self) -> None:
         self._habilitado = False
 
-    #TODO Revisar esta logica
+    # TODO Revisar esta logica
     def clasificar_en(self, categoria: Categoria, es_principal: bool = False) -> None:
         if es_principal:
             actual = next((v for v in self._clasificaciones if v.es_principal), None)
@@ -116,7 +118,7 @@ class Producto(ABC):
     def precio_publicado(self) -> str:
         if self._unidad_venta is None:
             return f"$ {self._precio_base:.2f}"
-        return f"$ {self._precio_base:.2f} / {self._unidad_venta.simbolo}" # el simbolo sale de UnidadMedida
+        return f"$ {self._precio_base:.2f} / {self._unidad_venta.simbolo}"  # el simbolo sale de UnidadMedida
 
     @property
     def categorias(self) -> tuple[ProductoCategoria, ...]:
@@ -128,6 +130,7 @@ class Producto(ABC):
             if vinculo.es_principal:
                 return vinculo.categoria
         raise RuntimeError("No hay categoría principal")
+
 
 class ProductoSimple(Producto):
     def __init__(
@@ -158,6 +161,7 @@ class ProductoSimple(Producto):
     def precio_final(self, cantidad: float) -> float:
         return self._precio_base * cantidad
 
+
 class ProductoPorPeso(Producto):
     def __init__(
         self,
@@ -171,9 +175,7 @@ class ProductoPorPeso(Producto):
 
         # ProductoPorPeso: precio_base > 0 y admite decimales
         if precio_base <= 0:
-            raise DomainError(
-                "precio_base debe ser > 0 para ProductoPorPeso"
-            )
+            raise DomainError("precio_base debe ser > 0 para ProductoPorPeso")
 
         super().__init__(
             nombre,
@@ -185,7 +187,7 @@ class ProductoPorPeso(Producto):
         )
 
     def precio_final(self, cantidad: float) -> float:
-        #ProductoPorPeso redondea a 2 decimales
+        # ProductoPorPeso redondea a 2 decimales
         return round(self._precio_base * cantidad, 2)
 
 
@@ -209,7 +211,9 @@ class ProductoCombo(Producto):
         # Validación: todos deben ser Productos
         for comp in componentes:
             if not isinstance(comp, Producto):
-                raise DomainError("Todos los componentes deben ser instancias de Producto")
+                raise DomainError(
+                    "Todos los componentes deben ser instancias de Producto"
+                )
 
         # Validación: descuento en [0, 1)
         if not (0 <= descuento < 1):
@@ -243,3 +247,33 @@ class ProductoCombo(Producto):
         total_con_descuento = subtotal * (1 - self._descuento)
         return total_con_descuento * cantidad
 
+
+class ProductoDestacado(Producto):
+    def __init__(
+        self,
+        nombre: str,
+        precio_base: float,
+        stock_cantidad: float,
+        unidad_venta: str | None,
+        categoria_principal: str,
+        orden_vidriera: int,
+        habilitado: bool = True,
+    ) -> None:
+        super().__init__(
+            nombre,
+            precio_base,
+            stock_cantidad,
+            unidad_venta,
+            categoria_principal,
+            habilitado,
+        )
+        self._orden_vidriera = orden_vidriera
+
+    @property
+    def orden_vidriera(self) -> int:
+        return self._orden_vidriera
+
+    def precio_final(self, cantidad: float) -> float:
+        if cantidad <= 0:
+            raise ValueError("Cantidad inválida, no puede ser negativa")
+        return self._precio_base * cantidad

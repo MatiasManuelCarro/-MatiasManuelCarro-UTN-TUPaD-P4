@@ -380,156 +380,101 @@ pero en este parcial el objetivo es demostrar diseño orientado a objetos, no co
 ```
 
 ---
+# 🧩 Producto destacado
 
-# ⭐ ProductoDestacado — Decisiones de diseño y justificación (Requerimiento 3)
+ProductoDestacado **se mantiene como subclase de Producto** porque cumple plenamente el criterio **«es‑un»** dentro del dominio.
 
-`ProductoDestacado` es una subclase concreta de `Producto` cuyo propósito es **alterar el orden de aparición en la vidriera del catálogo**.  
-No modifica el precio, no modifica el stock, no modifica la categoría, no modifica la disponibilidad.  
-Solo agrega **un atributo adicional** que afecta la presentación del catálogo.
+Un ProductoDestacado:
 
+- tiene nombre → como cualquier Producto  
+- tiene precio_base → como cualquier Producto  
+- tiene stock_cantidad → como cualquier Producto  
+- tiene unidad_venta → como cualquier Producto  
+- tiene categoría principal → como cualquier Producto  
+- tiene habilitado/disponible → como cualquier Producto  
+- se exporta en el catálogo → como cualquier Producto  
 
-## 🧩 1. ¿Por qué existe ProductoDestacado?
+La única diferencia es que agrega **orden_vidriera**, un atributo que afecta **solo la presentación** del catálogo, sin modificar comportamiento funcional.
 
-El UML lo marca con:
+Por lo tanto:
 
-class ProductoDestacado {
-    <<a revisar en el Requerimiento 3>>
-    #_orden_vidriera int
-}
+### ✔ ProductoDestacado **es‑un Producto**  
+### ✔ La herencia es pertinente y se conserva  
+### ✔ La especialización es semántica (presentación), no funcional  
 
-Esto significa que el UML deja **abierta** la interpretación y vos debés justificarla.  
-La decisión correcta es:
+## 🧠 Frase para la defensa oral
 
-**ProductoDestacado existe para representar productos que deben aparecer primero en la vidriera del catálogo.**
+“ProductoDestacado cumple el criterio es‑un Producto.  
+Comparte todo el comportamiento de Producto y solo agrega un atributo de presentación llamado orden_vidriera.  
+No altera precio, stock, disponibilidad ni categorías, por lo que la herencia es pertinente y se mantiene como una especialización semántica del dominio.”
 
-Es una **especialización semántica**, no funcional.
+## ⭐ ProductoDestacado — Resumen de las dos decisiones faltantes del Requerimiento 3
 
+## ✔ 1) Regla de `precio_final(cantidad)` en un ProductoDestacado
+ProductoDestacado **no redefine** `precio_final`.  
+Su especialización es **solo de presentación**, por lo que:
 
-## 🧩 2. ¿Qué agrega al dominio?
+- mantiene exactamente la misma regla de precio que la subclase concreta de Producto de la que proviene.
+- si es simple → usa la regla de ProductoSimple  
+- si es por peso → usa la regla de ProductoPorPeso  
+- si es combo → usa la regla de ProductoCombo  
 
-Agrega **un solo atributo**:
-
-#_orden_vidriera int
-
-Este atributo:
-
-- no afecta el precio  
-- no afecta el stock  
-- no afecta la disponibilidad  
-- no afecta la categoría  
-- no afecta la lógica de venta  
-- no afecta la lógica de combos  
-
-Solo afecta **cómo se ordena el catálogo al exportarlo**.
-
-
-## 🧩 3. ¿Por qué es una subclase y no un atributo en Producto?
-
-Justificación fuerte:
-
-- Porque no todos los productos necesitan orden especial.  
-- Porque el UML explícitamente define una subclase.  
-- Porque el orden de vidriera es una característica opcional del dominio.  
-- Porque evita contaminar la clase base con atributos que no aplican a todos.  
-- Porque respeta el principio de “especialización por comportamiento o presentación”.
+**Justificación:**  
+ProductoDestacado agrega únicamente `orden_vidriera`, que no afecta precio, stock ni disponibilidad.  
+Por eso **no introduce comportamiento nuevo**, solo presentación.
 
 
-## 🧩 4. ¿Qué representa orden_vidriera?
+## ✔ 2) ¿Cómo se destaca un ProductoPorPeso o un ProductoCombo?
+ProductoDestacado **no reemplaza** a las otras subclases.  
+Es un **rol opcional** del dominio que se aplica a cualquier Producto.
 
-Es un entero que indica la prioridad de aparición en la vidriera.
+Para destacar un producto:
 
-Reglas:
+- se instancia un ProductoDestacado con los mismos datos del producto original  
+- se agrega `orden_vidriera`  
+- el cálculo de precio y el comportamiento funcional siguen siendo los de la clase concreta original
 
-- valores más bajos → aparecen primero  
-- valores más altos → aparecen después  
-- si dos productos tienen el mismo orden → se respeta el orden natural del catálogo  
-- si no se define orden → el producto se comporta como uno normal
+## Justificación:
 
+La herencia se mantiene porque ProductoDestacado **es‑un Producto**, y su especialización es semántica (presentación), no funcional.
 
-## 🧩 5. ¿Qué pasa si el producto destacado se elimina?
+**Justificación integrada en el código (lo que exige HU‑P1‑05)**
+1) La herencia se mantiene
+class ProductoDestacado(Producto)  
+Cumple el criterio es‑un.
 
-- Nada especial.  
-- No afecta a otros productos.  
-- No altera el catálogo.  
-- No rompe invariantes.
+1) Regla de precio_final explícita
+ProductoDestacado no altera la regla:
+return self._precio_base * cantidad  
+Es la misma que ProductoSimple y ProductoPorPeso.
+Coherente con “solo presentación”.
 
-ProductoDestacado **no controla** nada más que su propio orden.
+1) Cómo se destaca un producto por peso o un combo
+Se instancia ProductoDestacado con los mismos datos del producto original.
+El cálculo de precio sigue siendo el de la clase concreta.
 
+1) orden_vidriera vive en ProductoDestacado
+self._orden_vidriera = orden_vidriera
 
-## 🧩 6. ¿Qué NO hace ProductoDestacado?
+1) No se fuerza el modelo del catálogo
+ProductoDestacado no toca stock, categorías, combos, ni disponibilidad.
 
-Esto es clave para evitar errores:
+1) UML, código y defensa coinciden
+La herencia se mantiene.
+El atributo está en la subclase.
+La regla de precio está explícita.
+El rol es opcional.
 
-- No cambia el precio  
-- No aplica descuentos  
-- No modifica stock  
-- No altera categorías  
-- No altera disponibilidad  
-- No altera la lógica de combos  
-- No altera la lógica de ProductoSimple o ProductoPorPeso  
-- No altera la lógica de ProductoCombo  
+## 🧠 Frase para la defensa oral
 
-Es **solo una marca de presentación**.
+“ProductoDestacado no redefine precio_final porque su especialización es solo de presentación.  
+Para destacar un ProductoSimple, un ProductoPorPeso o un ProductoCombo, simplemente instancio ProductoDestacado con los mismos datos y agrego orden_vidriera.  
+El comportamiento funcional sigue siendo el de la subclase concreta de Producto.”
 
-
-## 🧩 7. ¿Cómo se implementa?
-
-Idea de constructor en Python (a nivel conceptual):
-
-```python
-class ProductoDestacado(Producto):
-    def __init__(
-        self,
-        nombre: str,
-        precio_base: float,
-        stock_cantidad: float,
-        unidad_venta: UnidadMedida | None,
-        categoria_principal: Categoria,
-        orden_vidriera: int,
-        habilitado: bool = True,
-    ) -> None:
-        super().__init__(nombre, precio_base, stock_cantidad, unidad_venta, categoria_principal, habilitado)
-        self._orden_vidriera = orden_vidriera
-```
-
-
-## 🧩 8. ¿Qué línea del código demuestra que es una especialización?
-
-La línea exacta:
-
-class ProductoDestacado(Producto):
-
-Justificación:
-
-- hereda todo el comportamiento de Producto  
-- agrega solo el atributo de orden  
-- no redefine precio_final  
-- no redefine disponibilidad  
-- no redefine stock  
-- no redefine categorías  
-
-Esto demuestra que es una **especialización semántica**, no funcional.
-
-
-## 🧩 9. ¿Qué pasa con orden_vidriera cuando el producto desaparece?
-
-- Nada.  
-- El atributo muere con el objeto.  
-- No afecta a otros productos.  
-- No deja “huecos” en la vidriera.  
-- No requiere reordenamiento global.
-
-
-
-## 🧩 10. Frase perfecta para tu defensa oral
-
-```
-“ProductoDestacado es una especialización de Producto que agrega un atributo de presentación llamado orden_vidriera.  
-No modifica la lógica de precio, stock, disponibilidad ni categorías.  
-Solo altera el orden en que el catálogo se exporta.  
-Es una subclase porque no todos los productos necesitan esta característica,
- y el UML lo define como una especialización opcional del dominio.”
-```
+“ProductoDestacado no diferencia si el producto era por unidad o por peso.
+Usa la misma fórmula precio_base × cantidad.
+La diferencia está en qué representa cantidad según el producto original: unidades para ProductoSimple, kilos/litros para ProductoPorPeso.
+Así se cumple el polimorfismo sin if/elif ni isinstance().”
 
 ---
 
