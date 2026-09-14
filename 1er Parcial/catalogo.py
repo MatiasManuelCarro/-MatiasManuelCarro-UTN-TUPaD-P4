@@ -128,7 +128,6 @@ class Producto(ABC):
     def deshabilitar(self) -> None:
         self._habilitado = False
 
-    # TODO Revisar esta logica
     def clasificar_en(self, categoria: Categoria, es_principal: bool = False) -> None:
 
         # No se puede clasificar dos veces en la misma categoría
