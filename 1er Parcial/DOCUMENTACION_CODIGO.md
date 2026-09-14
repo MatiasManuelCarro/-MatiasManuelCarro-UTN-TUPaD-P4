@@ -457,9 +457,11 @@ Esta línea muestra que:
 
 ### ✔ Properties (retorno protegido)
 
+```python
 @property  
 def componentes(self) -> tuple[Producto, ...]:
     return tuple(self._componentes)
+```
 
 - Devuelve una **tupla**, no la lista interna.  
 - Protege la colección del combo.  
@@ -467,7 +469,7 @@ def componentes(self) -> tuple[Producto, ...]:
 
 ### ✔ Cálculo del precio final
 
-```
+```python
 def precio_final(self, cantidad: float) -> float:
     if cantidad < 1 or cantidad != int(cantidad):
         raise DomainError("La cantidad debe ser un entero >= 1 para ProductoCombo")
@@ -475,6 +477,7 @@ def precio_final(self, cantidad: float) -> float:
     subtotal = sum(p.precio_final(1) for p in self._componentes)
     total_con_descuento = subtotal * (1 - self._descuento)
     return total_con_descuento * cantidad
+```
 
 - Suma el precio final unitario de cada componente.  
 - Aplica el descuento del combo.  
@@ -483,13 +486,16 @@ def precio_final(self, cantidad: float) -> float:
 
 ### ✔ Exportación
 
+```python
 def exportar(self) -> str:
     return f"COMBO|{self.nombre}|{len(self._componentes)}"
+```
 
 - Formato definido por el PDF.  
 - Exporta nombre y cantidad de componentes.
 
 ### ✔ Justificación de diseño
+
 - **Agregación real**: los componentes existen independientemente del combo.  
 - **Polimorfismo**: cada componente aporta su precio final.  
 - **Retorno protegido**: `componentes` devuelve una tupla.  
@@ -507,81 +513,90 @@ Eso es agregación pura: el combo **usa** productos, pero **no los posee**.
 
 ---
 
-# 🟨 Rediseño de `ProductoDestacado` — Justificación completa
+# 🟨 Rediseño de `ProductoDestacado` — Justificación completa - Decorador por composición (NO herencia)
 
-## 🟦 Reemplazo de la herencia
-El diseño original asumía que *ProductoDestacado es‑un Producto*, pero destacar un producto **no modifica** su precio_final, stock, unidad_venta, categorías ni comportamiento.  
-Solo agrega **información de presentación** (orden en la vidriera).  
-Por lo tanto, **no corresponde usar herencia**.
-
-La herencia se reemplaza por **composición**:  
-`ProductoDestacado` ahora **envuelve** a un `Producto` existente.
-
-### Implementación
+### ✔ Rol en el dominio
+`ProductoDestacado` **no es un tipo de producto**.  
+Es un **decorador** que envuelve a un producto existente para mostrarlo primero en la vidriera.  
+Por eso **no cumple el criterio “es‑un Producto”** y la herencia del diagrama debe **rediseñarse**.
 
 ```python
 class ProductoDestacado:
     def __init__(self, producto: Producto, orden_vidriera: int) -> None:
         self._producto = producto
         self._orden_vidriera = orden_vidriera
-
-    @property
-    def orden_vidriera(self) -> int:
-        return self._orden_vidriera
-
-    @property
-    def producto(self) -> Producto:
-        return self._producto
-
-    def exportar(self) -> str:
-        return f"DEST|{self._producto.nombre}|{self._orden_vidriera}"
 ```
 
+### ✔ Decisión: se elimina la herencia
+En el diagrama original, `ProductoDestacado` aparecía como subclase de `Producto`.  
+Aplicando el criterio **«es‑un»**, vemos que:
 
-## 🟩 Dónde vive `orden_vidriera`
-`orden_vidriera` **no pertenece al producto**, sino a la **forma en que se muestra** en la vidriera.  
-Por eso vive en el **envoltorio** `ProductoDestacado` y no en el producto original.
+- No tiene precio propio.  
+- No tiene stock propio.  
+- No tiene unidad de venta.  
+- No participa del cálculo polimórfico de `precio_final`.  
+- No es un ítem vendible del catálogo.  
 
-Esto respeta el principio de responsabilidad única:  
-el producto mantiene su lógica de negocio, y el destacado maneja la presentación.
+👉 **Conclusión:** *Un destacado NO es un producto*.  
+Por lo tanto, **la herencia se elimina** y se reemplaza por **composición**.
+
+### ✔ Con qué se reemplaza la herencia
+Se reemplaza por un **envoltorio** que recibe un `Producto` ya construido:
+
+```python
+self._producto = producto
+```
+
+Esto significa:
+
+- El destacado **depende** del producto.  
+- No existe sin él.  
+- No modifica su comportamiento.  
+- Solo agrega el atributo `orden_vidriera`.
+
+### ✔ Dónde vive `_orden_vidriera`
+Vive dentro de `ProductoDestacado`, porque es un dato **propio del destacado**, no del producto:
+
+self._orden_vidriera = orden_vidriera
+
+### ✔ Qué productos pueden destacarse
+Como el constructor recibe un **Producto** abstracto:
+
+def __init__(self, producto: Producto, orden_vidriera: int)
+
+👉 **Cualquier producto del catálogo puede destacarse**:
+
+- `ProductoSimple`  
+- `ProductoPorPeso`  
+- `ProductoCombo`  
+
+No hay restricciones: el decorador funciona para todos.
+
+### ✔ Exportación
+El destacado delega la información al producto que envuelve:
+
+def exportar(self) -> str:
+    return f"DEST|{self._producto.nombre}|{self._orden_vidriera}"
+
+### ✔ Línea que evidencia la composición
+```python
+self._producto = producto
+```
+
+Esa línea muestra que:
+
+- El destacado **no crea** el producto.  
+- Solo lo **envuelve**.  
+- Su ciclo de vida depende del producto.  
+- Es composición, no agregación.
 
 
-
-## 🟪 Qué productos pueden destacarse
-Con la versión anterior (herencia), solo podían destacarse los productos que heredaban de `ProductoDestacado`.
-
-Con la nueva versión (composición), pueden destacarse **todos los productos del catálogo**, porque el envoltorio recibe:
-
-producto: Producto
-
-Esto permite destacar:
-
-- ProductoSimple  
-- ProductoPorPeso  
-- ProductoCombo  
-- Cualquier otro tipo futuro  
-
-Sin duplicar ni recrear productos.
-
-
-
-## 🟫 Compatibilidad con el Protocol
-`ProductoDestacado` sigue cumpliendo el Protocol `exportar()`:
-
-DEST|{nombre_del_producto}|{orden_vidriera}
-
-No necesita heredar de `Producto` ni de `Exportable`.  
-Cumple por **conformidad estructural**, tal como exige el Requerimiento 4.
-
-
-
-## 🟧 Resumen para defensa oral
-Rediseñé `ProductoDestacado` porque no cumple el criterio es‑un Producto.  
-No modifica precio_final, stock, unidad_venta ni categorías.  
-Solo agrega un atributo de presentación llamado `orden_vidriera`.  
-Por eso reemplazo la herencia por composición: `ProductoDestacado` envuelve a un `Producto` existente.  
-Así cualquier producto del catálogo puede destacarse sin duplicarlo, y `orden_vidriera` vive en el envoltorio, no en el producto.  
-El diseño queda más limpio, más flexible y más alineado con el dominio.
+## 🎯 Cierre coloquial para la presentación
+Un destacado **no es un producto nuevo**, es simplemente *un producto que se muestra primero*.  
+Por eso no hereda de `Producto`: no vende nada, no tiene precio ni stock.  
+Lo único que aporta es el `orden_vidriera`, y lo hace envolviendo a un producto ya existente.  
+La línea que lo demuestra es `self._producto = producto`.  
+Así, **cualquier producto del catálogo puede destacarse**, sin romper el modelo.
 
 ---
 
@@ -670,219 +685,174 @@ El sistema de exportación quedó simple y flexible: definí un Protocol y cualq
 
 ---
 
+# 🧩 Decisiones globales del modelo de dominio
 
-# 🧩 Decisiones globales del modelo
+### ✔ 1. Composición donde corresponde
+- **Producto → ProductoCategoria** es **composición real**.  
+  La categoría principal nace dentro del producto y muere con él.  
+  Línea que lo evidencia: `principal = ProductoCategoria(self, categoria_principal, ...)`.
 
-✔ Producto es abstracto  
-No se instancian productos genéricos.  
-Solo se instancian productos concretos:
-- ProductoSimple
-- ProductoPorPeso
-- (más adelante) ProductoCombo
-- (a analizar) ProductoDestacado
+### ✔ 2. Agregación donde corresponde
+- **ProductoCombo → componentes** es **agregación**.  
+  Los componentes existen antes y después del combo.  
+  Línea que lo evidencia: `self._componentes = componentes`.
 
-✔ Las validaciones van en el constructor de cada subclase  
-Porque son reglas del tipo de producto, no del cálculo.
+### ✔ 3. Decorador en lugar de herencia
+- **ProductoDestacado NO es un Producto**.  
+  Se rediseña como **envoltorio por composición**, no como subclase.  
+  Línea que lo evidencia: `self._producto = producto`.
 
-✔ precio_final siempre recibe cantidad  
-El UML exige que todas las subclases respeten ese nombre de parámetro.
+### ✔ 4. Polimorfismo limpio
+- Cada subclase implementa su propio `precio_final` y `exportar`.  
+- No hay ramificaciones por tipo dentro de `Producto`.
 
-✔ precio_publicado formatea con :.2f  
-Por eso las otras subclases no necesitan redondear.
+### ✔ 5. Validación temprana
+- Cada constructor valida sus reglas específicas antes de delegar a `super()`.  
+- Si falla, el objeto no se construye.
+
+### ✔ 6. Retorno protegido
+- Las colecciones internas (`categorias`, `componentes`) se exponen como **tuplas**.  
+  Nunca se devuelve la lista interna.
+
+### ✔ 7. Ciclo de vida controlado
+- `Producto` controla la creación de su categoría principal.  
+- `ProductoCombo` no controla el ciclo de vida de sus componentes.  
+- `ProductoDestacado` depende del producto que envuelve.
 
 ---
 
-# UML
+# PREGUNTAS PARA EL VIDEO
+
+## R1 — Composición, agregación y asociación
+
+En Python las tres relaciones se escriben igual, así que lo que miro es quién crea la parte y qué pasa si el todo desaparece.
+
+ En la composición, la línea que lo delata es cuando el producto crea su categoría principal: `principal = ProductoCategoria(self, categoria_principal, es_principal=True)`. Esa parte nace dentro del producto y si el producto deja de existir, la categoría también muere. 
+ 
+ En la agregación, lo que me muestra que no hay creación es la línea `self._componentes = componentes` dentro del combo. Ahí el combo recibe productos que ya existen y si el combo desaparece, los componentes siguen vivos. 
+ 
+ En la asociación, simplemente asigno referencias, como `self._categoria_principal = categoria_principal` o `self._unidad_venta = unidad_venta`. El producto apunta a esas entidades, pero no las crea ni controla su ciclo de vida; si el producto muere, la categoría y la unidad siguen existiendo.
+
+## R2 — ProductoDestacado: ¿subclase o rediseño?
+
+ProductoDestacado no puede quedarse como subclase porque, aplicando el criterio “es‑un”, un destacado no es un tipo de producto. No tiene precio propio, no tiene stock, no participa del cálculo polimórfico y no representa un ítem vendible del catálogo. Destacar un producto es solo agregarle información de presentación, no cambiar su naturaleza. Por eso lo rediseñé usando composición: `self._producto = producto`. Con este enfoque, cualquier producto del catálogo puede destacarse, incluso combos, sin romper el modelo.
+
+## R3 — Por qué Exportable es un Protocol y no una ABC
+
+El enunciado pide resolver Exportable con un Protocol porque la librería externa que consume `exportar()` no puede modificarse. Si intentara resolverlo con una ABC, esa librería no podría heredar de mi clase abstracta y, por lo tanto, no podría ser tratada como Exportable. El Protocol permite conformidad estructural: si una clase tiene `exportar()`, ya cumple el contrato sin heredar nada. En cambio, para Producto sí sirve una ABC porque Producto sí es un tipo base del dominio. Todas las subclases son‑un Producto y comparten estructura y comportamiento, así que ahí la herencia es correcta.
+
+## R4 — Qué seguí del diagrama y qué tuve que decidir yo
+
+Del diagrama seguí tal cual la jerarquía de productos, la composición con ProductoCategoria y las asociaciones con Categoria y UnidadMedida. Lo que tuve que decidir yo fue rediseñar ProductoDestacado porque el diagrama lo mostraba como subclase y eso no respetaba el dominio. También tuve que decidir que el precio y la disponibilidad del combo se derivan dinámicamente de sus componentes, porque el diagrama no decía cómo resolverlo. Y finalmente, tuve que elegir usar un Protocol para Exportable para poder integrarme con la librería externa sin modificarla.
+
+
+---
+
+# 🧩 UML en Mermaid
+
 
 ```mermaid
 classDiagram
 direction LR
 
-%% ============================
-%% Protocol
-%% ============================
 class Exportable {
-    <<protocol>>
+    <<Protocol>>
     +exportar() str
 }
 
-%% ============================
-%% Clases del dominio
-%% ============================
 class Producto {
     <<abstract>>
-    -nombre: str
-    -precio_base: float
-    -stock_cantidad: float
-    -unidad_venta: UnidadMedida
-    -categoria_principal: Categoria
-    +precio_final(cantidad: float) float
-    +exportar() str
+    #_nombre str
+    #_precio_base float
+    #_stock_cantidad float
+    #_habilitado bool
+    #_unidad_venta UnidadMedida
+    #_clasificaciones list~ProductoCategoria~
+    +nombre str
+    +precio_base float
+    +unidad_venta UnidadMedida
+    +disponible bool
+    +precio_publicado str
+    +precio_final(cantidad float)* float
+    +exportar()* str
+    +habilitar() None
+    +deshabilitar() None
+    +clasificar_en(categoria Categoria, es_principal bool) None
+    +categorias() tuple~ProductoCategoria~
+    +categoria_principal() Categoria
 }
 
 class ProductoSimple {
-    +precio_final(cantidad: float) float
-    +exportar() str
+    +precio_final(cantidad float) float
 }
 
 class ProductoPorPeso {
-    +precio_final(kg: float) float
-    +exportar() str
+    +precio_final(cantidad float) float
 }
 
 class ProductoCombo {
-    -componentes: list~Producto~
-    -descuento: float
-    +precio_final(cantidad: float) float
-    +exportar() str
+    #_componentes list~Producto~
+    #_descuento float
+    +componentes() tuple~Producto~
+    +precio_final(cantidad float) float
 }
 
 class ProductoDestacado {
-    -orden_vidriera: int
-    +precio_final(cantidad: float) float
+    <<rediseñado con composición>>
+    #_producto Producto
+    #_orden_vidriera int
+    +producto Producto
+    +orden_vidriera int
     +exportar() str
 }
 
+class ProductoCategoria {
+    #_categoria Categoria
+    #_es_principal bool
+    +categoria Categoria
+    +es_principal bool
+    #_marcar_principal(valor bool) None
+}
+
 class Categoria {
-    -nombre: str
+    #_nombre str
+    #_descripcion str
+    +nombre str
+    +descripcion str
 }
 
 class UnidadMedida {
-    -nombre: str
-    -simbolo: str
-    -tipo: str
+    <<frozen dataclass>>
+    +nombre str
+    +simbolo str
+    +tipo str
 }
 
-%% ============================
-%% Clase externa
-%% ============================
 class FichaPuntoDeVenta {
-    -_codigo: str
-    -_detalle: str
+    <<libreria externa>>
     +exportar() str
 }
 
-%% ============================
-%% Relaciones
-%% ============================
-
-%% Herencia
 Producto <|-- ProductoSimple
 Producto <|-- ProductoPorPeso
 Producto <|-- ProductoCombo
-Producto <|-- ProductoDestacado
 
-%% Composición (Combo contiene Productos)
-ProductoCombo *-- Producto : componentes 1..*
+Producto "1" *-- "1..*" ProductoCategoria : composicion
+ProductoCombo "1" o-- "2..*" Producto : agregacion
+Producto "0..*" --> "0..1" UnidadMedida : asociacion
+ProductoCategoria "0..*" --> "1" Categoria : asociacion
 
-%% Agregación (Producto tiene Categoria y UnidadMedida)
-Producto o-- Categoria : 1
-Producto o-- UnidadMedida : 0..1
+ProductoDestacado "1" *-- "1" Producto : envuelve (composicion)
 
-%% Conformidad estructural con Protocol
-ProductoSimple ..|> Exportable
-ProductoPorPeso ..|> Exportable
-ProductoCombo ..|> Exportable
-ProductoDestacado ..|> Exportable
-FichaPuntoDeVenta ..|> Exportable
+Producto ..> Exportable : conformidad estructural
+ProductoDestacado ..> Exportable : conformidad estructural
+FichaPuntoDeVenta ..> Exportable : conformidad estructural
+
+note for ProductoDestacado "Rediseñado con composición.<br>No es subclase; envuelve una<br>instancia existente.<br>Línea que lo delata en código:<br>self._producto = producto"
+note for ProductoCombo "Decisión: precio y disponibilidad<br>se derivan dinámicamente de los<br>componentes (no se reciben<br>como datos estáticos)."
+note for ProductoCategoria "Composición: Producto crea y<br>controla ProductoCategoria.<br>Línea que lo delata en código:<br>principal = ProductoCategoria(self, ...)"
+note for Exportable "Decisión: Exportable implementado<br>como Protocol para permitir<br>conformidad estructural<br>sin forzar herencia."
 ```
 
+## PLANTUML
 
----
-
-# ✅ **2. UML en PlantUML (para exportar PNG)**
-
-```markdown
-```plantuml
-@startuml
-skinparam classAttributeIconSize 0
-
-' ============================
-' Protocol
-' ============================
-class Exportable <<protocol>> {
-    +exportar(): String
-}
-
-' ============================
-' Clases del dominio
-' ============================
-abstract class Producto {
-    -nombre: String
-    -precio_base: float
-    -stock_cantidad: float
-    -unidad_venta: UnidadMedida
-    -categoria_principal: Categoria
-    +precio_final(cantidad: float): float
-    +exportar(): String
-}
-
-class ProductoSimple {
-    +precio_final(cantidad: float): float
-    +exportar(): String
-}
-
-class ProductoPorPeso {
-    +precio_final(kg: float): float
-    +exportar(): String
-}
-
-class ProductoCombo {
-    -componentes: List<Producto>
-    -descuento: float
-    +precio_final(cantidad: float): float
-    +exportar(): String
-}
-
-class ProductoDestacado {
-    -orden_vidriera: int
-    +precio_final(cantidad: float): float
-    +exportar(): String
-}
-
-class Categoria {
-    -nombre: String
-}
-
-class UnidadMedida {
-    -nombre: String
-    -simbolo: String
-    -tipo: String
-}
-
-' ============================
-' Clase externa
-' ============================
-class FichaPuntoDeVenta {
-    -_codigo: String
-    -_detalle: String
-    +exportar(): String
-}
-
-' ============================
-' Relaciones
-' ============================
-
-' Herencia
-Producto <|-- ProductoSimple
-Producto <|-- ProductoPorPeso
-Producto <|-- ProductoCombo
-Producto <|-- ProductoDestacado
-
-' Composición
-ProductoCombo *-- Producto : componentes 1..*
-
-' Agregación
-Producto o-- Categoria : 1
-Producto o-- UnidadMedida : 0..1
-
-' Conformidad estructural con Protocol
-ProductoSimple ..|> Exportable
-ProductoPorPeso ..|> Exportable
-ProductoCombo ..|> Exportable
-ProductoDestacado ..|> Exportable
-FichaPuntoDeVenta ..|> Exportable
-
-@enduml
-```
-```
