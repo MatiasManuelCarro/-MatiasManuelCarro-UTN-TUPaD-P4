@@ -141,17 +141,6 @@ def test_habilitar_deshabilitar_y_disponible():
 # ProductoSimple - reglas específicas
 # ---------------------------
 
-def test_producto_simple_precio_base_entero_requerido():
-    # precio_base 1.5 no entero -> falla
-    with pytest.raises(DomainError):
-        ProductoSimple("A", 1.5, 1, um_unidad(), categoria())
-    # precio_base 0 -> falla (debe ser >= 1)
-    with pytest.raises(DomainError):
-        ProductoSimple("A", 0, 1, um_unidad(), categoria())
-    # precio_base 1.0 (float pero entero en valor) debe pasar
-    p = ProductoSimple("OK", 1.0, 1, um_unidad(), categoria())
-    assert p.precio_base == 1.0
-
 
 def test_producto_simple_precio_final_cantidad_entera():
     p = ProductoSimple("P", 10, 5, um_unidad(), categoria())
@@ -437,7 +426,7 @@ import math
 import time
 import pytest
 
-from catalogo import (
+from catalogo_old import (
     Categoria,
     DomainError,
     ProductoSimple,

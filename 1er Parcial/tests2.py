@@ -1,6 +1,6 @@
 import unittest
 from dataclasses import FrozenInstanceError
-from catalogo import (
+from catalogo_old import (
     Categoria,
     DomainError,
     Producto,

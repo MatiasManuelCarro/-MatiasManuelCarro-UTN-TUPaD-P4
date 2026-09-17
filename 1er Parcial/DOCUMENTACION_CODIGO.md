@@ -778,7 +778,7 @@ class Producto {
     +habilitar() None
     +deshabilitar() None
     +clasificar_en(categoria Categoria, es_principal bool) None
-    +categorias() tuple~ProductoCategoria~
+    +categorias() tuple~Categoria~
     +categoria_principal() Categoria
 }
 
@@ -841,18 +841,149 @@ Producto "1" *-- "1..*" ProductoCategoria : composicion
 ProductoCombo "1" o-- "2..*" Producto : agregacion
 Producto "0..*" --> "0..1" UnidadMedida : asociacion
 ProductoCategoria "0..*" --> "1" Categoria : asociacion
-
-ProductoDestacado "1" *-- "1" Producto : envuelve (composicion)
+ProductoDestacado "1" o-- "1" Producto : envuelve (agregacion)
 
 Producto ..> Exportable : conformidad estructural
 ProductoDestacado ..> Exportable : conformidad estructural
 FichaPuntoDeVenta ..> Exportable : conformidad estructural
 
-note for ProductoDestacado "Rediseñado con composición.<br>No es subclase; envuelve una<br>instancia existente.<br>Línea que lo delata en código:<br>self._producto = producto"
+note for ProductoDestacado "Rediseñado con agregacion.<br>No es subclase; envuelve una<br>instancia existente."
 note for ProductoCombo "Decisión: precio y disponibilidad<br>se derivan dinámicamente de los<br>componentes (no se reciben<br>como datos estáticos)."
-note for ProductoCategoria "Composición: Producto crea y<br>controla ProductoCategoria.<br>Línea que lo delata en código:<br>principal = ProductoCategoria(self, ...)"
+note for ProductoCategoria "Composición: Producto crea y<br>controla ProductoCategoria.<br>"
 note for Exportable "Decisión: Exportable implementado<br>como Protocol para permitir<br>conformidad estructural<br>sin forzar herencia."
 ```
 
 ## PLANTUML
 
+```
+@startuml
+' PlantUML translation of the Mermaid class diagram (with ProductoDestacado as agregation)
+
+interface Exportable <<Protocol>> {
+    +exportar() : str
+}
+
+abstract class Producto {
+    #_nombre : str
+    #_precio_base : float
+    #_stock_cantidad : float
+    #_habilitado : bool
+    #_unidad_venta : UnidadMedida
+    #_clasificaciones : list<ProductoCategoria>
+    +nombre() : str
+    +precio_base() : float
+    +stock_cantidad() : float
+    +unidad_venta() : UnidadMedida
+    +disponible() : bool
+    +precio_publicado() : str
+    +precio_final(cantidad : float) : float
+    +exportar() : str
+    +habilitar() : None
+    +deshabilitar() : None
+    +clasificar_en(categoria : Categoria, es_principal : bool) : None
+    +categorias() : tuple<Categoria>
+    +categoria_principal() : Categoria
+}
+
+class ProductoSimple {
+    +precio_final(cantidad : float) : float
+}
+
+class ProductoPorPeso {
+    +precio_final(cantidad : float) : float
+}
+
+class ProductoCombo {
+    #_componentes : list<Producto>
+    #_descuento : float
+    +componentes() : tuple<Producto>
+    +precio_final(cantidad : float) : float
+    +exportar() : str
+}
+
+class ProductoDestacado {
+    <<rediseñado con agregacion>>
+    #_producto : Producto
+    #_orden_vidriera : int
+    +producto() : Producto
+    +orden_vidriera() : int
+    +exportar() : str
+}
+
+class ProductoCategoria {
+    #_producto : Producto
+    #_categoria : Categoria
+    #_es_principal : bool
+    +categoria() : Categoria
+    +es_principal() : bool
+    #_marcar_principal(valor : bool) : None
+}
+
+class Categoria {
+    #_nombre : str
+    #_descripcion : str
+    +nombre() : str
+    +descripcion() : str
+}
+
+class UnidadMedida {
+    <<frozen dataclass>>
+    +nombre : str
+    +simbolo : str
+    +tipo : str
+}
+
+class FichaPuntoDeVenta {
+    <<libreria externa>>
+    +exportar() : str
+}
+
+' Inheritance
+Producto <|-- ProductoSimple
+Producto <|-- ProductoPorPeso
+Producto <|-- ProductoCombo
+
+' Composition: Producto -> ProductoCategoria (Producto crea y controla ProductoCategoria)
+Producto "1" *-- "1..*" ProductoCategoria : composicion
+
+' Aggregation: ProductoCombo -> Producto (componentes)
+ProductoCombo "1" o-- "2..*" Producto : agregacion
+
+' Association: Producto -> UnidadMedida
+Producto "0..*" --> "0..1" UnidadMedida : asociacion
+
+' Association: ProductoCategoria -> Categoria
+ProductoCategoria "0..*" --> "1" Categoria : asociacion
+
+' Aggregation (changed): ProductoDestacado -> Producto (envuelve)
+ProductoDestacado "1" o-- "1" Producto : envuelve (agregacion)
+
+' Protocol conformity / dependency
+Producto ..> Exportable : conformidad estructural
+ProductoDestacado ..> Exportable : conformidad estructural
+FichaPuntoDeVenta ..> Exportable : conformidad estructural
+
+' Notes
+note right of ProductoDestacado
+  Rediseñado con agregacion.
+  No es subclase; envuelve una instancia existente.
+end note
+
+note right of ProductoCombo
+  Decisión: precio y disponibilidad
+  se derivan dinámicamente de los
+  componentes (no se reciben como datos estáticos).
+end note
+
+note right of ProductoCategoria
+  Composición: Producto crea y controla ProductoCategoria.
+end note
+
+note left of Exportable
+  Exportable implementado como Protocol para permitir
+  conformidad estructural sin forzar herencia.
+end note
+
+@enduml
+
+```

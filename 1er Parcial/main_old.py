@@ -1,7 +1,6 @@
 from catalogo import (
     Categoria,
     Producto,
-    ProductoCategoria,
     ProductoCombo,
     ProductoDestacado,
     ProductoPorPeso,
@@ -11,7 +10,7 @@ from catalogo import (
 )
 from libreria_externa import FichaPuntoDeVenta
 
-print("\n=== DEMO EJECUTABLE — Food Store ===")
+print("\n=== DEMO EJECUTABLE — Requerimiento 5 ===")
 
 # ============================================================
 # 1. Falla temprana: Producto es abstracto → no se puede instanciar
@@ -27,14 +26,14 @@ try:
         habilitado=True,
     )
 except TypeError as e:
-    print("Falla temprana OK: ", e)
+    print("OK:", e)
 
 # ============================================================
-# 2. Categorías y unidades
+# 2. Categorías y unidades (agregación)
 # ============================================================
-cat_snacks = Categoria("Snacks")
-cat_bebidas = Categoria("Bebidas")
+cat_golosinas = Categoria("Golosinas")
 cat_fiambres = Categoria("Fiambres")
+cat_bebidas = Categoria("Bebidas")
 cat_combos = Categoria("Combos")
 
 u_unidad = UnidadMedida("Unidad", "u", "unidad")
@@ -42,71 +41,81 @@ u_kg = UnidadMedida("Kilogramo", "kg", "peso")
 u_litro = UnidadMedida("Litro", "l", "volumen")
 
 # ============================================================
-# 3. Productos concretos (9 productos totales)
+# 3. Productos concretos (al menos 4, sin contar componentes de combos)
 # ============================================================
 
-print("\n=== Creación de productos ===")
+print("\n=== Creación de productos concretos ===")
 
-# ProductoSimple
-alfajor = ProductoSimple("Alfajor", 500, 100, u_unidad, cat_snacks)
-galletitas = ProductoSimple("Galletitas", 300, 80, u_unidad, cat_snacks)
-papas = ProductoSimple("Papas Fritas", 450, 120, u_unidad, cat_snacks)
-jugo = ProductoSimple("Jugo", 900, 200, u_litro, cat_bebidas)
+p_simple = ProductoSimple("Alfajor", 500, 100, u_unidad, cat_golosinas)
+print("ProductoSimple creado:", p_simple.nombre)
 
-# ProductoPorPeso
-queso = ProductoPorPeso("Queso", 3200, 50, u_kg, cat_fiambres)
-jamon = ProductoPorPeso("Jamón", 2800, 40, u_kg, cat_fiambres)
+p_peso = ProductoPorPeso("Queso", 3200, 50, u_kg, cat_fiambres)
+print("ProductoPorPeso creado:", p_peso.nombre)
 
-# ProductoDestacado
-yerba = ProductoSimple("Yerba", 2500, 200, u_kg, cat_snacks)
-destacado = ProductoDestacado(yerba, orden_vidriera=1)
+p_simple2 = ProductoSimple("Galletitas", 300, 80, u_unidad, cat_golosinas)
+print("ProductoSimple creado:", p_simple2.nombre)
 
-print("Productos simples y por peso creados.")
+p_bebida = ProductoSimple("Jugo", 900, 200, u_litro, cat_bebidas)
+print("ProductoSimple creado:", p_bebida.nombre)
 
 # ============================================================
-# 4. Combos (agregación)
+# 4. Composición: ProductoCombo contiene productos
 # ============================================================
 
-print("\n=== ProductoCombo (agregación) ===")
+print("\n=== ProductoCombo (composición) ===")
 
 combo_desayuno = ProductoCombo(
     nombre="Combo Desayuno",
-    componentes=[alfajor, jugo],
+    componentes=[p_simple, p_peso],  # los componentes sobreviven → agregación
     descuento=0.10,
     unidad_venta=None,
     categoria_principal=cat_combos,
 )
 
-combo_merienda = ProductoCombo(
-    nombre="Combo Merienda",
-    componentes=[galletitas, jugo],
+print("Combo creado:", combo_desayuno.nombre)
+
+# ============================================================
+# 5. Agregación: los componentes sobreviven y pueden reutilizarse
+# ============================================================
+
+print("\n=== Agregación: componentes reutilizados ===")
+
+combo_snack = ProductoCombo(
+    nombre="Combo Snack",
+    componentes=[p_simple2, p_bebida],  # reutilización → agregación
     descuento=0.15,
     unidad_venta=None,
     categoria_principal=cat_combos,
 )
 
-combo_picada = ProductoCombo(
-    nombre="Combo Picada",
-    componentes=[queso, jamon, papas],
-    descuento=0.20,
-    unidad_venta=None,
-    categoria_principal=cat_combos,
-)
+print("Combo creado:", combo_snack.nombre)
 
-print("Combos creados.")
 
 # ============================================================
-# 5. Cálculo de precios finales
+# 6. ProductoDestacado (Rediseñado con Composición)
+# ============================================================
+print("\n=== ProductoDestacado ===")
+
+# Tomamos un producto existente y lo destacamos
+dest = ProductoDestacado(producto=p_peso, orden_vidriera=1)
+
+print("ProductoDestacado creado envolviendo a:", dest.producto.nombre)
+
+print("Queso Destacado x2:", dest.producto.precio_final(2))
+
+# ============================================================
+# 7. Cálculo de precios finales
 # ============================================================
 
 print("\n=== Cálculo de precios finales ===")
-print("Alfajor x3:", alfajor.precio_final(3))
-print("Queso 0.250kg:", queso.precio_final(0.250))
+print("Alfajor x3:", p_simple.precio_final(3))
+print("Queso 0.250kg:", p_peso.precio_final(0.250))
 print("Combo Desayuno x1:", combo_desayuno.precio_final(1))
-print("Combo Picada x2:", combo_picada.precio_final(2))
+print("Combo Snack x1:", combo_snack.precio_final(1))
+print("Yerba x2:", dest.producto.precio_final(2))
 
 # ============================================================
-# 6. Ficha externa
+# 8. Ficha externa (librería externa)
 # ============================================================
 
 print("\n=== Ficha externa ===")
@@ -114,24 +123,20 @@ ficha = FichaPuntoDeVenta("A12", "Pago en caja")
 print("Ficha externa exportada:", ficha.exportar())
 
 # ============================================================
-# 7. Exportación completa del catálogo
+# 9. Exportación completa del catálogo (Protocol)
 # ============================================================
 
 print("\n=== Exportación completa del catálogo ===")
 
 catalogo = [
-    alfajor,
-    galletitas,
-    papas,
-    jugo,
-    queso,
-    jamon,
-    yerba,
+    p_simple,
+    p_peso,
+    p_simple2,
+    p_bebida,
     combo_desayuno,
-    combo_merienda,
-    combo_picada,
-    destacado,
-    ficha,
+    combo_snack,
+    dest,
+    ficha,  # mezcla con clase externa
 ]
 
 exportados = exportar_catalogo(catalogo)

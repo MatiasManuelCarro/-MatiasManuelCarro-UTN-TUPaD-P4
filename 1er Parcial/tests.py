@@ -1,4 +1,4 @@
-from catalogo import (
+from catalogo_old import (
     Categoria,
     DomainError,
     Producto,
@@ -178,7 +178,7 @@ items = [
     combo_A,     # combos dentro de combos también exportan
 ]
 
-from catalogo import exportar_catalogo  # donde definiste el Protocol y la función
+from catalogo_old import exportar_catalogo  # donde definiste el Protocol y la función
 
 resultado = exportar_catalogo(items)
 
