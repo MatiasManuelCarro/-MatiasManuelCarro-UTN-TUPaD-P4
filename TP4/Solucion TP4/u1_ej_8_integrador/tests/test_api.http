@@ -105,7 +105,7 @@ Content-Type: application/json
 ### 1. ALTA DE PROVEEDOR (POST)
 
 ### 1.1 Funcionamiento ok: Crear proveedor correctamente (201 Created)
-POST {{baseUrl}}/proveedor/
+POST {{baseUrl}}/proveedores/
 Content-Type: application/json
 
 {
@@ -119,7 +119,7 @@ Content-Type: application/json
 
 ### 1.2 Escenario Error: Falla validación de Pydantic (422 Unprocessable Entity)
 # Razón social menor a 3 caracteres y CUIT menor a 11
-POST {{baseUrl}}/proveedor/
+POST {{baseUrl}}/proveedores/
 Content-Type: application/json
 
 {
@@ -136,32 +136,33 @@ Content-Type: application/json
 
 
 ### 2.1 Escenario Feliz: Listar todos (200 OK)
-GET {{baseUrl}}/proveedor/
+GET {{baseUrl}}/proveedores/
 
 ### 2.2 Escenario Feliz: Filtrar solo ACTIVOS (200 OK)
-GET {{baseUrl}}/proveedor/?activo=true
+GET {{baseUrl}}/proveedores/?activo=true
 
 ### 2.3 Escenario Feliz: Filtrar solo INACTIVOS (200 OK)
-GET {{baseUrl}}/?activo=false
+GET {{baseUrl}}/proveedores/?activo=false
+
 
 ### 2.4 Escenario Feliz: Paginación (200 OK)
 # Saltea el primero y trae un máximo de 2
-GET {{baseUrl}}/proveedor/?skip=1&limit=2
+GET {{baseUrl}}/proveedores/?skip=1&limit=2
 
 
 ### 3. DETALLE DE PROVEEDOR (GET /{id})
 
 ### 3.1 Escenario Feliz: Obtener proveedor existente (200 OK)
-GET {{baseUrl}}/proveedor/1
+GET {{baseUrl}}/proveedores/1
 
 ### 3.2 Escenario Error: Proveedor inexistente (404 Not Found)
-GET {{baseUrl}}/proveedor/999
+GET {{baseUrl}}/proveedores/999
 
 
 ### 4. ACTUALIZACIÓN TOTAL (PUT /{id})
 
 ### 4.1 Escenario Feliz: Actualizar proveedor (200 OK)
-PUT {{baseUrl}}/proveedor/1
+PUT {{baseUrl}}/proveedores/1
 Content-Type: application/json
 
 {
@@ -174,12 +175,12 @@ Content-Type: application/json
 }
 
 ### 4.2 Escenario Error: Actualizar proveedor inexistente (404 Not Found)
-PUT {{baseUrl}}/proveedor/999
+PUT {{baseUrl}}/proveedores/999
 Content-Type: application/json
 
 {
-  "codigo": "FANTASMA",
-  "razon_social": "No Existo",
+  "codigo": "ERROR",
+  "razon_social": "No Existe",
   "cuit": "11111111111",
   "email": "",
   "telefono": "",
@@ -191,10 +192,10 @@ Content-Type: application/json
 
 ### 5.1 Escenario Feliz: Desactivar proveedor (200 OK)
 # Debería devolver el proveedor 2 con el campo activo en false
-PUT {{baseUrl}}/proveedor/2/desactivar
+PUT {{baseUrl}}/proveedores/2/desactivar
 
 ### Prueba - mostrar activos para verificar que se elimino 
-GET {{baseUrl}}/proveedor/?activo=true
+GET {{baseUrl}}/proveedores/?activo=true
 
 ### 5.2 Escenario Error: Desactivar proveedor inexistente (404 Not Found)
-PUT {{baseUrl}}/proveedor/999/desactivar
+PUT {{baseUrl}}/proveedores/999/desactivar

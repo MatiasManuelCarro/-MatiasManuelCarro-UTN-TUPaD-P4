@@ -2,13 +2,12 @@ from fastapi import APIRouter, HTTPException, Path, Query, status
 
 from . import schemas, services
 
-
-router = APIRouter(prefix="/proveedor", tags=["Proveedor"])
+router = APIRouter(prefix="/proveedores", tags=["proveedores"])
 
 
 # ---------------------------------------------------------
 # ALTA DE PROVEEDOR
-# Método: POST | Endpoint: /proveedor | Estado: 201 Created
+# Método: POST | Endpoint: /proveedores | Estado: 201 Created
 # ---------------------------------------------------------
 @router.post(
     "/", response_model=schemas.ProveedorRead, status_code=status.HTTP_201_CREATED
@@ -36,7 +35,7 @@ def listar_proveedores(
 
 # ---------------------------------------------------------
 # DETALLE DE PROVEEDOR
-# Método: GET | Endpoint: /proveedor/{id} | Estado: 200 OK
+# Método: GET | Endpoint: /proveedores/{id} | Estado: 200 OK
 # ---------------------------------------------------------
 @router.get(
     "/{id}", response_model=schemas.ProveedorRead, status_code=status.HTTP_200_OK
@@ -51,7 +50,7 @@ def detalle_proveedor(id: int = Path(..., gt=0)):
 
 # ---------------------------------------------------------
 # ACTUALIZACIÓN (Reemplazo Total)
-# Método: PUT | Endpoint: /proveedor/{id} | Estado: 200 OK
+# Método: PUT | Endpoint: /proveedores/{id} | Estado: 200 OK
 # ---------------------------------------------------------
 
 @router.put(
@@ -69,7 +68,7 @@ def actualizar_proveedor(proveedor: schemas.ProveedorCreate, id: int = Path(...,
 
 # ---------------------------------------------------------
 # BORRADO LÓGICO
-# Método: PUT | Endpoint: /proveedor/{id}/desactivar | Estado: 200 OK
+# Método: PUT | Endpoint: /proveedores/{id}/desactivar | Estado: 200 OK
 # ---------------------------------------------------------
 @router.put(
     "/{id}/desactivar",

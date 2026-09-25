@@ -15,7 +15,7 @@ class ProveedorCreate(ProveedorBase):
 class ProveedorRead(ProveedorBase):
     id: int
 
-class ProveedorUpdate(ProveedorBase):
+class ProveedorUpdate(BaseModel):
     codigo: str | None = Field(default=None, min_length=1)
     razon_social: str | None = Field(default=None, min_length=3)
     cuit: str | None = Field(default=None, min_length=11, max_length=15)
