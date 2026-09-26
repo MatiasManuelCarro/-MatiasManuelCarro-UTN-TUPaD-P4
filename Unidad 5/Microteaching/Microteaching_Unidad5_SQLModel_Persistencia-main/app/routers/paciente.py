@@ -24,7 +24,7 @@ def listar_pacientes(
     session: SessionDep,
     skip: int = 0,
     limit: int = 20,
-    activo: Optional[bool] = None,
+    activo: bool | None = None,
 ):
     return paciente_service.listar_pacientes(session, skip, limit, activo)
 

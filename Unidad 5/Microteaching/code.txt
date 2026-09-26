@@ -1,0 +1,569 @@
+# Microteaching
+
+## Copied Files
+
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/app/models/paciente.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/app/models/turno.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/app/routers/paciente.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/app/routers/turno.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/app/schemas/paciente.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/app/schemas/turno.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/app/service/paciente_service.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/app/service/turno_service.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/database.py
+  - Microteaching_Unidad5_SQLModel_Persistencia-main/main.py
+  - code.txt
+
+## File Contents
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/app/models/paciente.py
+
+```
+from datetime import date
+from typing import TYPE_CHECKING, Optional
+
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from app.models.turno import Turno
+
+
+class PacienteBase(SQLModel):
+    """Campos comunes a todas las variantes del paciente (no es tabla)."""
+
+    nombre: str = Field(index=True, min_length=2, max_length=50)
+    apellido: str = Field(index=True, min_length=2, max_length=50)
+    dni: str = Field(index=True, unique=True, min_length=7, max_length=10)
+    telefono: str = Field(max_length=20)
+    fecha_nacimiento: Optional[date] = None
+
+
+class Paciente(PacienteBase, table=True):
+    """Modelo de tabla: representa la entidad persistida en PostgreSQL."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    # Campo interno/sensible: se acepta al crear, pero nunca se devuelve
+    # en el modelo público (PacientePublic).
+    obra_social: Optional[str] = Field(default=None, max_length=50)
+
+    # Baja lógica en lugar de borrado físico.
+    activo: bool = Field(default=True)
+
+    turnos: list["Turno"] = Relationship(back_populates="paciente")
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/app/models/turno.py
+
+```
+from datetime import date, time
+from typing import TYPE_CHECKING, Optional
+
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from app.models.paciente import Paciente
+
+
+class TurnoBase(SQLModel):
+    """Campos comunes a todas las variantes del turno (no es tabla)."""
+
+    fecha: date
+    hora: time
+    profesional: str = Field(max_length=60)
+    motivo: str = Field(max_length=200)
+
+
+class Turno(TurnoBase, table=True):
+    """Modelo de tabla: representa el turno persistido en PostgreSQL."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    # pendiente -> confirmado -> atendido, o pendiente/confirmado -> cancelado
+    estado: str = Field(default="pendiente", max_length=20)
+
+    paciente_id: int = Field(foreign_key="paciente.id")
+    paciente: Optional["Paciente"] = Relationship(back_populates="turnos")
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/app/routers/paciente.py
+
+```
+from typing import Optional
+
+from database import SessionDep
+from fastapi import APIRouter, status
+
+from app.schemas.paciente import (
+    PacienteConTurnos,
+    PacienteCreate,
+    PacientePublic,
+    PacienteUpdate,
+)
+from app.service import paciente_service
+
+router = APIRouter(prefix="/pacientes", tags=["Pacientes"])
+
+
+@router.post("/", response_model=PacientePublic, status_code=status.HTTP_201_CREATED)
+def crear_paciente(paciente: PacienteCreate, session: SessionDep):
+    return paciente_service.crear_paciente(session, paciente)
+
+
+@router.get("/", response_model=list[PacientePublic])
+def listar_pacientes(
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 20,
+    activo: bool | None = None,
+):
+    return paciente_service.listar_pacientes(session, skip, limit, activo)
+
+
+@router.get("/{paciente_id}", response_model=PacienteConTurnos)
+def obtener_paciente(paciente_id: int, session: SessionDep):
+    return paciente_service.obtener_paciente(session, paciente_id)
+
+
+@router.patch("/{paciente_id}", response_model=PacientePublic)
+def actualizar_paciente(paciente_id: int, paciente: PacienteUpdate, session: SessionDep):
+    return paciente_service.actualizar_paciente(session, paciente_id, paciente)
+
+
+@router.patch("/{paciente_id}/desactivar", response_model=PacientePublic)
+def desactivar_paciente(paciente_id: int, session: SessionDep):
+    return paciente_service.desactivar_paciente(session, paciente_id)
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/app/routers/turno.py
+
+```
+from datetime import date
+from typing import Optional
+
+from fastapi import APIRouter, status
+
+from database import SessionDep
+from app.schemas.turno import TurnoCreate, TurnoPublic, TurnoUpdate
+from app.service import turno_service
+
+router = APIRouter(prefix="/turnos", tags=["Turnos"])
+
+
+@router.post("/", response_model=TurnoPublic, status_code=status.HTTP_201_CREATED)
+def crear_turno(turno: TurnoCreate, session: SessionDep):
+    return turno_service.crear_turno(session, turno)
+
+
+@router.get("/", response_model=list[TurnoPublic])
+def listar_turnos(
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 20,
+    estado: Optional[str] = None,
+    paciente_id: Optional[int] = None,
+    fecha: Optional[date] = None,
+):
+    return turno_service.listar_turnos(session, skip, limit, estado, paciente_id, fecha)
+
+
+@router.get("/{turno_id}", response_model=TurnoPublic)
+def obtener_turno(turno_id: int, session: SessionDep):
+    return turno_service.obtener_turno(session, turno_id)
+
+
+@router.patch("/{turno_id}", response_model=TurnoPublic)
+def actualizar_turno(turno_id: int, turno: TurnoUpdate, session: SessionDep):
+    return turno_service.actualizar_turno(session, turno_id, turno)
+
+
+@router.patch("/{turno_id}/confirmar", response_model=TurnoPublic)
+def confirmar_turno(turno_id: int, session: SessionDep):
+    return turno_service.confirmar_turno(session, turno_id)
+
+
+@router.patch("/{turno_id}/cancelar", response_model=TurnoPublic)
+def cancelar_turno(turno_id: int, session: SessionDep):
+    return turno_service.cancelar_turno(session, turno_id)
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/app/schemas/paciente.py
+
+```
+from datetime import date, time
+from typing import Optional
+
+from sqlmodel import SQLModel
+
+from app.models.paciente import PacienteBase
+
+
+class PacienteCreate(PacienteBase):
+    """Esquema de entrada para crear un paciente. No incluye id ni activo."""
+
+    obra_social: Optional[str] = None
+
+
+class PacientePublic(PacienteBase):
+    """Esquema de salida. Nunca expone obra_social."""
+
+    id: int
+    activo: bool
+
+
+class PacienteUpdate(SQLModel):
+    """Esquema para PATCH: todos los campos opcionales."""
+
+    nombre: Optional[str] = None
+    apellido: Optional[str] = None
+    telefono: Optional[str] = None
+    obra_social: Optional[str] = None
+    fecha_nacimiento: Optional[date] = None
+
+
+class TurnoResumen(SQLModel):
+    """Vista reducida de un turno, usada al anidarlo dentro del paciente."""
+
+    id: int
+    fecha: date
+    hora: time
+    profesional: str
+    estado: str
+
+
+class PacienteConTurnos(PacientePublic):
+    """Esquema de salida para GET /pacientes/{id}: incluye sus turnos."""
+
+    turnos: list[TurnoResumen] = []
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/app/schemas/turno.py
+
+```
+from datetime import date, time
+from typing import Optional
+
+from sqlmodel import SQLModel
+
+from app.models.turno import TurnoBase
+
+
+class TurnoCreate(TurnoBase):
+    """Esquema de entrada para crear un turno. No incluye id ni estado."""
+
+    paciente_id: int
+
+
+class TurnoPublic(TurnoBase):
+    """Esquema de salida."""
+
+    id: int
+    paciente_id: int
+    estado: str
+
+
+class TurnoUpdate(SQLModel):
+    """Esquema para PATCH: reprogramar un turno (solo si sigue vigente)."""
+
+    fecha: Optional[date] = None
+    hora: Optional[time] = None
+    profesional: Optional[str] = None
+    motivo: Optional[str] = None
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/app/service/paciente_service.py
+
+```
+"""
+Lógica de negocio de Pacientes: es la única capa que controla
+transacciones (add/commit/refresh) y decide cuándo confirmar o
+rechazar una operación.
+"""
+
+from typing import Optional
+
+from fastapi import HTTPException, status
+from sqlmodel import Session, select
+
+from app.models.paciente import Paciente
+from app.schemas.paciente import PacienteCreate, PacienteUpdate
+
+
+def crear_paciente(session: Session, data: PacienteCreate) -> Paciente:
+    existe = session.exec(select(Paciente).where(Paciente.dni == data.dni)).first()
+    if existe:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ya existe un paciente con DNI {data.dni}",
+        )
+
+    nuevo_paciente = Paciente(**data.model_dump())
+    session.add(nuevo_paciente)
+    session.commit()
+    session.refresh(nuevo_paciente)
+    return nuevo_paciente
+
+
+def listar_pacientes(
+    session: Session,
+    skip: int = 0,
+    limit: int = 20,
+    activo: Optional[bool] = None,
+) -> list[Paciente]:
+    query = select(Paciente)
+    if activo is not None:
+        query = query.where(Paciente.activo == activo)
+    query = query.offset(skip).limit(limit)
+    return list(session.exec(query).all())
+
+
+def obtener_paciente(session: Session, paciente_id: int) -> Paciente:
+    paciente = session.get(Paciente, paciente_id)
+    if not paciente:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Paciente no encontrado")
+    return paciente
+
+
+def actualizar_paciente(session: Session, paciente_id: int, data: PacienteUpdate) -> Paciente:
+    paciente = obtener_paciente(session, paciente_id)
+
+    cambios = data.model_dump(exclude_unset=True)
+    paciente.sqlmodel_update(cambios)
+
+    session.add(paciente)
+    session.commit()
+    session.refresh(paciente)
+    return paciente
+
+
+def desactivar_paciente(session: Session, paciente_id: int) -> Paciente:
+    """Baja lógica: no borra al paciente, lo marca inactivo."""
+    paciente = obtener_paciente(session, paciente_id)
+
+    if not paciente.activo:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El paciente ya está inactivo")
+
+    paciente.activo = False
+    session.add(paciente)
+    session.commit()
+    session.refresh(paciente)
+    return paciente
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/app/service/turno_service.py
+
+```
+"""
+Lógica de negocio de Turnos: valida al paciente, las reglas de
+agenda (sin superposición, sin fechas pasadas) y controla los
+cambios de estado (confirmar / cancelar).
+"""
+
+from datetime import date
+from typing import Optional
+
+from fastapi import HTTPException, status
+from sqlmodel import Session, select
+
+from app.models.paciente import Paciente
+from app.models.turno import Turno
+from app.schemas.turno import TurnoCreate, TurnoUpdate
+
+ESTADOS_FINALES = {"cancelado", "atendido"}
+
+
+def crear_turno(session: Session, data: TurnoCreate) -> Turno:
+    paciente = session.get(Paciente, data.paciente_id)
+    if not paciente:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El paciente indicado no existe")
+    if not paciente.activo:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No se pueden asignar turnos a un paciente inactivo",
+        )
+
+    if data.fecha < date.today():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No se pueden crear turnos en una fecha pasada")
+
+    turnos_mismo_horario = session.exec(
+        select(Turno).where(
+            Turno.profesional == data.profesional,
+            Turno.fecha == data.fecha,
+            Turno.hora == data.hora,
+        )
+    ).all()
+    if any(t.estado not in ESTADOS_FINALES for t in turnos_mismo_horario):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El profesional ya tiene un turno vigente en ese horario",
+        )
+
+    nuevo_turno = Turno(**data.model_dump())
+    session.add(nuevo_turno)
+    session.commit()
+    session.refresh(nuevo_turno)
+    return nuevo_turno
+
+
+def listar_turnos(
+    session: Session,
+    skip: int = 0,
+    limit: int = 20,
+    estado: Optional[str] = None,
+    paciente_id: Optional[int] = None,
+    fecha: Optional[date] = None,
+) -> list[Turno]:
+    query = select(Turno)
+    if estado is not None:
+        query = query.where(Turno.estado == estado)
+    if paciente_id is not None:
+        query = query.where(Turno.paciente_id == paciente_id)
+    if fecha is not None:
+        query = query.where(Turno.fecha == fecha)
+    query = query.offset(skip).limit(limit)
+    return list(session.exec(query).all())
+
+
+def obtener_turno(session: Session, turno_id: int) -> Turno:
+    turno = session.get(Turno, turno_id)
+    if not turno:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Turno no encontrado")
+    return turno
+
+
+def actualizar_turno(session: Session, turno_id: int, data: TurnoUpdate) -> Turno:
+    turno = obtener_turno(session, turno_id)
+
+    if turno.estado in ESTADOS_FINALES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No se puede modificar un turno cancelado o ya atendido",
+        )
+
+    cambios = data.model_dump(exclude_unset=True)
+    turno.sqlmodel_update(cambios)
+
+    session.add(turno)
+    session.commit()
+    session.refresh(turno)
+    return turno
+
+
+def confirmar_turno(session: Session, turno_id: int) -> Turno:
+    turno = obtener_turno(session, turno_id)
+    if turno.estado != "pendiente":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Solo se puede confirmar un turno pendiente")
+
+    turno.estado = "confirmado"
+    session.add(turno)
+    session.commit()
+    session.refresh(turno)
+    return turno
+
+
+def cancelar_turno(session: Session, turno_id: int) -> Turno:
+    turno = obtener_turno(session, turno_id)
+    if turno.estado in ESTADOS_FINALES:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El turno ya está cancelado o atendido")
+
+    turno.estado = "cancelado"
+    session.add(turno)
+    session.commit()
+    session.refresh(turno)
+    return turno
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/database.py
+
+```
+"""
+Capa de persistencia: configuración del engine, creación de tablas
+e inyección de sesión por request.
+
+Sigue el mismo patrón visto en la unidad: una única instancia global
+del engine, una Session por petición vía Depends, y create_db_and_tables()
+ejecutada al levantar la aplicación.
+"""
+
+import os
+from typing import Annotated
+
+from fastapi import Depends
+from sqlmodel import SQLModel, Session, create_engine
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg://postgres:1234@localhost:5432/turnos_db",
+)
+
+# echo=True muestra las consultas SQL generadas; útil en desarrollo,
+# se puede apagar en producción.
+engine = create_engine(DATABASE_URL, echo=True)
+
+
+def create_db_and_tables() -> None:
+    """Inspecciona los modelos con table=True y crea las tablas si no existen."""
+    SQLModel.metadata.create_all(engine)
+
+
+def get_session():
+    """Crea una sesión nueva por cada request y la cierra al finalizar."""
+    with Session(engine) as session:
+        yield session
+
+
+SessionDep = Annotated[Session, Depends(get_session)]
+
+```
+
+### Microteaching_Unidad5_SQLModel_Persistencia-main/main.py
+
+```
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from database import create_db_and_tables
+from app.routers import paciente, turno
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Se ejecuta al levantar el servidor: crea las tablas si no existen.
+    create_db_and_tables()
+    yield
+
+
+app = FastAPI(
+    title="API Consultorio - Gestión de Turnos",
+    description="CRUD persistente de Pacientes y Turnos sobre PostgreSQL, con SQLModel.",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+app.include_router(paciente.router)
+app.include_router(turno.router)
+
+
+@app.get("/", tags=["Root"])
+def root():
+    return {"mensaje": "API de gestión de turnos de consultorio. Ver /docs para la documentación interactiva."}
+
+
+
+```
+
+### code.txt
+
+```
+
+```
+
