@@ -1,85 +1,47 @@
-from fastapi import APIRouter, HTTPException, Path, Query, status
+from fastapi import APIRouter, Path, Query, status
 
-from ..service import proveedor_services
-from ..schemas import proveedor
-
-router = APIRouter(prefix="/proveedores", tags=["proveedores"])
-
-
-# ---------------------------------------------------------
-# ALTA DE PROVEEDOR
-# Método: POST | Endpoint: /proveedores | Estado: 201 Created
-# ---------------------------------------------------------
-@router.post(
-    "/", response_model=proveedor.ProveedorRead, status_code=status.HTTP_201_CREATED
+from app.database import SessionDep
+from app.schemas.proveedor import ProveedorCreate, ProveedorPublic, ProveedorUpdate
+from app.service.proveedor_services import (
+    actualizar_proveedor,
+    crear_proveedor,
+    desactivar_proveedor,
+    listar_proveedores,
+    obtener_proveedor_por_id,
 )
-def alta_proveedor(proveedor: proveedor.ProveedorCreate):
-    return proveedor_services.crear(proveedor)
 
-# ---------------------------------------------------------
-# OBTENER PROVEEDORES (Todos / Activos / Inactivos)
-# Método: GET | Endpoint: /proveedores | Estado: 200 OK
-# Activos / inactivos:
-# GET /proveedores/?activo=true
-# GET /proveedores/?activo=false
-# ---------------------------------------------------------
-@router.get(
-    "/", response_model=list[proveedor.ProveedorRead], status_code=status.HTTP_200_OK
-)
-def listar_proveedores(
-    activo: bool | None = Query(None, description="Filtra por estado (True=activos, False=inactivos, ausente=todos)"),
-    skip: int = Query(0, ge=0), 
-    limit: int = Query(10, le=50)
+router = APIRouter(prefix="/proveedores", tags=["Proveedores"])
+
+
+@router.post("/", response_model=ProveedorPublic, status_code=status.HTTP_201_CREATED)
+def alta_proveedor(proveedor: ProveedorCreate, session: SessionDep):
+    return crear_proveedor(session, proveedor)
+
+
+@router.get("/", response_model=list[ProveedorPublic], status_code=status.HTTP_200_OK)
+def obtener_proveedores(
+    session: SessionDep,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, le=50),
+    activo: bool | None = None,
 ):
-    return proveedor_services.obtener_proveedores(activo, skip, limit)
+    return listar_proveedores(session, skip, limit, activo)
 
 
-# ---------------------------------------------------------
-# DETALLE DE PROVEEDOR
-# Método: GET | Endpoint: /proveedores/{id} | Estado: 200 OK
-# ---------------------------------------------------------
-@router.get(
-    "/{id}", response_model=proveedor.ProveedorRead, status_code=status.HTTP_200_OK
-)
-def detalle_proveedor(id: int = Path(..., gt=0)):
-    proveedor = proveedor_services.obtener_por_id(id)
-    if not proveedor:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Proveedor no encontrado"
-        )
-    return proveedor
-
-# ---------------------------------------------------------
-# ACTUALIZACIÓN (Reemplazo Total)
-# Método: PUT | Endpoint: /proveedores/{id} | Estado: 200 OK
-# ---------------------------------------------------------
-
-@router.put(
-    "/{id}", response_model=proveedor.ProveedorRead, status_code=status.HTTP_200_OK
-)
-def actualizar_proveedor(proveedor: proveedor.ProveedorCreate, id: int = Path(..., gt=0)):
-    # Usamos ProductoCreate porque es un reemplazo total (exige todos los campos)
-    actualizado = proveedor_services.actualizar_total(id, proveedor)
-    if not actualizado:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Proveedor no encontrado"
-        )
-    return actualizado
+@router.get("/{proveedor_id}", response_model=ProveedorPublic, status_code=status.HTTP_200_OK)
+def detalle_proveedor(session: SessionDep, proveedor_id: int = Path(..., gt=0)):
+    return obtener_proveedor_por_id(session, proveedor_id)
 
 
-# ---------------------------------------------------------
-# BORRADO LÓGICO
-# Método: PUT | Endpoint: /proveedores/{id}/desactivar | Estado: 200 OK
-# ---------------------------------------------------------
-@router.put(
-    "/{id}/desactivar",
-    response_model=proveedor.ProveedorRead,
-    status_code=status.HTTP_200_OK,
-)
-def borrado_logico(id: int = Path(..., gt=0)):
-    desactivado = proveedor_services.desactivar(id)
-    if not desactivado:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Proveedor no encontrado"
-        )
-    return desactivado
+@router.patch("/{proveedor_id}", response_model=ProveedorPublic, status_code=status.HTTP_200_OK)
+def modificar_proveedor(
+    proveedor_id: int = Path(..., gt=0),
+    data: ProveedorUpdate = None,
+    session: SessionDep = None,
+):
+    return actualizar_proveedor(session, proveedor_id, data)
+
+
+@router.patch("/{proveedor_id}/desactivar", response_model=ProveedorPublic, status_code=status.HTTP_200_OK)
+def desactivar_proveedor_endpoint(proveedor_id: int = Path(..., gt=0), session: SessionDep = None):
+    return desactivar_proveedor(session, proveedor_id)

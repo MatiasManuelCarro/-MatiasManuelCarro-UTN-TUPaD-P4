@@ -1,62 +1,91 @@
-from ..schemas.producto import ProductoCreate, ProductoRead
-
-# Simulamos que la BD guarda objetos tipo ProductoRead (con ID asignado)
-# ! TODO: REVISAR
-db_productos: list[ProductoRead] = []
-id_counter = 1
+from app.models.producto import Producto
+from app.schemas.producto import ProductoCreate, ProductoUpdate
+from fastapi import HTTPException, status
+from sqlmodel import Session, select
 
 
-def crear(data: ProductoCreate) -> ProductoRead:
-    global id_counter
-    nuevo = ProductoRead(id=id_counter, **data.model_dump())
-    db_productos.append(nuevo)
-    id_counter += 1
-    return nuevo
+def crear_producto(session: Session, data: ProductoCreate) -> Producto:
+    # Validación: nombre único 
+    existe = session.exec(
+        select(Producto).where(Producto.nombre == data.nombre)
+    ).first()
+
+    if existe:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ya existe un producto con nombre: {data.nombre}",
+        )
+
+    nuevo_producto = Producto(**data.model_dump())
+    session.add(nuevo_producto)
+    session.commit()
+    session.refresh(nuevo_producto)
+    return nuevo_producto
 
 
-def obtener_todos(skip: int, limit: int) -> list[ProductoRead]:
-    return db_productos[skip : skip + limit]
+def listar_productos(
+    session: Session,
+    skip: int = 0,
+    limit: int = 10,
+    activo: bool | None = None,
+) -> list[Producto]:
+
+    query = select(Producto)
+
+    if activo is not None:
+        query = query.where(Producto.activo == activo)
+
+    query = query.offset(skip).limit(limit)
+    return list(session.exec(query).all())
 
 
-def obtener_por_id(id: int) -> ProductoRead | None:
-    for p in db_productos:
-        if p.id == id:
-            return p
-    return None
+def obtener_producto_por_id(session: Session, producto_id: int) -> Producto:
+    producto = session.get(Producto, producto_id)
 
-
-def actualizar_total(id: int, data: ProductoCreate) -> ProductoRead | None:
-    # Reemplazo total: Requiere todos los campos validables (ProductoCreate)
-    for index, p in enumerate(db_productos):
-        if p.id == id:
-            producto_actualizado = ProductoRead(id=id, **data.model_dump())
-            db_productos[index] = producto_actualizado
-            return producto_actualizado
-    return None
-
-
-def desactivar(id: int) -> ProductoRead | None:
-    # Borrado lógico: Solo altera el estado 'activo'
-    for index, p in enumerate(db_productos):
-        if p.id == id:
-            p_dict = p.model_dump()
-            p_dict["activo"] = False
-            producto_actualizado = ProductoRead(**p_dict)
-            db_productos[index] = producto_actualizado
-            return producto_actualizado
-    return None
-
-
-def obtener_estado_stock(id: int) -> dict | None:
-    producto = obtener_por_id(id)
     if not producto:
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Producto no encontrado",
+        )
 
-    # La lógica de negocio vive aquí
-    alerta_stock = producto.stock < producto.stock_minimo
+    return producto
+
+
+def actualizar_producto(session: Session, producto_id: int, data: ProductoUpdate) -> Producto:
+    producto = obtener_producto_por_id(session, producto_id)
+
+    cambios = data.model_dump(exclude_unset=True)
+    producto.sqlmodel_update(cambios)
+
+    session.add(producto)
+    session.commit()
+    session.refresh(producto)
+    return producto
+
+
+def desactivar_producto(session: Session, producto_id: int) -> Producto:
+    producto = obtener_producto_por_id(session, producto_id)
+
+    if not producto.activo:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El producto ya está inactivo",
+        )
+
+    producto.activo = False
+    session.add(producto)
+    session.commit()
+    session.refresh(producto)
+    return producto
+
+
+def obtener_estado_stock(session: Session, producto_id: int):
+    producto = obtener_producto_por_id(session, producto_id)
+
+    bajo_minimo = producto.stock < producto.stock_minimo
 
     return {
         "stock": producto.stock,
-        "bajo_stock_minimo": alerta_stock,
+        "bajo_stock_minimo": bajo_minimo,
         "activo": producto.activo,
     }

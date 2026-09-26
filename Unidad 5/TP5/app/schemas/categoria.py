@@ -17,5 +17,5 @@ class CategoriaUpdate(SQLModel):
     activo: bool | None = None
 
 
-class CategoriaRead(CategoriaBase):
-    id: int
+# class CategoriaRead(CategoriaBase):
+#     id: int

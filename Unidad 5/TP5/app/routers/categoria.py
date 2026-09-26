@@ -1,15 +1,13 @@
-# app/routers/categoria.py
+from fastapi import APIRouter, Path, Query, status
 
-from fastapi import APIRouter, HTTPException, Path, Query, status
 from app.database import SessionDep
-
 from app.schemas.categoria import CategoriaCreate, CategoriaPublic, CategoriaUpdate
 from app.service.categoria_services import (
+    actualizar_categoria,
     crear_categoria,
+    desactivar_categoria,
     listar_categorias,
     obtener_categoria_por_id,
-    actualizar_categoria,
-    desactivar_categoria,
 )
 
 router = APIRouter(prefix="/categorias", tags=["Categorías"])

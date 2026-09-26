@@ -1,70 +1,93 @@
-from fastapi import HTTPException
+from app.models.proveedor import Proveedor
+from app.schemas.proveedor import ProveedorCreate, ProveedorUpdate
+from fastapi import HTTPException, status
+from sqlmodel import Session, select
 
-from ..schemas.proveedor import ProveedorCreate, ProveedorRead
 
-#Mockup de proveedores en la BD 
-db_proveedores: list[ProveedorRead]=[
-    ProveedorRead(id=1, codigo= "PROV-01", razon_social="desillas SA", cuit="27865565882", email="contacto@desillas.com", telefono="1165238469", activo=True),
-    ProveedorRead(id=2, codigo="PROV-02", razon_social="Amoblamientos Garcia SRL", cuit="30715488921", email="ventas@amoblamientosgarcia.com", telefono="1145879632", activo=True),
-    ProveedorRead(id=3, codigo="PROV-03", razon_social="ElectroTech SA", cuit="33687412589", email="contacto@electrotech.com.ar", telefono="1132569874", activo=True)
-]
-id_counter = 4
+def crear_proveedor(session: Session, data: ProveedorCreate) -> Proveedor:
+    # RN-02: Código único
+    existe = session.exec(
+        select(Proveedor).where(Proveedor.codigo == data.codigo)
+    ).first()
 
-def _validar_codigo_unico(codigo: str):
-    for p in db_proveedores:
-        if p.codigo.lower() == codigo.lower():
+    if existe:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"RN-02: Ya existe un proveedor con código: {data.codigo}",
+        )
+
+    nuevo_proveedor = Proveedor(**data.model_dump())
+    session.add(nuevo_proveedor)
+    session.commit()
+    session.refresh(nuevo_proveedor)
+    return nuevo_proveedor
+
+
+def listar_proveedores(
+    session: Session,
+    skip: int = 0,
+    limit: int = 10,
+    activo: bool | None = None,
+) -> list[Proveedor]:
+
+    query = select(Proveedor)
+
+    if activo is not None:
+        query = query.where(Proveedor.activo == activo)
+
+    query = query.offset(skip).limit(limit)
+    return list(session.exec(query).all())
+
+
+def obtener_proveedor_por_id(session: Session, proveedor_id: int) -> Proveedor:
+    proveedor = session.get(Proveedor, proveedor_id)
+
+    if not proveedor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="RN-04: Proveedor no encontrado",
+        )
+
+    return proveedor
+
+
+def actualizar_proveedor(session: Session, proveedor_id: int, data: ProveedorUpdate) -> Proveedor:
+    proveedor = obtener_proveedor_por_id(session, proveedor_id)
+
+    cambios = data.model_dump(exclude_unset=True)
+
+    # RN-02: Código único (solo si cambia)
+    if "codigo" in cambios and cambios["codigo"].lower() != proveedor.codigo.lower():
+        existe = session.exec(
+            select(Proveedor).where(Proveedor.codigo == cambios["codigo"])
+        ).first()
+
+        if existe:
             raise HTTPException(
-                status_code=409,
-                detail="RN-02: Ya existe un proveedor con ese código"
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"RN-02: Ya existe un proveedor con código: {cambios['codigo']}",
             )
 
-def crear(data: ProveedorCreate) -> ProveedorRead:
-    global id_counter
-    _validar_codigo_unico(data.codigo)
-    nuevo = ProveedorRead(id=id_counter, **data.model_dump())
-    db_proveedores.append(nuevo)
-    id_counter += 1
-    return nuevo
+    proveedor.sqlmodel_update(cambios)
 
-def obtener_proveedores(activo: bool | None, skip: int, limit: int) -> list[ProveedorRead]:
-    filtrados = [p for p in db_proveedores if activo is None or p.activo == activo]
-    return filtrados[skip : skip + limit]
+    session.add(proveedor)
+    session.commit()
+    session.refresh(proveedor)
+    return proveedor
 
-def obtener_por_id(id: int) -> ProveedorRead | None:
-    return next((p for p in db_proveedores if p.id == id), None)
 
-def actualizar_total(id: int, data: ProveedorCreate) -> ProveedorRead | None:
-    # Reemplazo total: Requiere todos los campos validables (ProveedorCreate)
-    proveedor = obtener_por_id(id)
-    if not proveedor:
-        raise HTTPException(status_code=404, detail="RN-04: Proveedor no encontrado")
+def desactivar_proveedor(session: Session, proveedor_id: int) -> Proveedor:
+    proveedor = obtener_proveedor_por_id(session, proveedor_id)
 
-    if data.codigo.lower() != proveedor.codigo.lower():
-        _validar_codigo_unico(data.codigo)
-
-    for index, p in enumerate(db_proveedores):
-        if p.id == id:
-            proveedor_actualizado = ProveedorRead(id=id, **data.model_dump())
-            db_proveedores[index] = proveedor_actualizado
-            return proveedor_actualizado
-    return None
-
-def desactivar(id: int) -> ProveedorRead | None:
-    # Borrado lógico: Solo altera el estado 'activo'
-    proveedor = obtener_por_id(id)
-    if not proveedor:
-        raise HTTPException(status_code=404, detail="RN-04: Proveedor no encontrado")
-    if proveedor.activo is False:
+    if not proveedor.activo:
         raise HTTPException(
-            status_code=409,
-            detail="RN-05: El proveedor ya está desactivado"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="RN-05: El proveedor ya está desactivado",
         )
-    p_dict = proveedor.model_dump()
-    p_dict["activo"] = False
-    proveedor_actualizado = ProveedorRead(**p_dict)
-    for index, p in enumerate(db_proveedores):
-        if p.id == id:
-            db_proveedores[index] = proveedor_actualizado
-            return proveedor_actualizado
-    return None
 
+    proveedor.activo = False
+
+    session.add(proveedor)
+    session.commit()
+    session.refresh(proveedor)
+    return proveedor
