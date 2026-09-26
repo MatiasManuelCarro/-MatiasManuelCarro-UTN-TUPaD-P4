@@ -1,0 +1,65 @@
+### Variables (REST Client / VS Code)
+@baseUrl = http://localhost:8000
+
+### Crear paciente
+POST {{baseUrl}}/pacientes/
+Content-Type: application/json
+
+{
+  "nombre": "Lucía",
+  "apellido": "Martínez",
+  "dni": "35987654",
+  "telefono": "2615551234",
+  "fecha_nacimiento": "1990-04-12",
+  "obra_social": "OSDE 210"
+}
+
+### Listar pacientes
+GET {{baseUrl}}/pacientes/
+
+### Obtener paciente con sus turnos
+GET {{baseUrl}}/pacientes/1
+
+### Actualizar paciente (PATCH)
+PATCH {{baseUrl}}/pacientes/1
+Content-Type: application/json
+
+{
+  "telefono": "2615559999"
+}
+
+### Desactivar paciente (baja lógica)
+PATCH {{baseUrl}}/pacientes/1/desactivar
+
+### Crear turno
+POST {{baseUrl}}/turnos/
+Content-Type: application/json
+
+{
+  "paciente_id": 1,
+  "fecha": "2026-09-15",
+  "hora": "10:30:00",
+  "profesional": "Dr. Alan Funes",
+  "motivo": "Control anual"
+}
+
+### Listar turnos (con filtros opcionales)
+GET {{baseUrl}}/turnos/?estado=pendiente
+
+### Obtener un turno
+GET {{baseUrl}}/turnos/1
+
+### Reprogramar turno (PATCH)
+PATCH {{baseUrl}}/turnos/1
+Content-Type: application/json
+
+{
+  "fecha": "2026-09-18",
+  "hora": "11:00:00"
+}
+
+### Confirmar turno
+PATCH {{baseUrl}}/turnos/1/confirmar
+
+### Cancelar turno
+PATCH {{baseUrl}}/turnos/1/cancelar
