@@ -1,47 +1,68 @@
-from ..schemas.categoria import CategoriaCreate, CategoriaRead
-
-# Simulamos algunos registros iniciales
-db_categorias: list[CategoriaRead] = [
-    CategoriaRead(id=1, codigo="MUE-01", descripcion="Muebles de Oficina", activo=True),
-    CategoriaRead(id=2, codigo="ELE-02", descripcion="Electrónica", activo=True),
-]
-id_counter = 3
+from app.models.categoria import Categoria
+from app.schemas.categoria import CategoriaCreate, CategoriaUpdate
+from fastapi import HTTPException, status
+from sqlmodel import Session, select
 
 
-def crear(data: CategoriaCreate) -> CategoriaRead:
-    global id_counter
-    nueva = CategoriaRead(id=id_counter, **data.model_dump())
-    db_categorias.append(nueva)
-    id_counter += 1
-    return nueva
+def crear_categoria(session: Session, data: CategoriaCreate) -> Categoria:
+    existe = session.exec(
+        select(Categoria).where(Categoria.codigo == data.codigo)
+    ).first()
+    if existe:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ya existe categotia con codigo: {data.codigo}",
+        )
+    nueva_categoria = Categoria(**data.model_dump())
+    session.add(nueva_categoria)
+    session.commit()
+    session.refresh(nueva_categoria)
+    return nueva_categoria
 
 
-def obtener_todas(skip: int = 0, limit: int = 10) -> list[CategoriaRead]:
-    return db_categorias[skip : skip + limit]
+
+def listar_categorias(
+    session: Session,
+    skip: int = 0,
+    limit: int = 10,
+    activo: bool | None = None,
+) -> list[Categoria]:
+    query = select(Categoria)
+    if activo is not None:
+        query = query.where(Categoria.activo == activo)
+    query = query.offset(skip).limit(limit)
+    return list(session.exec(query).all())
 
 
-def obtener_por_id(id: int) -> CategoriaRead | None:
-    for c in db_categorias:
-        if c.id == id:
-            return c
-    return None
+def obtener_categoria_por_id(session: Session, categoria_id: int) -> Categoria:
+    categoria = session.get(Categoria, categoria_id)
+    if not categoria:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Categoria no encontrada"
+        )
+    return categoria
 
 
-def actualizar_total(id: int, data: CategoriaCreate) -> CategoriaRead | None:
-    for index, c in enumerate(db_categorias):
-        if c.id == id:
-            actualizada = CategoriaRead(id=id, **data.model_dump())
-            db_categorias[index] = actualizada
-            return actualizada
-    return None
+def actualizar_categoria(session: Session, categoria_id: int, data: CategoriaUpdate) -> Categoria:
+    categoria = obtener_categoria_por_id(session, categoria_id)
+    cambios = data.model_dump(exclude_unset=True)
+    categoria.sqlmodel_update(cambios)
+    
+    session.add(categoria)
+    session.commit()
+    session.refresh(categoria)
+    return categoria
 
 
-def desactivar(id: int) -> CategoriaRead | None:
-    for index, c in enumerate(db_categorias):
-        if c.id == id:
-            c_dict = c.model_dump()
-            c_dict["activo"] = False
-            actualizada = CategoriaRead(**c_dict)
-            db_categorias[index] = actualizada
-            return actualizada
-    return None
+def desactivar_categoria(session: Session, categoria_id: int) -> Categoria:
+    """Baja lógica: no borra la Categoria, lo marca inactivo."""
+    categoria = obtener_categoria_por_id(session, categoria_id)
+    
+    if not categoria.activo:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="La categoria ya está inactiva")
+
+    categoria.activo = False
+    session.add(categoria)
+    session.commit()
+    session.refresh(categoria)
+    return categoria

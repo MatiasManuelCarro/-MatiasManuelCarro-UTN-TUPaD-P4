@@ -1,6 +1,6 @@
 from sqlmodel import Field, SQLModel
 
-from ..models.categoria import CategoriaBase
+from app.models.categoria import CategoriaBase
 
 
 class CategoriaCreate(CategoriaBase):
@@ -12,7 +12,7 @@ class CategoriaPublic(CategoriaBase):
 
 
 class CategoriaUpdate(SQLModel):
-    codigo: str | None = Field(None, pattern=r"^[A-Z]{3}-\d{2}$")
+    codigo: str | None = Field(None, regex=r"^[A-Z]{3}-\d{2}$")
     descripcion: str | None = Field(None, min_length=3)
     activo: bool | None = None
 

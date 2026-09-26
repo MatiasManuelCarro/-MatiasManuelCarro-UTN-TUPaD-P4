@@ -11,16 +11,4 @@ class CategoriaBase(SQLModel):
 class Categoria(CategoriaBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-# POST
-class CategoriaCreate(CategoriaBase):
-    pass
 
-# PATCH
-class CategoriaUpdate(SQLModel):
-    codigo: str | None = Field(default=None, regex=r"^[A-Z]{3}-\d{2}$")
-    descripcion: str | None = Field(default=None, min_length=3)
-    activo: bool | None = None
-
-# GET
-class CategoriaRead(CategoriaBase):
-    id: int

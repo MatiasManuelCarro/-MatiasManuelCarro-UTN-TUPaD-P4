@@ -1,69 +1,48 @@
+# app/routers/categoria.py
+
 from fastapi import APIRouter, HTTPException, Path, Query, status
+from app.database import SessionDep
 
-from database import SessionDep
-
-from ..schemas import categoria
-from ..service import categoria_services
+from app.schemas.categoria import CategoriaCreate, CategoriaPublic, CategoriaUpdate
+from app.service.categoria_services import (
+    crear_categoria,
+    listar_categorias,
+    obtener_categoria_por_id,
+    actualizar_categoria,
+    desactivar_categoria,
+)
 
 router = APIRouter(prefix="/categorias", tags=["Categorías"])
 
 
-@router.post(
-    "/", response_model=categoria.CategoriaPublic, status_code=status.HTTP_201_CREATED
-)
-def alta_categoria(categoria: categoria.CategoriaCreate, session: SessionDep):
-    return categoria_services.crear(session, categoria)
+@router.post("/", response_model=CategoriaPublic, status_code=status.HTTP_201_CREATED)
+def alta_categoria(categoria: CategoriaCreate, session: SessionDep):
+    return crear_categoria(session, categoria)
 
 
-@router.get(
-    "/", response_model=list[categoria.CategoriaPublic], status_code=status.HTTP_200_OK
-)
-def listar_categorias(
-    session: SessionDep, skip: int = Query(0, ge=0), limit: int = Query(10, le=50)
-):
-    return categoria_services.obtener_todas(session, skip, limit)
-
-
-@router.get(
-    "/{id}", response_model=categoria.CategoriaPublic, status_code=status.HTTP_200_OK
-)
-def detalle_categoria(session: SessionDep, id: int = Path(..., gt=0)):
-    categoria = categoria_services.obtener_por_id(session, id)
-    if not categoria:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada"
-        )
-    return categoria
-
-
-@router.put(
-    "/{id}", response_model=categoria.CategoriaPublic, status_code=status.HTTP_200_OK
-)
-def actualizar_categoria(
-    *, #soluciona el problema del orden dentro de los parametros
+@router.get("/", response_model=list[CategoriaPublic], status_code=status.HTTP_200_OK)
+def obtener_categorias(
     session: SessionDep,
-    data: categoria.CategoriaUpdate,
-    id: int = Path(...),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, le=50),
+    activo: bool | None = None,
 ):
-    actualizada = categoria_services.actualizar_total(session, data, id)
-    if not actualizada:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Categoría no encontrada"
-        )
-    return actualizada
+    return listar_categorias(session, skip, limit, activo)
 
 
+@router.get("/{categoria_id}", response_model=CategoriaPublic, status_code=status.HTTP_200_OK)
+def detalle_categoria(session: SessionDep, categoria_id: int = Path(..., gt=0)):
+    return obtener_categoria_por_id(session, categoria_id)
 
-@router.put(
-    "/{id}/desactivar",
-    response_model=categoria.CategoriaPublic,
-    status_code=status.HTTP_200_OK,
-)
-def borrado_logico(session: SessionDep, id: int = Path(..., gt=0)):
-    desactivada = categoria_services.desactivar(session, id)
-    if not desactivada:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada"
-        )
-    return desactivada
+@router.patch("/{categoria_id}", response_model=CategoriaPublic, status_code=status.HTTP_200_OK)
+def modificar_categoria(
+    categoria_id: int = Path(..., gt=0),
+    data: CategoriaUpdate = None,
+    session: SessionDep = None,
+):
+    return actualizar_categoria(session, categoria_id, data)
+
+
+@router.patch("/{categoria_id}/desactivar", response_model=CategoriaPublic, status_code=status.HTTP_200_OK)
+def desactivar_categoria_endpoint(categoria_id: int = Path(..., gt=0), session: SessionDep = None):
+    return desactivar_categoria(session, categoria_id)

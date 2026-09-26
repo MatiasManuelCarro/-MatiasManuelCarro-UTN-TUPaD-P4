@@ -18,23 +18,26 @@ app/
 ├── database.py
 ├── main.py
 │
-├── producto/
-│   ├── models.py
-│   ├── schemas.py
-│   ├── services.py
-│   └── routers.py
+├── models/
+│   ├── producto.py
+│   ├── categoria.py
+│   └── proveedor.py
 │
-├── proveedor/
-│   ├── models.py
-│   ├── schemas.py
-│   ├── services.py
-│   └── routers.py
+├── schemas/
+│   ├── producto.py
+│   ├── categoria.py
+│   └── proveedor.py
 │
-└── categoria/
-    ├── models.py
-    ├── schemas.py
-    ├── services.py
-    └── routers.py
+├── services/
+│   ├── producto.py
+│   ├── categoria.py
+│   └── proveedor.py
+│
+└── routers/
+    ├── producto.py
+    ├── categoria.py
+    └── proveedor.py
+
 ```
 
 

@@ -1,0 +1,30 @@
+### Variables (REST Client / VS Code)
+@baseUrl = http://localhost:8000
+
+### Crear categoría
+POST {{baseUrl}}/categorias/
+Content-Type: application/json
+
+{
+  "codigo": "ELE-01",
+  "descripcion": "Electrónica",
+  "activo": true
+}
+
+### Listar categorías
+GET {{baseUrl}}/categorias/
+
+### Obtener categoría por ID
+GET {{baseUrl}}/categorias/1
+
+### Actualizar categoría (PUT)
+PUT {{baseUrl}}/categorias/1
+Content-Type: application/json
+
+{
+  "descripcion": "Electrónica y audio",
+  "activo": true
+}
+
+### Desactivar categoría (baja lógica)
+PUT {{baseUrl}}/categorias/1/desactivar

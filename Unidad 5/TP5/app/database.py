@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlmodel import Session, SQLModel, create_engine
 
-DATABASE_URL = "postgresql://usuario:password@localhost:5432/tp_productos"
+DATABASE_URL = "postgresql://postgres:1234@localhost:5432/tp_productos"
 
 engine = create_engine(DATABASE_URL, echo=True)
 
