@@ -4,10 +4,8 @@ from fastapi import FastAPI
 
 from app.database import create_db  #Función actual
 from app.routers.categoria import router as categoria_router
-
-# ! cuando este producto y proveedor:
-# from app.routers.producto import router as producto_router
-# from app.routers.proveedor import router as proveedor_router
+from app.routers.producto import router as producto_router
+from app.routers.proveedor import router as proveedor_router
 
 
 @asynccontextmanager
@@ -26,8 +24,8 @@ app = FastAPI(
 
 # Routers
 app.include_router(categoria_router)
-# * app.include_router(producto_router)
-# * app.include_router(proveedor_router)
+app.include_router(producto_router)
+app.include_router(proveedor_router)
 
 
 @app.get("/", tags=["Root"])
