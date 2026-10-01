@@ -6318,9 +6318,9 @@
       "id": "s5M3aJITEEDLi1wZ36M-4",
       "type": "rectangle",
       "x": 760.260868,
-      "y": 534.4097276675562,
+      "y": 525.3930996675563,
       "width": 381.5557259764038,
-      "height": 243.6630906648876,
+      "height": 213.19932244298457,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -6336,8 +6336,8 @@
         "type": 3
       },
       "seed": 1100928290,
-      "version": 63,
-      "versionNonce": 253622398,
+      "version": 91,
+      "versionNonce": 1869843326,
       "isDeleted": false,
       "boundElements": [
         {
@@ -6349,7 +6349,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1790861012845,
+      "updated": 1790868097171,
       "created": 1790860946038,
       "link": null,
       "locked": false
@@ -6398,9 +6398,9 @@
       "id": "qOb8--LidM8KAFi8Q1Hl9",
       "type": "arrow",
       "x": 1147.8165939764037,
-      "y": 656.2656393090665,
+      "y": 632.0140808212929,
       "width": 187.81132094545,
-      "height": 105.50339959562007,
+      "height": 81.25184110784642,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -6414,11 +6414,11 @@
       "index": "bA0",
       "roundness": null,
       "seed": 1215674174,
-      "version": 31,
-      "versionNonce": 1314508542,
+      "version": 58,
+      "versionNonce": 1244752830,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1790861009508,
+      "updated": 1790868097171,
       "created": 1790861008716,
       "link": null,
       "locked": false,
@@ -6433,11 +6433,11 @@
         ],
         [
           93.905660472725,
-          -105.50339959562007
+          -81.25184110784642
         ],
         [
           187.81132094545,
-          -105.50339959562007
+          -81.25184110784642
         ]
       ],
       "startBinding": {
@@ -6467,9 +6467,9 @@
       "id": "FyudH4uMbzo2qVKHfIbQ2",
       "type": "arrow",
       "x": 1147.8165939764037,
-      "y": 656.2656393090665,
+      "y": 632.0140808212929,
       "width": 187.81132094545,
-      "height": 0.47065749444755056,
+      "height": 24.7222159822212,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -6483,11 +6483,11 @@
       "index": "bA1",
       "roundness": null,
       "seed": 1758398398,
-      "version": 42,
-      "versionNonce": 2135005758,
+      "version": 69,
+      "versionNonce": 180962302,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1790861014756,
+      "updated": 1790868097171,
       "created": 1790861012845,
       "link": null,
       "locked": false,
@@ -6497,8 +6497,16 @@
           0
         ],
         [
+          93.905660472725,
+          0
+        ],
+        [
+          93.905660472725,
+          24.7222159822212
+        ],
+        [
           187.81132094545,
-          0.47065749444755056
+          24.7222159822212
         ]
       ],
       "startBinding": {
@@ -7928,8 +7936,8 @@
       "type": "text",
       "x": 769.1061435143698,
       "y": 848.6361325025624,
-      "width": 781.4434663604836,
-      "height": 320,
+      "width": 807.9742418941612,
+      "height": 200,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -7943,8 +7951,8 @@
       "index": "bAQ",
       "roundness": null,
       "seed": 2123117758,
-      "version": 78,
-      "versionNonce": 1868637118,
+      "version": 243,
+      "versionNonce": 317791714,
       "isDeleted": false,
       "boundElements": [
         {
@@ -7952,18 +7960,18 @@
           "type": "arrow"
         }
       ],
-      "updated": 1790861978613,
+      "updated": 1790868075436,
       "created": 1790861942423,
       "link": null,
       "locked": false,
-      "text": "El ORM arma una consulta principal para buscar el héroe por su ID.\n\nPostgreSQL recibe esa consulta y busca la fila en la tabla hero.\n\nEl ORM detecta que pediste selectinload(Hero.weapon) y arma una segunda consulta.\n\nPostgreSQL ejecuta esa segunda consulta para buscar el arma asociada en la tabla weapon.\n\nPostgreSQL devuelve dos conjuntos de resultados:\n\n    - uno con el héroe\n\n    - otro con el arma\n\nEl ORM combina ambos resultados y te entrega un objeto Hero completo, con su relación\nweapon ya cargada.",
+      "text": "Cuando tu servicio ejecuta una operación (insert, select, update, delete), PostgreSQL\nrecibe instrucciones SQL reales generadas por el ORM. A partir de esas instrucciones,\nPostgreSQL:\n\n- Interpreta la consulta que llega desde el ORM.\n- Accede a las tablas que existen en la base de datos.\n- Busca o modifica filas según lo que la consulta solicita.\n- Aplica constraints como claves primarias, claves foráneas, unicidad o tipos de datos.\n- Devuelve resultados en forma de filas, o confirma que una operación fue realizada.\n- No sabe nada de Python, routers, servicios ni modelos, solo ejecuta SQL.",
       "fontSize": 16,
       "baseFontSize": null,
       "fontFamily": 8,
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "originalText": "El ORM arma una consulta principal para buscar el héroe por su ID.\n\nPostgreSQL recibe esa consulta y busca la fila en la tabla hero.\n\nEl ORM detecta que pediste selectinload(Hero.weapon) y arma una segunda consulta.\n\nPostgreSQL ejecuta esa segunda consulta para buscar el arma asociada en la tabla weapon.\n\nPostgreSQL devuelve dos conjuntos de resultados:\n\n    - uno con el héroe\n\n    - otro con el arma\n\nEl ORM combina ambos resultados y te entrega un objeto Hero completo, con su relación weapon ya cargada.",
+      "originalText": "Cuando tu servicio ejecuta una operación (insert, select, update, delete), PostgreSQL recibe instrucciones SQL reales generadas por el ORM. A partir de esas instrucciones, PostgreSQL:\n\n- Interpreta la consulta que llega desde el ORM.\n- Accede a las tablas que existen en la base de datos.\n- Busca o modifica filas según lo que la consulta solicita.\n- Aplica constraints como claves primarias, claves foráneas, unicidad o tipos de datos.\n- Devuelve resultados en forma de filas, o confirma que una operación fue realizada.\n- No sabe nada de Python, routers, servicios ni modelos, solo ejecuta SQL.",
       "autoResize": false,
       "lineHeight": 1.25,
       "labelPosition": null
@@ -7974,7 +7982,7 @@
       "x": 752.6722229999999,
       "y": 837.018039,
       "width": 790.288742,
-      "height": 349.09478909339737,
+      "height": 218.18762199999992,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -7990,11 +7998,11 @@
         "type": 3
       },
       "seed": 1849551486,
-      "version": 53,
-      "versionNonce": 2087613054,
+      "version": 71,
+      "versionNonce": 253812286,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1790861974475,
+      "updated": 1790868077818,
       "created": 1790861969612,
       "link": null,
       "locked": false
@@ -8002,10 +8010,10 @@
     {
       "id": "VW9ERJHjmycwzwDBf8wCZ",
       "type": "arrow",
-      "x": 1548.3744650817591,
-      "y": 1018.5509150032176,
-      "width": 136.21782277748252,
-      "height": 206.70025956304312,
+      "x": 1574.8313923068347,
+      "y": 954.8328715654719,
+      "width": 109.76089555240696,
+      "height": 142.98221612529744,
       "angle": 0,
       "strokeColor": "#1971c2",
       "backgroundColor": "transparent",
@@ -8021,11 +8029,11 @@
         "type": 2
       },
       "seed": 91646718,
-      "version": 48,
-      "versionNonce": 1510018942,
+      "version": 150,
+      "versionNonce": 1370179390,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1790861980746,
+      "updated": 1790868071944,
       "created": 1790861978612,
       "link": null,
       "locked": false,
@@ -8035,12 +8043,12 @@
           0
         ],
         [
-          85.82396808276212,
-          -80.02505132041324
+          59.36704085768656,
+          -16.307007882667563
         ],
         [
-          136.21782277748252,
-          -206.70025956304312
+          109.76089555240696,
+          -142.98221612529744
         ]
       ],
       "startBinding": {
@@ -8061,7 +8069,8 @@
       },
       "startArrowhead": null,
       "endArrowhead": "arrow",
-      "elbowed": false
+      "elbowed": false,
+      "moveMidPointsWithElement": false
     },
     {
       "id": "lWi603Pvijp6ir_lCOYcX",

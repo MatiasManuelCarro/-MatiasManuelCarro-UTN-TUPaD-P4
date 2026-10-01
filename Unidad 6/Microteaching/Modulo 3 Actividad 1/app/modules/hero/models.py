@@ -13,4 +13,4 @@ class Hero(SQLModel, table=True):
         unique=True
     )
 
-    weapon: Optional[Weapon] = Relationship(back_populates="hero")
+    weapon: Weapon | None = Relationship(back_populates="hero")
