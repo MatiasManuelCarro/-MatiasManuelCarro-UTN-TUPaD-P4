@@ -1053,8 +1053,8 @@
         "type": 3
       },
       "seed": 1176925666,
-      "version": 23,
-      "versionNonce": 801304318,
+      "version": 25,
+      "versionNonce": 2030445154,
       "isDeleted": false,
       "boundElements": [
         {
@@ -1070,7 +1070,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1790860777898,
+      "updated": 1790862116977,
       "created": 1790807033471,
       "link": null,
       "locked": false
@@ -4610,8 +4610,8 @@
         "type": 3
       },
       "seed": 1039948898,
-      "version": 69,
-      "versionNonce": 38834274,
+      "version": 71,
+      "versionNonce": 387969762,
       "isDeleted": false,
       "boundElements": [
         {
@@ -4619,7 +4619,7 @@
           "type": "arrow"
         }
       ],
-      "updated": 1790860373616,
+      "updated": 1790862116976,
       "created": 1790859951673,
       "link": null,
       "locked": false
@@ -7744,7 +7744,7 @@
       "x": 2105.1871153839465,
       "y": 1055.205660687973,
       "width": 800,
-      "height": 580,
+      "height": 560,
       "angle": 0,
       "strokeColor": "#2f9e44",
       "backgroundColor": "transparent",
@@ -7758,22 +7758,22 @@
       "index": "bAM",
       "roundness": null,
       "seed": 1431540222,
-      "version": 28,
-      "versionNonce": 285686562,
+      "version": 44,
+      "versionNonce": 2085317886,
       "isDeleted": false,
       "boundElements": null,
-      "updated": 1790861847602,
+      "updated": 1790862184441,
       "created": 1790861837383,
       "link": null,
       "locked": false,
-      "text": "modules/hero/service.py\n\n- Línea 3: hero = Hero(**hero_data.model_dump())\n  Crea una instancia del modelo Hero en memoria. Todavía no existe en la base de datos.\nEstado ORM: transient.\n\n- Línea 4: session.add(hero)\n  Registra la instancia dentro de la sesión. El objeto pasa a estado pending. Todavía no\nse ejecuta SQL.\n\n- Línea 5: session.commit()\n  Ejecuta el SQL real en PostgreSQL. Inserta la fila en la tabla hero. El objeto pasa a\nestado persistent.\n\n- Línea 6: session.refresh(hero)\n  Ejecuta un SELECT para obtener el registro recién insertado y actualizar la instancia\ncon el id generado y otros valores.\n\n- Línea 14: statement = select(Hero).where(Hero.id ==\nhero_id).options(selectinload(Hero.weapon))\n  Construye una consulta ORM para obtener un Hero por id y cargar la relación weapon\nusando selectinload.\n\n- Línea 21: hero = session.exec(statement).first()\n  Ejecuta la consulta. SQLAlchemy envía:\n  - SELECT * FROM hero WHERE id = X\n  - SELECT * FROM weapon WHERE id IN (weapon_id del héroe)\n  Devuelve un objeto Hero con la relación weapon cargada.\n",
+      "text": "modules/hero/service.py\n\n- hero = Hero(**hero_data.model_dump())\n  Crea una instancia del modelo Hero en memoria. Todavía no existe en la base de datos.\nEstado ORM: transient.\n\n- session.add(hero)\n  Registra la instancia dentro de la sesión. El objeto pasa a estado pending. Todavía no\nse ejecuta SQL.\n\n- session.commit()\n  Ejecuta el SQL real en PostgreSQL. Inserta la fila en la tabla hero. El objeto pasa a\nestado persistent.\n\n- session.refresh(hero)\n  Ejecuta un SELECT para obtener el registro recién insertado y actualizar la instancia\ncon el id generado y otros valores.\n\n- statement = select(Hero).where(Hero.id == hero_id).options(selectinload(Hero.weapon))\n  Construye una consulta ORM para obtener un Hero por id y cargar la relación weapon\nusando selectinload.\n\n- hero = session.exec(statement).first()\n  Ejecuta la consulta. SQLAlchemy envía:\n  - SELECT * FROM hero WHERE id = X\n  - SELECT * FROM weapon WHERE id IN (weapon_id del héroe)\n  Devuelve un objeto Hero con la relación weapon cargada.\n",
       "fontSize": 16,
       "baseFontSize": null,
       "fontFamily": 8,
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "originalText": "modules/hero/service.py\n\n- Línea 3: hero = Hero(**hero_data.model_dump())\n  Crea una instancia del modelo Hero en memoria. Todavía no existe en la base de datos. Estado ORM: transient.\n\n- Línea 4: session.add(hero)\n  Registra la instancia dentro de la sesión. El objeto pasa a estado pending. Todavía no se ejecuta SQL.\n\n- Línea 5: session.commit()\n  Ejecuta el SQL real en PostgreSQL. Inserta la fila en la tabla hero. El objeto pasa a estado persistent.\n\n- Línea 6: session.refresh(hero)\n  Ejecuta un SELECT para obtener el registro recién insertado y actualizar la instancia con el id generado y otros valores.\n\n- Línea 14: statement = select(Hero).where(Hero.id == hero_id).options(selectinload(Hero.weapon))\n  Construye una consulta ORM para obtener un Hero por id y cargar la relación weapon usando selectinload.\n\n- Línea 21: hero = session.exec(statement).first()\n  Ejecuta la consulta. SQLAlchemy envía:\n  - SELECT * FROM hero WHERE id = X\n  - SELECT * FROM weapon WHERE id IN (weapon_id del héroe)\n  Devuelve un objeto Hero con la relación weapon cargada.\n",
+      "originalText": "modules/hero/service.py\n\n- hero = Hero(**hero_data.model_dump())\n  Crea una instancia del modelo Hero en memoria. Todavía no existe en la base de datos. Estado ORM: transient.\n\n- session.add(hero)\n  Registra la instancia dentro de la sesión. El objeto pasa a estado pending. Todavía no se ejecuta SQL.\n\n- session.commit()\n  Ejecuta el SQL real en PostgreSQL. Inserta la fila en la tabla hero. El objeto pasa a estado persistent.\n\n- session.refresh(hero)\n  Ejecuta un SELECT para obtener el registro recién insertado y actualizar la instancia con el id generado y otros valores.\n\n- statement = select(Hero).where(Hero.id == hero_id).options(selectinload(Hero.weapon))\n  Construye una consulta ORM para obtener un Hero por id y cargar la relación weapon usando selectinload.\n\n- hero = session.exec(statement).first()\n  Ejecuta la consulta. SQLAlchemy envía:\n  - SELECT * FROM hero WHERE id = X\n  - SELECT * FROM weapon WHERE id IN (weapon_id del héroe)\n  Devuelve un objeto Hero con la relación weapon cargada.\n",
       "autoResize": false,
       "lineHeight": 1.25,
       "labelPosition": null
@@ -8059,6 +8059,56 @@
           0.5319625518820496
         ]
       },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false
+    },
+    {
+      "id": "lWi603Pvijp6ir_lCOYcX",
+      "type": "arrow",
+      "x": 2299.045154533417,
+      "y": -128.29323209912278,
+      "width": 513.468719139318,
+      "height": 123.59621506471026,
+      "angle": 0,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "bAT",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 140275298,
+      "version": 310,
+      "versionNonce": 340224062,
+      "isDeleted": true,
+      "boundElements": null,
+      "updated": 1790862118610,
+      "created": 1790862103034,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -78.35903590018279,
+          115.23012652825906
+        ],
+        [
+          -513.468719139318,
+          123.59621506471026
+        ]
+      ],
+      "startBinding": null,
+      "endBinding": null,
       "startArrowhead": null,
       "endArrowhead": "arrow",
       "elbowed": false
