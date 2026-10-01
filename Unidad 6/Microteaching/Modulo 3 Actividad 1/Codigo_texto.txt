@@ -1,0 +1,273 @@
+# app
+
+## Copied Files
+
+  - main.py
+  - docker-compose.yml
+  - .env
+  - modules/weapon/service.py
+  - modules/weapon/router.py
+  - modules/weapon/schemas.py
+  - modules/weapon/models.py
+  - modules/team/models.py
+  - modules/hero/service.py
+  - modules/hero/schemas.py
+  - modules/hero/router.py
+  - modules/hero/models.py
+  - core/database.py
+  - core/config.py
+
+## File Contents
+
+### main.py
+
+```
+from contextlib import asynccontextmanager
+
+from app.core.database import engine
+from app.modules.hero.models import Hero
+from app.modules.hero.router import router as hero_router
+from app.modules.weapon.models import Weapon
+from app.modules.weapon.router import router as weapon_router
+from fastapi import FastAPI
+from sqlmodel import SQLModel
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    SQLModel.metadata.create_all(engine)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(hero_router)
+app.include_router(weapon_router)
+```
+
+### docker-compose.yml
+
+```
+services:
+  db:
+    image: postgres:15
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres_data:
+```
+
+### .env
+
+```
+# .env
+POSTGRES_DB=appdb
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/appdb
+```
+
+### modules/weapon/service.py
+
+```
+from sqlmodel import Session
+from app.modules.weapon.models import Weapon
+from app.modules.weapon.schemas import WeaponCreate
+
+
+def create_weapon(session: Session, weapon_data: WeaponCreate):
+    weapon = Weapon(**weapon_data.model_dump())
+    session.add(weapon)
+    session.commit()
+    session.refresh(weapon)
+    return weapon
+```
+
+### modules/weapon/router.py
+
+```
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
+from app.core.database import get_session
+from app.modules.weapon.schemas import WeaponCreate
+from app.modules.weapon import service
+
+router = APIRouter(prefix="/weapons", tags=["Weapons"])
+
+
+@router.post("/")
+def create_weapon(
+    weapon: WeaponCreate,
+    session: Session = Depends(get_session)
+):
+    return service.create_weapon(session, weapon)
+```
+
+### modules/weapon/schemas.py
+
+```
+from sqlmodel import SQLModel
+
+
+class WeaponCreate(SQLModel):
+    name: str
+```
+
+### modules/weapon/models.py
+
+```
+from typing import Optional
+from sqlmodel import SQLModel, Field, Relationship
+from app.modules.hero.models import Hero
+
+
+class Weapon(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+
+    hero: Optional["Hero"] = Relationship(back_populates="weapon")
+```
+
+### modules/team/models.py
+
+```
+from sqlmodel import SQLModel, Field
+
+class Team(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+```
+
+### modules/hero/service.py
+
+```
+from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
+from app.modules.hero.models import Hero
+from app.modules.hero.schemas import HeroCreate
+
+
+def create_hero(session: Session, hero_data: HeroCreate):
+    hero = Hero(**hero_data.model_dump())
+    session.add(hero)
+    session.commit()
+    session.refresh(hero)
+    return hero
+
+
+def get_hero(session: Session, hero_id: int):
+    statement = (
+        select(Hero)
+        .where(Hero.id == hero_id)
+        .options(selectinload(Hero.weapon))
+    )
+    return session.exec(statement).first()
+```
+
+### modules/hero/schemas.py
+
+```
+from typing import Optional
+from sqlmodel import SQLModel
+
+
+class HeroCreate(SQLModel):
+    name: str
+    weapon_id: Optional[int] = None
+```
+
+### modules/hero/router.py
+
+```
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
+from app.core.database import get_session
+from app.modules.hero.schemas import HeroCreate
+from app.modules.hero import service
+
+router = APIRouter(prefix="/heroes", tags=["Heroes"])
+
+
+@router.post("/")
+def create_hero(
+    hero: HeroCreate,
+    session: Session = Depends(get_session)
+):
+    return service.create_hero(session, hero)
+
+
+@router.get("/{hero_id}")
+def read_hero(
+    hero_id: int,
+    session: Session = Depends(get_session)
+):
+    return service.get_hero(session, hero_id)
+```
+
+### modules/hero/models.py
+
+```
+from typing import Optional
+from sqlmodel import SQLModel, Field, Relationship
+from app.modules.weapon.models import Weapon
+
+
+class Hero(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str
+
+    weapon_id: int | None = Field(
+        default=None,
+        foreign_key="weapon.id",
+        unique=True
+    )
+
+    weapon: Optional[Weapon] = Relationship(back_populates="hero")
+```
+
+### core/database.py
+
+```
+from sqlmodel import create_engine, Session
+from app.core.config import settings
+
+engine = create_engine(
+    settings.DATABASE_URL,
+    echo=True
+)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+```
+
+### core/config.py
+
+```
+from pydantic_settings import BaseSettings
+import os
+
+
+class Settings(BaseSettings):
+    DATABASE_URL: str
+
+    class Config:
+        env_file = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            ".env"
+        )
+        env_file_encoding = "utf-8"
+
+
+settings = Settings()
+```
+
