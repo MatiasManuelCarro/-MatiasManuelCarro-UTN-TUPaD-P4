@@ -8,4 +8,4 @@ class Categoria(SQLModel, table=True):
     nombre: str = Field(min_length=2)
     descripcion: str = Field(min_length=5)
     
-    productos: list["Producto"] = Relationship(back_populates="categorias", link_model=ProductoCategoria) # type: ignore
+    productos: list["Producto"] = Relationship(back_populates="categorias", link_model=ProductoCategoria) # type: ignore  # noqa: F821

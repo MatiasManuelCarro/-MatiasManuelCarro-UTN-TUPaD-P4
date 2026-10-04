@@ -21,10 +21,9 @@ class Producto(SQLModel, table=True):
     descripcion: str = Field(min_length=5)
     precio: float = Field(gt=0)
     imagen_url: list[str] | None = Field(default=None, sa_column=Column(JSON))
-    # imagen_url: str = Field(min_length=1)
     disponible: bool = True
 
-    categorias: list["Categoria"] = Relationship( # type: ignore
+    categorias: list["Categoria"] = Relationship( # type: ignore  # noqa: F821
         back_populates="productos",
         link_model=ProductoCategoria
     )
