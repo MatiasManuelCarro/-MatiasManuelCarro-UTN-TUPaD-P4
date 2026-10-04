@@ -1,8 +1,9 @@
+
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
-from app.models.producto import Producto
-from app.schemas.producto import ProductoCreate, ProductoUpdate
+from app.producto.model import Producto
+from app.producto.schema import ProductoCreate, ProductoUpdate
 
 
 def crear_producto(session: Session, data: ProductoCreate) -> Producto:
@@ -28,17 +29,16 @@ def listar_productos(
     session: Session,
     skip: int = 0,
     limit: int = 10,
-    activo: bool | None = None,
+    disponible: bool | None = None,
 ) -> list[Producto]:
 
     query = select(Producto)
 
-    if activo is not None:
-        query = query.where(Producto.activo == activo)
+    if disponible is not None:
+        query = query.where(Producto.disponible == disponible)
 
     query = query.offset(skip).limit(limit)
     return list(session.exec(query).all())
-
 
 def obtener_producto_por_id(session: Session, producto_id: int) -> Producto:
     producto = session.get(Producto, producto_id)
@@ -67,26 +67,26 @@ def actualizar_producto(session: Session, producto_id: int, data: ProductoUpdate
 def desactivar_producto(session: Session, producto_id: int) -> Producto:
     producto = obtener_producto_por_id(session, producto_id)
 
-    if not producto.activo:
+    if not producto.disponible:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="El producto ya está inactivo",
+            detail="El producto ya está marcado como no disponible",
         )
 
-    producto.activo = False
+    producto.disponible = False
     session.add(producto)
     session.commit()
     session.refresh(producto)
     return producto
 
+def eliminar_producto(session: Session, producto_id: int) -> None:
+    producto = session.get(Producto, producto_id)
 
-def obtener_estado_stock(session: Session, producto_id: int):
-    producto = obtener_producto_por_id(session, producto_id)
+    if not producto:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Producto no encontrado"
+        )
 
-    bajo_minimo = producto.stock < producto.stock_minimo
-
-    return {
-        "stock": producto.stock,
-        "bajo_stock_minimo": bajo_minimo,
-        "activo": producto.activo,
-    }
+    session.delete(producto)
+    session.commit()

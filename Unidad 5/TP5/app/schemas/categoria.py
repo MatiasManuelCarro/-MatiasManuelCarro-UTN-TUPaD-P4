@@ -1,6 +1,6 @@
 from sqlmodel import Field, SQLModel
 
-from app.models.categoria import CategoriaBase
+from models.categoria import CategoriaBase
 
 
 class CategoriaCreate(CategoriaBase):

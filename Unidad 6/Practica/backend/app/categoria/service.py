@@ -1,17 +1,18 @@
 from fastapi import HTTPException, status
-from models.categoria import Categoria
-from schemas.categoria import CategoriaCreate, CategoriaUpdate
 from sqlmodel import Session, select
+
+from app.categoria.model import Categoria
+from app.categoria.schema import CategoriaCreate, CategoriaUpdate
 
 
 def crear_categoria(session: Session, data: CategoriaCreate) -> Categoria:
     existe = session.exec(
-        select(Categoria).where(Categoria.codigo == data.codigo)
+        select(Categoria).where(Categoria.nombre == data.nombre)
     ).first()
     if existe:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Ya existe categotia con codigo: {data.codigo}",
+            detail=f"Ya existe categotia con nombre: {data.nombre}",
         )
     nueva_categoria = Categoria(**data.model_dump())
     session.add(nueva_categoria)
@@ -20,19 +21,13 @@ def crear_categoria(session: Session, data: CategoriaCreate) -> Categoria:
     return nueva_categoria
 
 
-
 def listar_categorias(
     session: Session,
     skip: int = 0,
     limit: int = 10,
-    activo: bool | None = None,
 ) -> list[Categoria]:
-    query = select(Categoria)
-    if activo is not None:
-        query = query.where(Categoria.activo == activo)
-    query = query.offset(skip).limit(limit)
-    return list(session.exec(query).all())
-
+    query = select(Categoria).offset(skip).limit(limit)
+    return session.exec(query).all()
 
 def obtener_categoria_por_id(session: Session, categoria_id: int) -> Categoria:
     categoria = session.get(Categoria, categoria_id)
@@ -66,3 +61,22 @@ def desactivar_categoria(session: Session, categoria_id: int) -> Categoria:
     session.commit()
     session.refresh(categoria)
     return categoria
+
+def eliminar_categoria(session: Session, categoria_id: int) -> None:
+    categoria = session.get(Categoria, categoria_id)
+
+    if not categoria:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Categoría no encontrada"
+        )
+
+    # Si tiene productos asociados → no permitir eliminar
+    if categoria.productos:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No se puede eliminar la categoría porque tiene productos asociados"
+        )
+
+    session.delete(categoria)
+    session.commit()

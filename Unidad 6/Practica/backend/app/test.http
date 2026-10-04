@@ -1,0 +1,130 @@
+###############################################
+#                 CATEGORÍAS
+###############################################
+
+### Crear categoría
+POST http://localhost:8000/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Tecnología",
+  "descripcion": "Productos electrónicos"
+}
+
+### Crear otra categoría
+POST http://localhost:8000/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Hogar",
+  "descripcion": "Artículos para el hogar"
+}
+
+### Listar categorías
+GET http://localhost:8000/categorias
+
+### Listar categorías con paginación
+GET http://localhost:8000/categorias?skip=0&limit=5
+
+### Obtener categoría por ID
+GET http://localhost:8000/categorias/1
+
+### Actualizar categoría
+PATCH http://localhost:8000/categorias/1
+Content-Type: application/json
+
+{
+  "descripcion": "Productos electrónicos y computación"
+}
+
+### Eliminar categoría (sin productos asociados)
+DELETE http://localhost:8000/categorias/2
+
+
+###############################################
+#                 PRODUCTOS
+###############################################
+
+### Crear producto con lista de imágenes
+POST http://localhost:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Notebook Asus",
+  "descripcion": "i7 32GB RAM",
+  "precio": 550000,
+  "imagen_url": ["img_asus1.png", "img_asus2.png", "img_asus3.png"],
+  "disponible": true
+}
+
+### Crear otro producto
+POST http://localhost:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Mouse Logitech",
+  "descripcion": "Inalámbrico",
+  "precio": 15000,
+  "imagen_url": ["mouse1.png"],
+  "disponible": true
+}
+
+### Intentar crear producto duplicado (debe fallar)
+POST http://localhost:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Mouse Logitech",
+  "descripcion": "Duplicado",
+  "precio": 10000,
+  "imagen_url": ["dup.png"],
+  "disponible": true
+}
+
+### Listar productos
+GET http://localhost:8000/productos
+
+### Listar productos activos
+GET http://localhost:8000/productos?activo=true
+
+### Listar productos con paginación
+GET http://localhost:8000/productos?skip=0&limit=5
+
+### Obtener producto por ID
+GET http://localhost:8000/productos/1
+
+### Actualizar producto (cambiar precio y agregar imágenes)
+PATCH http://localhost:8000/productos/3
+Content-Type: application/json
+
+{
+  "precio": 499999,
+  "imagen_url": ["asus_new1.png", "asus_new2.png"]
+}
+
+### Desactivar producto
+PATCH http://localhost:8000/productos/2/desactivar
+
+### Eliminar producto
+DELETE http://localhost:8000/productos/2
+
+### Intentar eliminar producto inexistente
+DELETE http://localhost:8000/productos/999
+
+
+###############################################
+#        PRUEBAS DE RELACIONES (N–N)
+###############################################
+
+### Asignar categorías a un producto (si tu TP lo requiere)
+# Esto depende de tu schema y service, pero dejo el ejemplo:
+
+PATCH http://localhost:8000/productos/1
+Content-Type: application/json
+
+{
+  "categoria_ids": [1]
+}
+
+### Ver producto con categorías
+GET http://localhost:8000/productos/1

@@ -1,13 +1,14 @@
-from database import SessionDep
 from fastapi import APIRouter, Path, Query, status
-from schemas import CategoriaCreate, CategoriaPublic, CategoriaUpdate
-from service.categoria_services import (
+
+from app.categoria.schema import CategoriaCreate, CategoriaPublic, CategoriaUpdate
+from app.categoria.service import (
     actualizar_categoria,
     crear_categoria,
-    desactivar_categoria,
+    eliminar_categoria,
     listar_categorias,
     obtener_categoria_por_id,
 )
+from app.core.database import SessionDep
 
 router = APIRouter(prefix="/categorias", tags=["Categorías"])
 
@@ -22,16 +23,20 @@ def obtener_categorias(
     session: SessionDep,
     skip: int = Query(0, ge=0),
     limit: int = Query(10, le=50),
-    activo: bool | None = None,
 ):
-    return listar_categorias(session, skip, limit, activo)
+    return listar_categorias(session, skip, limit)
 
 
-@router.get("/{categoria_id}", response_model=CategoriaPublic, status_code=status.HTTP_200_OK)
+@router.get(
+    "/{categoria_id}", response_model=CategoriaPublic, status_code=status.HTTP_200_OK
+)
 def detalle_categoria(session: SessionDep, categoria_id: int = Path(..., gt=0)):
     return obtener_categoria_por_id(session, categoria_id)
 
-@router.patch("/{categoria_id}", response_model=CategoriaPublic, status_code=status.HTTP_200_OK)
+
+@router.patch(
+    "/{categoria_id}", response_model=CategoriaPublic, status_code=status.HTTP_200_OK
+)
 def modificar_categoria(
     categoria_id: int = Path(..., gt=0),
     data: CategoriaUpdate = None,
@@ -39,7 +44,8 @@ def modificar_categoria(
 ):
     return actualizar_categoria(session, categoria_id, data)
 
+@router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_categoria_endpoint(session: SessionDep, categoria_id: int = Path(..., gt=0)):
+    eliminar_categoria(session, categoria_id)
 
-@router.patch("/{categoria_id}/desactivar", response_model=CategoriaPublic, status_code=status.HTTP_200_OK)
-def desactivar_categoria_endpoint(categoria_id: int = Path(..., gt=0), session: SessionDep = None):
-    return desactivar_categoria(session, categoria_id)
+

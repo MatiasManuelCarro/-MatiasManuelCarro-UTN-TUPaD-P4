@@ -1,0 +1,49 @@
+### Crear producto
+POST http://localhost:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Notebook Lenovo",
+  "descripcion": "i5 16GB RAM",
+  "precio": 550000,
+  "imagen_url": ["img1.png"],
+  "disponible": true,
+  "categoria_ids": [1, 2]
+}
+
+### Producto con listado de imagen_url
+POST http://localhost:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Notebook Asus",
+  "descripcion": "i7 32GB RAM",
+  "precio": 550000,
+  "imagen_url": ["img_asus1.png", "img_asus2.png", "img_asus3.png"],
+  "disponible": true
+}
+
+
+### Listar productos
+GET http://localhost:8000/productos
+
+### Listar productos activos
+GET http://localhost:8000/productos?activo=true
+
+### Obtener producto por ID
+GET http://localhost:8000/productos/1
+
+### Actualizar producto
+PATCH http://localhost:8000/productos/1
+Content-Type: application/json
+
+{
+  "precio": 499999,
+  "descripcion": "i5 16GB RAM - Oferta"
+}
+
+### Desactivar producto
+PATCH http://localhost:8000/productos/1/desactivar
+
+### Eliminar producto
+DELETE http://localhost:8000/productos/1

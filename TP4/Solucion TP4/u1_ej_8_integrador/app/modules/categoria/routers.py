@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Path, Query, status
-from typing import List
+
 from . import schemas, services
 
 router = APIRouter(prefix="/categorias", tags=["Categorías"])
@@ -13,7 +13,7 @@ def alta_categoria(categoria: schemas.CategoriaCreate):
 
 
 @router.get(
-    "/", response_model=List[schemas.CategoriaRead], status_code=status.HTTP_200_OK
+    "/", response_model=list[schemas.CategoriaRead], status_code=status.HTTP_200_OK
 )
 def listar_categorias(skip: int = Query(0, ge=0), limit: int = Query(10, le=50)):
     return services.obtener_todas(skip, limit)
