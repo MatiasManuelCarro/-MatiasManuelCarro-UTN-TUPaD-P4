@@ -20,7 +20,7 @@ export default function CategoriaModal({ abierta, categoria, onClose, onSubmit }
     }
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center"  onClick={onClose}>
             <div className="bg-white p-6 rounded shadow w-80">
                 <h2 className="text-lg font-bold mb-4">
                     {categoria ? "Editar Categoría" : "Nueva Categoría"}

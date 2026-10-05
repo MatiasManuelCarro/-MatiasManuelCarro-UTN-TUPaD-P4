@@ -8,20 +8,20 @@ interface Props {
 
 export default function CategoriaCard({ categoria, onEdit, onDelete }: Props) {
     return (
-        <div className="border p-4 rounded shadow">
-            <h2 className="font-bold">{categoria.nombre}</h2>
-            <p>{categoria.descripcion}</p>
+        <div className="grid grid-cols-3 items-center border-b border-slate-300 py-3">
+            <h2 className="text-slate-800 font-semibold text-lg tracking-wide">{categoria.nombre}</h2>
+            <p className="text-slate-600 text-sm mt-1 leading-relaxed">{categoria.descripcion}</p>
 
-            <div className="flex gap-2 mt-2">
+            <div className="flex justify-end gap-2 mt-3">
                 <button
-                    className="bg-gray-600 text-white px-2 py-1 rounded"
+                    className="bg-gray-600 text-white px-2 py-1 rounded cursor-pointer "
                     onClick={() => onEdit(categoria)}
                 >
                     Editar
                 </button>
 
                 <button
-                    className="bg-red-400 text-white px-2 py-1 rounded"
+                    className="bg-red-400 text-white px-2 py-1 rounded cursor-pointer"
                     onClick={() => onDelete(categoria.id)}
                 >
                     Eliminar
