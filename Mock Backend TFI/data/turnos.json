@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "fecha": "2026-10-09",
+    "horario": "MANANA",
+    "estado": "PROGRAMADO",
+    "nombre_chofer": "Carlos López",
+    "nombre_medico": "Dra. Martínez",
+    "ambulancia_id": 1,
+    "enfermero_id": 2,
+    "admin_id": 1,
+    "observaciones_ingreso": null,
+    "observaciones_egreso": null
+  },
+  {
+    "id": 2,
+    "fecha": "2026-10-09",
+    "horario": "TARDE",
+    "estado": "EN_CURSO",
+    "nombre_chofer": "Luis Fernández",
+    "nombre_medico": "Dr. Ruiz",
+    "ambulancia_id": 2,
+    "enfermero_id": 3,
+    "admin_id": 1,
+    "observaciones_ingreso": "Oxígeno justo, revisar",
+    "observaciones_egreso": null
+  },
+  {
+    "id": 3,
+    "fecha": "2026-10-08",
+    "horario": "NOCHE",
+    "estado": "FINALIZADO",
+    "nombre_chofer": "Mario Díaz",
+    "nombre_medico": "Dra. Torres",
+    "ambulancia_id": 1,
+    "enfermero_id": 2,
+    "admin_id": 1,
+    "observaciones_ingreso": "Todo OK",
+    "observaciones_egreso": "Se usaron gasas y analgésicos"
+  }
+]

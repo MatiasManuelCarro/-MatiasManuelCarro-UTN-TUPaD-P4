@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "nombre": "Gasas",
+    "punto_control": 20,
+    "critico": false,
+    "categoria_id": 3
+  },
+  {
+    "id": 2,
+    "nombre": "Guantes",
+    "punto_control": 30,
+    "critico": false,
+    "categoria_id": 3
+  },
+  {
+    "id": 3,
+    "nombre": "Analgésico",
+    "punto_control": 10,
+    "critico": false,
+    "categoria_id": 1
+  },
+  {
+    "id": 4,
+    "nombre": "Oxigeno",
+    "punto_control": 200,
+    "critico": true,
+    "categoria_id": 2
+  }
+]

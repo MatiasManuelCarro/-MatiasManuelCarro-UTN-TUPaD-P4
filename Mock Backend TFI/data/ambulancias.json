@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "patente": "AA123BB",
+    "disponible": true
+  },
+  {
+    "id": 2,
+    "patente": "AC456DD",
+    "disponible": true
+  }
+]

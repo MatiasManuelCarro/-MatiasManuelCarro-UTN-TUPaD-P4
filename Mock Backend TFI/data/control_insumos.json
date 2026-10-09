@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "turno_id": 1,
+    "insumo_id": 1,
+    "cantidad_ingreso": 18,
+    "cantidad_restockeo": 0,
+    "cantidad_egreso": null
+  },
+  {
+    "id": 2,
+    "turno_id": 1,
+    "insumo_id": 4,
+    "cantidad_ingreso": 150,
+    "cantidad_restockeo": 0,
+    "cantidad_egreso": null
+  },
+
+  {
+    "id": 3,
+    "turno_id": 2,
+    "insumo_id": 1,
+    "cantidad_ingreso": 20,
+    "cantidad_restockeo": 5,
+    "cantidad_egreso": 10
+  },
+  {
+    "id": 4,
+    "turno_id": 2,
+    "insumo_id": 4,
+    "cantidad_ingreso": 180,
+    "cantidad_restockeo": 20,
+    "cantidad_egreso": 150
+  },
+
+  {
+    "id": 5,
+    "turno_id": 3,
+    "insumo_id": 1,
+    "cantidad_ingreso": 20,
+    "cantidad_restockeo": 0,
+    "cantidad_egreso": 5
+  },
+  {
+    "id": 6,
+    "turno_id": 3,
+    "insumo_id": 3,
+    "cantidad_ingreso": 10,
+    "cantidad_restockeo": 0,
+    "cantidad_egreso": 2
+  }
+]
