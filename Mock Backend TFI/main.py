@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.ambulancias import router as ambulancias_router
+from app.categorias import router as categorias_router
 from app.controles import router as controles_router
 from app.insumos import router as insumos_router
 from app.turnos import router as turnos_router
@@ -21,6 +22,7 @@ app.include_router(ambulancias_router)
 app.include_router(insumos_router)
 app.include_router(turnos_router)
 app.include_router(controles_router)
+app.include_router(categorias_router)
 
 @app.get("/")
 def root():

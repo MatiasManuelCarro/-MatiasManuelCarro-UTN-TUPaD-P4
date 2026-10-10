@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  /* Identidad base */
+  --color-petro: #17313B;
+  --color-turquesa: #087E8B;
+  --color-coral: #D9574C;
+  --color-ambar: #D99A18;
+  --color-verde: #2A9D72;
+  --color-azul: #3978A8;
+
+  /* Superficies */
+  --color-fondo: #F3F7F6;
+  --color-blanco: #FFFFFF;
+
+  /* Tipografías */
+  --font-barlow: "Barlow Semi Condensed", sans-serif;
+  --font-plex: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}

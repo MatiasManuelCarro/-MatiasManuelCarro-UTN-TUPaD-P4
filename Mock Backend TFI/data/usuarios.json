@@ -24,11 +24,29 @@
     "activo": true
   },
   {
-    "nombre": "German Ruiz",
+    "nombre": "Enfermero German Ruiz",
     "dni": "30000001",
     "email": "gruiz@107.com",
     "rol": "ENFERMERO",
     "activo": true,
     "id": 4
+  },
+  {
+    "nombre": "Administrador Matias Carro",
+    "email": "matiascarro@mail.com",
+    "rol": "ADMIN",
+    "id": 5
+  },
+  {
+    "nombre": "Enfermero Emiliano",
+    "email": "Carro",
+    "rol": "ENFERMERO",
+    "id": 6
+  },
+  {
+    "nombre": "Ezequiel ",
+    "email": "eze@mail.com",
+    "rol": "ENFERMERO",
+    "id": 7
   }
 ]
