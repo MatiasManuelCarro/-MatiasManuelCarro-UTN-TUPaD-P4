@@ -1,5 +1,12 @@
+
 import { useEffect, useState } from "react";
-import type { Categoria } from "../types/categoria";
+import type { Categoria, CategoriaData } from "../types/categoria";
+import {
+    getCategorias,
+    createCategoria,
+    updateCategoria,
+    deleteCategoria,
+} from "../services/categorias.service";
 
 export function useCategorias() {
     const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -8,35 +15,24 @@ export function useCategorias() {
         useState<Categoria | null>(null);
 
     useEffect(() => {
-        fetch("http://localhost:8000/categorias")
-            .then((res) => res.json())
-            .then((data) => setCategorias(data));
+        getCategorias().then(setCategorias);
     }, []);
 
-    async function handleCreate(data: { nombre: string; descripcion: string }) {
-        const res = await fetch("http://localhost:8000/categorias", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-
-        const nueva = await res.json();
+    async function handleCreate(data: CategoriaData) {
+        const nueva = await createCategoria(data);
         setCategorias([...categorias, nueva]);
     }
 
-    async function handleUpdate(id: number, data: { nombre: string; descripcion: string }) {
-        const res = await fetch(`http://localhost:8000/categorias/${id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-
-        const actualizada = await res.json();
+    async function handleUpdate(
+        id: number,
+        data: CategoriaData
+    ) {
+        const actualizada = await updateCategoria(id, data);
         setCategorias(categorias.map((c) => (c.id === id ? actualizada : c)));
     }
 
     async function handleDelete(id: number) {
-        await fetch(`http://localhost:8000/categorias/${id}`, { method: "DELETE" });
+        await deleteCategoria(id);
         setCategorias(categorias.filter((c) => c.id !== id));
     }
 
@@ -66,3 +62,7 @@ export function useCategorias() {
         handleDelete,
     };
 }
+
+
+
+

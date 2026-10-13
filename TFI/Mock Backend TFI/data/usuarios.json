@@ -4,7 +4,7 @@
     "nombre": "Administrador General",
     "dni": "10000001",
     "email": "admin@107.com",
-    "rol": "ADMIN",
+    "rol": "ADMINISTRADOR",
     "activo": true
   },
   {
@@ -24,29 +24,35 @@
     "activo": true
   },
   {
+    "id": 4,
     "nombre": "Enfermero German Ruiz",
     "dni": "30000001",
     "email": "gruiz@107.com",
     "rol": "ENFERMERO",
-    "activo": true,
-    "id": 4
+    "activo": true
   },
   {
+    "id": 5,
     "nombre": "Administrador Matias Carro",
+    "dni": "50000001",
     "email": "matiascarro@mail.com",
-    "rol": "ADMIN",
-    "id": 5
+    "rol": "ADMINISTRADOR",
+    "activo": true
   },
   {
+    "id": 6,
     "nombre": "Enfermero Emiliano",
-    "email": "Carro",
+    "dni": "60000001",
+    "email": "emiliano@107.com",
     "rol": "ENFERMERO",
-    "id": 6
+    "activo": true
   },
   {
-    "nombre": "Ezequiel ",
+    "id": 7,
+    "nombre": "Ezequiel",
+    "dni": "70000001",
     "email": "eze@mail.com",
     "rol": "ENFERMERO",
-    "id": 7
+    "activo": true
   }
 ]

@@ -2,11 +2,13 @@
   {
     "id": 1,
     "patente": "AA123BB",
-    "disponible": true
+    "disponible": true,
+    "insumos": []
   },
   {
     "id": 2,
     "patente": "AC456DD",
-    "disponible": true
+    "disponible": true,
+    "insumos": []
   }
 ]

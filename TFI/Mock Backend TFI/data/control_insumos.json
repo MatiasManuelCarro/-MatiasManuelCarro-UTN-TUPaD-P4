@@ -15,7 +15,6 @@
     "cantidad_restockeo": 0,
     "cantidad_egreso": null
   },
-
   {
     "id": 3,
     "turno_id": 2,
@@ -32,7 +31,6 @@
     "cantidad_restockeo": 20,
     "cantidad_egreso": 150
   },
-
   {
     "id": 5,
     "turno_id": 3,

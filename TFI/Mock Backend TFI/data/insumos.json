@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "nombre": "Gasas estériles",
+    "categoriaId": 3,
+    "categoria": "Descartables",
+    "puntoControl": 20,
+    "esCritico": false
+  },
+  {
+    "id": 2,
+    "nombre": "Analgésicos",
+    "categoriaId": 1,
+    "categoria": "Medicamentos",
+    "puntoControl": 10,
+    "esCritico": true
+  },
+  {
+    "id": 3,
+    "nombre": "Oxígeno portátil",
+    "categoriaId": 2,
+    "categoria": "Oxígeno",
+    "puntoControl": 5,
+    "esCritico": true
+  },
+  {
+    "id": 4,
+    "nombre": "Guantes descartables",
+    "categoriaId": 3,
+    "categoria": "Descartables",
+    "puntoControl": 50,
+    "esCritico": false
+  },
+  {
+    "id": 5,
+    "nombre": "Suero fisiológico",
+    "categoriaId": 1,
+    "categoria": "Medicamentos",
+    "puntoControl": 15,
+    "esCritico": false
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "fecha": "2026-10-09",
+    "horario": "MANIANA",
+    "estado": "PROGRAMADO",
+    "chofer": "Carlos López",
+    "medico": "Dra. Martínez",
+    "ambulancia": {
+      "id": 1
+    },
+    "enfermero": {
+      "id": 2
+    },
+    "admin": {
+      "id": 1
+    },
+    "observacionesIngreso": null,
+    "observacionesEgreso": null,
+    "controlInsumos": []
+  },
+  {
+    "id": 2,
+    "fecha": "2026-10-09",
+    "horario": "TARDE",
+    "estado": "EN_CURSO",
+    "chofer": "Luis Fernández",
+    "medico": "Dr. Ruiz",
+    "ambulancia": {
+      "id": 2
+    },
+    "enfermero": {
+      "id": 3
+    },
+    "admin": {
+      "id": 1
+    },
+    "observacionesIngreso": "Oxígeno justo, revisar",
+    "observacionesEgreso": null,
+    "controlInsumos": []
+  },
+  {
+    "id": 3,
+    "fecha": "2026-10-08",
+    "horario": "NOCHE",
+    "estado": "FINALIZADO",
+    "chofer": "Mario Díaz",
+    "medico": "Dra. Torres",
+    "ambulancia": {
+      "id": 1
+    },
+    "enfermero": {
+      "id": 2
+    },
+    "admin": {
+      "id": 1
+    },
+    "observacionesIngreso": "Todo OK",
+    "observacionesEgreso": "Se usaron gasas y analgésicos",
+    "controlInsumos": []
+  },
+  {
+    "id": 4,
+    "fecha": "2026-10-12",
+    "horario": "NOCHE",
+    "estado": "PROGRAMADO",
+    "chofer": "Mauro Gonzales",
+    "medico": "Dr. Marcos Gutierrez",
+    "ambulancia": {
+      "id": 2
+    },
+    "enfermero": {
+      "id": 2
+    },
+    "admin": {
+      "id": 1
+    },
+    "observacionesIngreso": null,
+    "observacionesEgreso": null,
+    "controlInsumos": []
+  }
+]

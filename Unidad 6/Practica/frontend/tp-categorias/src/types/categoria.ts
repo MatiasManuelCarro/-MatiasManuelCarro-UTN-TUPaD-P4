@@ -3,3 +3,8 @@ export interface Categoria {
     nombre: string;
     descripcion: string;
 }
+
+export type CategoriaData = {
+    nombre: string;
+    descripcion: string;
+};

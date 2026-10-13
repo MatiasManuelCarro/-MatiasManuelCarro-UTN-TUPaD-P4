@@ -20,27 +20,31 @@ export default function CategoriaModal({ abierta, categoria, onClose, onSubmit }
     }
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center"  onClick={onClose}>
-            <div className="bg-white p-6 rounded shadow w-80">
-                <h2 className="text-lg font-bold mb-4">
+
+        //onClick={onClose} -> cierra al hacer click en el overlay 
+        <div className="modal-overlay fixed inset-0 bg-black/40 flex justify-center items-center" onClick={onClose}>
+            <div className="modal-box bg-white p-6 rounded shadow w-80"
+                //stop propagation evita que cierre el form de nueva categoria
+                onClick={(e) => e.stopPropagation()}>
+                <h2 className="modal-title text-lg font-bold mb-4">
                     {categoria ? "Editar Categoría" : "Nueva Categoría"}
                 </h2>
 
                 <input
-                    className="border p-2 w-full mb-2"
+                    className="modal-input border p-2 w-full mb-2"
                     placeholder="Nombre"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
                 />
 
                 <input
-                    className="border p-2 w-full mb-4"
+                    className="modal-input border p-2 w-full mb-4"
                     placeholder="Descripción"
                     value={descripcion}
                     onChange={(e) => setDescripcion(e.target.value)}
                 />
 
-                <div className="flex justify-end gap-2">
+                <div className="modal-actions flex justify-end gap-2">
                     <button className="px-3 py-1 bg-gray-300 rounded" onClick={onClose}>
                         Cancelar
                     </button>
