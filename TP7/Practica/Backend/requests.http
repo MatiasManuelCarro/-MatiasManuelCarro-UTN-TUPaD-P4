@@ -33,3 +33,36 @@ Content-Type: application/json
 
 ### Listar asociaciones
 GET http://127.0.0.1:8000/producto-categoria
+
+
+### Intentar asociar un producto que NO existe
+POST http://127.0.0.1:8000/producto-categoria
+Content-Type: application/json
+
+{
+  "producto_id": 999,
+  "categoria_id": 1,
+  "es_principal": false
+}
+
+
+### Intentar asociar una categoría que NO existe
+POST http://127.0.0.1:8000/producto-categoria
+Content-Type: application/json
+
+{
+  "producto_id": 1,
+  "categoria_id": 999,
+  "es_principal": false
+}
+
+
+### Intentar crear una relación que ya existe
+POST http://127.0.0.1:8000/producto-categoria
+Content-Type: application/json
+
+{
+  "producto_id": 1,
+  "categoria_id": 1,
+  "es_principal": false
+}
