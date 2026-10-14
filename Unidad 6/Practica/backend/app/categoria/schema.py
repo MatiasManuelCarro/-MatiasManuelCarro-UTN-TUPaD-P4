@@ -1,5 +1,5 @@
 
-from sqlmodel import Field, SQLModel
+from SQLModel import Field, SQLModel
 
 
 class CategoriaCreate(SQLModel):
