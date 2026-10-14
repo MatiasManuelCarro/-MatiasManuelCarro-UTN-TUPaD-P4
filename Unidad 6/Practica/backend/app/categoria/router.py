@@ -12,6 +12,7 @@ from app.core.database import SessionDep
 
 router = APIRouter(prefix="/categorias", tags=["Categorías"])
 
+# ! TODO: hacer que en caso de error -> devuelva 404
 
 @router.post("/", response_model=CategoriaPublic, status_code=status.HTTP_201_CREATED)
 def alta_categoria(categoria: CategoriaCreate, session: SessionDep):
