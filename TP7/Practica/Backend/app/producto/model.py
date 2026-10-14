@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from app.producto_categoria.model import ProductoCategoria
-from sqlalchemy import ARRAY, Column, DateTime, String
+from sqlalchemy import ARRAY, Boolean, Column, DateTime, Numeric, String, Text
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -18,16 +18,28 @@ class Producto(SQLModel, table=True):
         sa_column=Column(String(150), nullable=False)
     )
 
-    descripcion: str | None = None
+    descripcion: str | None = Field(
+        default=None,
+        sa_column=Column(String, nullable=True)
+    )
 
-    precio_base: float = Field(ge=0)
+    precio_base: float = Field(
+        ge=0,
+        sa_column=Column(
+            Numeric(10, 2),   # DECIMAL(10,2)
+            nullable=False
+        )
+    )
 
     imagenes_url: list[str] | None = Field(
         default=None,
-        sa_column=Column(ARRAY(String))
+        sa_column=Column(ARRAY(Text))   # TEXT[]
     )
 
-    disponible: bool = Field(default=True)
+    disponible: bool = Field(
+        default=True,
+        sa_column=Column(Boolean, nullable=False, default=True)
+    )
 
     created_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

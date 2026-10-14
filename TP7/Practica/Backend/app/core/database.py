@@ -1,16 +1,20 @@
+import os
 from typing import Annotated
 
+from dotenv import load_dotenv
 from fastapi import Depends
 from sqlmodel import Session, SQLModel, create_engine
 
-# URL de conexión a PostgreSQL
-DATABASE_URL = "postgresql://postgres:1234@localhost:5432/tp_unidad_7"
+# Cargar variables de entorno
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(
     DATABASE_URL,
-    echo=True,            # mSQL en consola 
+    echo=True,
+    pool_pre_ping=True
 )
-
 
 # Sesión de SQLModel
 def get_session():

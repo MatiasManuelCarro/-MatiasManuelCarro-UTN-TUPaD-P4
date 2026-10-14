@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 
 class CategoriaCreate(SQLModel):
     nombre: str
-    descripcion: str | None = None
+    descripcion: str = "0"
 
 
 class CategoriaUpdate(SQLModel):

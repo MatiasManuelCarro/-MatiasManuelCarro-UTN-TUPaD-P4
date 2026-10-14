@@ -19,7 +19,11 @@ def crear_categoria(session: Session, data: CategoriaCreate) -> Categoria:
             detail=f"Ya existe categoría con nombre: {data.nombre}",
         )
 
-    nueva = Categoria(**data.model_dump())
+    payload = data.model_dump()
+    if payload.get("descripcion") is None:
+        payload["descripcion"] = "0"
+
+    nueva = Categoria(**payload)
     session.add(nueva)
     session.commit()
     session.refresh(nueva)

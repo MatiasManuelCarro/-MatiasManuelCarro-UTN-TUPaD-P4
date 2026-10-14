@@ -7,7 +7,9 @@ from sqlmodel import Session, select
 
 
 def crear_producto(session: Session, data: ProductoCreate) -> Producto:
-    nuevo = Producto(**data.model_dump())
+    payload = data.model_dump()
+
+    nuevo = Producto(**payload)
     session.add(nuevo)
     session.commit()
     session.refresh(nuevo)
@@ -64,3 +66,4 @@ def eliminar_producto(session: Session, producto_id: int) -> None:
     producto.deleted_at = datetime.now(timezone.utc)
     session.add(producto)
     session.commit()
+
