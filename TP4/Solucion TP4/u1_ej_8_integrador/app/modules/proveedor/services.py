@@ -2,7 +2,7 @@ from fastapi import HTTPException
 
 from .schemas import ProveedorCreate, ProveedorRead
 
-#Mockup de proveedores en la BD 
+#Mockup de proveedores en la BD para pruebas
 db_proveedores: list[ProveedorRead]=[
     ProveedorRead(id=1, codigo= "PROV-01", razon_social="desillas SA", cuit="27865565882", email="contacto@desillas.com", telefono="1165238469", activo=True),
     ProveedorRead(id=2, codigo="PROV-02", razon_social="Amoblamientos Garcia SRL", cuit="30715488921", email="ventas@amoblamientosgarcia.com", telefono="1145879632", activo=True),
@@ -15,7 +15,7 @@ def _validar_codigo_unico(codigo: str):
         if p.codigo.lower() == codigo.lower():
             raise HTTPException(
                 status_code=409,
-                detail="RN-02: Ya existe un proveedor con ese código"
+                detail="Ya existe un proveedor con ese código"
             )
 
 def crear(data: ProveedorCreate) -> ProveedorRead:
@@ -37,7 +37,7 @@ def actualizar_total(id: int, data: ProveedorCreate) -> ProveedorRead | None:
     # Reemplazo total: Requiere todos los campos validables (ProveedorCreate)
     proveedor = obtener_por_id(id)
     if not proveedor:
-        raise HTTPException(status_code=404, detail="RN-04: Proveedor no encontrado")
+        raise HTTPException(status_code=404, detail="Proveedor no encontrado")
 
     if data.codigo.lower() != proveedor.codigo.lower():
         _validar_codigo_unico(data.codigo)
@@ -53,11 +53,11 @@ def desactivar(id: int) -> ProveedorRead | None:
     # Borrado lógico: Solo altera el estado 'activo'
     proveedor = obtener_por_id(id)
     if not proveedor:
-        raise HTTPException(status_code=404, detail="RN-04: Proveedor no encontrado")
+        raise HTTPException(status_code=404, detail="Proveedor no encontrado")
     if proveedor.activo is False:
         raise HTTPException(
             status_code=409,
-            detail="RN-05: El proveedor ya está desactivado"
+            detail="El proveedor ya está desactivado"
         )
     p_dict = proveedor.model_dump()
     p_dict["activo"] = False

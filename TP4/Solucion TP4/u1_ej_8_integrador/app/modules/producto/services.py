@@ -1,8 +1,8 @@
-from typing import List, Optional
+
 from .schemas import ProductoCreate, ProductoRead
 
 # Simulamos que la BD guarda objetos tipo ProductoRead (con ID asignado)
-db_productos: List[ProductoRead] = []
+db_productos: list[ProductoRead] = []
 id_counter = 1
 
 
@@ -14,7 +14,7 @@ def crear(data: ProductoCreate) -> ProductoRead:
     return nuevo
 
 
-def obtener_todos(skip: int, limit: int) -> List[ProductoRead]:
+def obtener_todos(skip: int, limit: int) -> list[ProductoRead]:
     return db_productos[skip : skip + limit]
 
 
@@ -46,8 +46,8 @@ def desactivar(id: int) -> ProductoRead | None:
             return producto_actualizado
     return None
 
-
-def obtener_estado_stock(id: int) -> Optional[dict]:
+    # Borrado lógico: Solo altera el estado 'activo'
+def obtener_estado_stock(id: int) -> dict | None:
     producto = obtener_por_id(id)
     if not producto:
         return None

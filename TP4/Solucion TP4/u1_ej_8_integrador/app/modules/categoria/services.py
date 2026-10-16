@@ -1,8 +1,7 @@
-from typing import List, Optional
 from .schemas import CategoriaCreate, CategoriaRead
 
 # Simulamos algunos registros iniciales
-db_categorias: List[CategoriaRead] = [
+db_categorias: list[CategoriaRead] = [
     CategoriaRead(id=1, codigo="MUE-01", descripcion="Muebles de Oficina", activo=True),
     CategoriaRead(id=2, codigo="ELE-02", descripcion="Electrónica", activo=True),
 ]
@@ -17,18 +16,18 @@ def crear(data: CategoriaCreate) -> CategoriaRead:
     return nueva
 
 
-def obtener_todas(skip: int = 0, limit: int = 10) -> List[CategoriaRead]:
+def obtener_todas(skip: int = 0, limit: int = 10) -> list[CategoriaRead]:
     return db_categorias[skip : skip + limit]
 
 
-def obtener_por_id(id: int) -> Optional[CategoriaRead]:
+def obtener_por_id(id: int) -> CategoriaRead | None:
     for c in db_categorias:
         if c.id == id:
             return c
     return None
 
 
-def actualizar_total(id: int, data: CategoriaCreate) -> Optional[CategoriaRead]:
+def actualizar_total(id: int, data: CategoriaCreate) -> CategoriaRead | None:
     for index, c in enumerate(db_categorias):
         if c.id == id:
             actualizada = CategoriaRead(id=id, **data.model_dump())
@@ -37,7 +36,7 @@ def actualizar_total(id: int, data: CategoriaCreate) -> Optional[CategoriaRead]:
     return None
 
 
-def desactivar(id: int) -> Optional[CategoriaRead]:
+def desactivar(id: int) -> CategoriaRead | None:
     for index, c in enumerate(db_categorias):
         if c.id == id:
             c_dict = c.model_dump()

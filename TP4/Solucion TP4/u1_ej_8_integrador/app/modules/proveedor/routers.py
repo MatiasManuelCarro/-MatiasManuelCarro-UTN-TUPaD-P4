@@ -5,38 +5,35 @@ from . import schemas, services
 router = APIRouter(prefix="/proveedores", tags=["proveedores"])
 
 
-# ---------------------------------------------------------
+
 # ALTA DE PROVEEDOR
-# Método: POST | Endpoint: /proveedores | Estado: 201 Created
-# ---------------------------------------------------------
+# Endpoint: /proveedores 
 @router.post(
     "/", response_model=schemas.ProveedorRead, status_code=status.HTTP_201_CREATED
 )
 def alta_proveedor(proveedor: schemas.ProveedorCreate):
     return services.crear(proveedor)
 
-# ---------------------------------------------------------
+
 # OBTENER PROVEEDORES (Todos / Activos / Inactivos)
-# Método: GET | Endpoint: /proveedores | Estado: 200 OK
+# Endpoint: /proveedores 
 # Activos / inactivos:
 # GET /proveedores/?activo=true
 # GET /proveedores/?activo=false
-# ---------------------------------------------------------
 @router.get(
     "/", response_model=list[schemas.ProveedorRead], status_code=status.HTTP_200_OK
 )
 def listar_proveedores(
     activo: bool | None = Query(None, description="Filtra por estado (True=activos, False=inactivos, ausente=todos)"),
     skip: int = Query(0, ge=0), 
-    limit: int = Query(10, le=50)
+    limit: int = Query(10, ge=1, le=50)
 ):
     return services.obtener_proveedores(activo, skip, limit)
 
 
-# ---------------------------------------------------------
+
 # DETALLE DE PROVEEDOR
-# Método: GET | Endpoint: /proveedores/{id} | Estado: 200 OK
-# ---------------------------------------------------------
+# Método: GET | Endpoint: /proveedores/{id} 
 @router.get(
     "/{id}", response_model=schemas.ProveedorRead, status_code=status.HTTP_200_OK
 )
@@ -48,11 +45,9 @@ def detalle_proveedor(id: int = Path(..., gt=0)):
         )
     return proveedor
 
-# ---------------------------------------------------------
-# ACTUALIZACIÓN (Reemplazo Total)
-# Método: PUT | Endpoint: /proveedores/{id} | Estado: 200 OK
-# ---------------------------------------------------------
 
+# ACTUALIZACIÓN (Reemplazo Total)
+# Método: PUT | Endpoint: /proveedores/{id} 
 @router.put(
     "/{id}", response_model=schemas.ProveedorRead, status_code=status.HTTP_200_OK
 )
@@ -66,10 +61,9 @@ def actualizar_proveedor(proveedor: schemas.ProveedorCreate, id: int = Path(...,
     return actualizado
 
 
-# ---------------------------------------------------------
+
 # BORRADO LÓGICO
-# Método: PUT | Endpoint: /proveedores/{id}/desactivar | Estado: 200 OK
-# ---------------------------------------------------------
+# Método: PUT | Endpoint: /proveedores/{id}/desactivar 
 @router.put(
     "/{id}/desactivar",
     response_model=schemas.ProveedorRead,

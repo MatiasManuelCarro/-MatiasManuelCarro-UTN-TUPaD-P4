@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Path, Query, status
 
 from . import schemas, services
 
-
 router = APIRouter(prefix="/productos", tags=["Productos"])
+
 
 
 # ---------------------------------------------------------
@@ -41,6 +41,7 @@ def detalle_producto(id: int = Path(..., gt=0)):
     return producto
 
 
+
 # ---------------------------------------------------------
 # ACTUALIZACIÓN (Reemplazo Total)
 # Método: PUT | Endpoint: /productos/{id} | Estado: 200 OK
@@ -56,6 +57,7 @@ def actualizar_producto(producto: schemas.ProductoCreate, id: int = Path(..., gt
             status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado"
         )
     return actualizado
+
 
 
 # ---------------------------------------------------------
@@ -76,15 +78,11 @@ def borrado_logico(id: int = Path(..., gt=0)):
     return desactivado
 
 
+
 # ---------------------------------------------------------
 # CONSULTAR STOCK (Lógica de Negocio)
 # Método: GET | Endpoint: /productos/{id}/stock | Estado: 200 OK
 # ---------------------------------------------------------
-@router.get(
-    "/{id}/stock",
-    response_model=schemas.ProductoStockResponse,
-    status_code=status.HTTP_200_OK,
-)
 @router.get("/{id}/stock", response_model=schemas.ProductoStockResponse)
 def consultar_stock(id: int = Path(..., gt=0)):
     resultado = services.obtener_estado_stock(id)  # Llamada al servicio

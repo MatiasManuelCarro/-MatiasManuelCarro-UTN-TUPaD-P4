@@ -1,7 +1,5 @@
 from pydantic import BaseModel, Field
 
-from typing import Optional
-
 
 class ProductoBase(BaseModel):
     nombre: str = Field(..., example="Silla de Oficina")
@@ -18,12 +16,12 @@ class ProductoCreate(ProductoBase):
 
 class ProductoUpdate(BaseModel):
     # Opcional: Se usa si en el futuro se implementa PATCH (actualización parcial)
-    nombre: Optional[str] = None
-    categoria: Optional[str] = Field(None, pattern=r"^[A-Z]{3}-\d{2}$")
-    precio: Optional[float] = Field(None, gt=0)
-    stock: Optional[int] = Field(None, ge=0)
-    stock_minimo: Optional[int] = Field(None, ge=0)
-    activo: Optional[bool] = None
+    nombre: str | None = None
+    categoria: str | None = Field(None, pattern=r"^[A-Z]{3}-\d{2}$")
+    precio: float | None = Field(None, gt=0)
+    stock: int | None = Field(None, ge=0)
+    stock_minimo: int | None = Field(None, ge=0)
+    activo: bool | None = None
 
 
 class ProductoRead(ProductoBase):
