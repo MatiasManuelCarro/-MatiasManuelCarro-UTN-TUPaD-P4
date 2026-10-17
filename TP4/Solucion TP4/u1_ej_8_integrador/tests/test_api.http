@@ -58,7 +58,6 @@ GET {{baseUrl}}/productos/?skip=0&limit=5
 GET {{baseUrl}}/productos/1
 
 ### 9. Actualizar Producto (Reemplazo total)
-# Bajamos el stock a 3 para forzar la alerta de "bajo_stock_minimo"
 PUT {{baseUrl}}/productos/1
 Content-Type: application/json
 
@@ -72,19 +71,15 @@ Content-Type: application/json
 }
 
 ### 10. Consultar Alerta de Stock (Prueba: Lógica de negocio dinámica)
-# Debería retornar "bajo_stock_minimo": true debido al PUT anterior
 GET {{baseUrl}}/productos/1/stock
 
 ### 11. Desactivar Producto (Borrado Lógico)
 PUT {{baseUrl}}/productos/1/desactivar
 
-### 12. Detalle Producto Inexistente (Prueba: Manejo de Errores 404)
+### 12. Detalle Producto Inexistente (Error 404)
 GET {{baseUrl}}/productos/99
 
-### 13. Producto Inválido (Prueba: Error 422 automático)
-# Falla porque: 
-# - La categoría no cumple el Regex.
-# - El precio es negativo.
+### 13. Producto Inválido (Error 422)
 POST {{baseUrl}}/productos/
 Content-Type: application/json
 
@@ -103,8 +98,6 @@ Content-Type: application/json
 
 
 ### 1. ALTA DE PROVEEDOR (POST)
-
-### Funcionamiento ok: Crear proveedor correctamente (201 Created)
 POST {{baseUrl}}/proveedores/
 Content-Type: application/json
 
@@ -117,8 +110,8 @@ Content-Type: application/json
   "activo": true
 }
 
-### Escenario Error: Falla validación de Pydantic (422 Unprocessable Entity)
-# Razón social menor a 3 caracteres y CUIT menor a 11
+### Falla validación de Pydantic (422 Unprocessable Entity)
+
 POST {{baseUrl}}/proveedores/
 Content-Type: application/json
 
@@ -146,7 +139,6 @@ GET {{baseUrl}}/proveedores/?activo=false
 
 
 ### Paginación (200 OK)
-# Saltea el primero y trae un máximo de 2
 GET {{baseUrl}}/proveedores/?skip=1&limit=2
 
 
@@ -191,7 +183,6 @@ Content-Type: application/json
 ### 5. BORRADO LÓGICO (PUT /{id}/desactivar)
 
 ### Desactivar proveedor (200 OK)
-# Debería devolver el proveedor 2 con el campo activo en false
 PUT {{baseUrl}}/proveedores/2/desactivar
 
 ### Prueba - mostrar activos para verificar que se elimino 
@@ -199,3 +190,20 @@ GET {{baseUrl}}/proveedores/?activo=true
 
 ### Desactivar proveedor inexistente (404 Not Found)
 PUT {{baseUrl}}/proveedores/999/desactivar
+
+
+### 6. CONFLICTO POR CÓDIGO DUPLICADO (409 Conflict)
+### Regla RN-02: El código del proveedor debe ser único
+
+PUT {{baseUrl}}/proveedores/1
+Content-Type: application/json
+
+{
+  "codigo": "PROV-02",
+  "razon_social": "Proveedor Duplicado SA",
+  "cuit": "27865565882",
+  "email": "duplicado@proveedor.com",
+  "telefono": "1165238469",
+  "activo": true
+}
+
