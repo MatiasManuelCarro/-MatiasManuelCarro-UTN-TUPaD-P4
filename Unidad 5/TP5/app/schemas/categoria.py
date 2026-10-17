@@ -1,6 +1,6 @@
 from sqlmodel import Field, SQLModel
 
-from models.categoria import CategoriaBase
+from app.models.categoria import CategoriaBase
 
 
 class CategoriaCreate(CategoriaBase):
@@ -17,5 +17,3 @@ class CategoriaUpdate(SQLModel):
     activo: bool | None = None
 
 
-# class CategoriaRead(CategoriaBase):
-#     id: int

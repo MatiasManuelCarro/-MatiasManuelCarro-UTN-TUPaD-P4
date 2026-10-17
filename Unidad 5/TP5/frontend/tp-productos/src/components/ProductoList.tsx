@@ -1,5 +1,5 @@
-import type { Producto } from "../types/producto"
-import ProductoCard from "./ProductoCard"
+import type { Producto } from "../types/producto";
+import ProductoCard from "./ProductoCard";
 
 export default function ProductoList({ productos }: { productos: Producto[] }) {
   return (
@@ -8,5 +8,5 @@ export default function ProductoList({ productos }: { productos: Producto[] }) {
         <ProductoCard key={p.id} producto={p} />
       ))}
     </div>
-  )
+  );
 }

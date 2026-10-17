@@ -1,7 +1,8 @@
-from database import SessionDep
 from fastapi import APIRouter, Path, Query, status
-from schemas import CategoriaCreate, CategoriaPublic, CategoriaUpdate
-from service.categoria_services import (
+
+from app.database import SessionDep
+from app.schemas.categoria import CategoriaCreate, CategoriaPublic, CategoriaUpdate
+from app.service.categoria_services import (
     actualizar_categoria,
     crear_categoria,
     desactivar_categoria,

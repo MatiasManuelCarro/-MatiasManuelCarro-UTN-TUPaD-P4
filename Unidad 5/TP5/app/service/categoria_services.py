@@ -1,7 +1,8 @@
 from fastapi import HTTPException, status
-from models.categoria import Categoria
-from schemas.categoria import CategoriaCreate, CategoriaUpdate
 from sqlmodel import Session, select
+
+from app.models.categoria import Categoria
+from app.schemas.categoria import CategoriaCreate, CategoriaUpdate
 
 
 def crear_categoria(session: Session, data: CategoriaCreate) -> Categoria:
