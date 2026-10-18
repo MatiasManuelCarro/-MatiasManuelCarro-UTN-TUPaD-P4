@@ -83,6 +83,72 @@ Content-Type: application/json
   "categorias": [1]
 }
 
+### Monitor
+POST http://127.0.0.1:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Monitor ASUS TUF 27''",
+  "descripcion": "IPS 165Hz, 1ms, FreeSync Premium",
+  "precio_base": 320000,
+  "imagenes_url": ["https://example.com/asus27.jpg"],
+  "disponible": true,
+  "categorias": [1]
+}
+
+### teclado
+POST http://127.0.0.1:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Teclado Redragon Kumara K552",
+  "descripcion": "Switches Outemu Blue, RGB",
+  "precio_base": 45000,
+  "imagenes_url": ["https://example.com/kumara.jpg"],
+  "disponible": true,
+  "categorias": [1]
+}
+
+###
+POST http://127.0.0.1:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Mouse Logitech G502 HERO",
+  "descripcion": "Sensor HERO 25K, 11 botones programables",
+  "precio_base": 65000,
+  "imagenes_url": ["https://example.com/g502.jpg"],
+  "disponible": true,
+  "categorias": [1]
+}
+
+###
+POST http://127.0.0.1:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "SSD Samsung 990 Pro 1TB",
+  "descripcion": "NVMe PCIe 4.0, lectura 7450MB/s",
+  "precio_base": 180000,
+  "imagenes_url": ["https://example.com/990pro.jpg"],
+  "disponible": true,
+  "categorias": [1]
+}
+
+###
+POST http://127.0.0.1:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "NVIDIA RTX 4070 Ti SUPER",
+  "descripcion": "16GB GDDR6X, DLSS 3.5",
+  "precio_base": 950000,
+  "imagenes_url": ["https://example.com/4070tisuper.jpg"],
+  "disponible": true,
+  "categorias": [1]
+}
+
+
 ###
 ### Listar productos (paginado + filtros)
 GET http://127.0.0.1:8000/productos?offset=0&limit=10&nombre=note&incluir_inactivos=false
