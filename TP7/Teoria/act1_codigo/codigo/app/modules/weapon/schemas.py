@@ -1,11 +1,9 @@
-from typing import Optional, List
-
 from sqlmodel import SQLModel
 
 
 class WeaponBase(SQLModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class WeaponCreate(WeaponBase):
@@ -17,11 +15,11 @@ class WeaponRead(WeaponBase):
 
 
 class WeaponUpdate(SQLModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
  
 
 #Paginado
 class WeaponPaginatedResponse(SQLModel):
     total: int
-    items: List[WeaponRead] 
+    items: list[WeaponRead] 

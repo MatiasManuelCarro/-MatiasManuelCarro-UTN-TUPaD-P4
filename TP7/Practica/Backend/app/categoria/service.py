@@ -1,7 +1,11 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.categoria.model import Categoria
-from app.categoria.schema import CategoriaCreate, CategoriaUpdate
+from app.categoria.schema import (
+    CategoriaCreate,
+    CategoriaPaginatedResponse,
+    CategoriaUpdate,
+)
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
@@ -19,25 +23,48 @@ def crear_categoria(session: Session, data: CategoriaCreate) -> Categoria:
             detail=f"Ya existe categoría con nombre: {data.nombre}",
         )
 
-    payload = data.model_dump()
-    if payload.get("descripcion") is None:
-        payload["descripcion"] = "0"
+    campos  = data.model_dump()
+    if campos .get("descripcion") is None:
+        campos ["descripcion"] = ""
 
-    nueva = Categoria(**payload)
+    nueva = Categoria(**campos )
     session.add(nueva)
     session.commit()
     session.refresh(nueva)
     return nueva
 
 
-def listar_categorias(session: Session, skip: int = 0, limit: int = 10) -> list[Categoria]:
-    query = (
-        select(Categoria)
-        .where(Categoria.deleted_at.is_(None))
-        .offset(skip)
-        .limit(limit)
+def listar_categorias(
+    session: Session,
+    offset: int,
+    limit: int,
+    nombre: str | None,
+    incluir_inactivos: bool
+) -> CategoriaPaginatedResponse:
+
+    # Base query
+    query = select(Categoria)
+
+    if not incluir_inactivos:
+        query = query.where(Categoria.deleted_at.is_(None))
+
+    if nombre:
+        query = query.where(Categoria.nombre.ilike(f"%{nombre}%"))
+
+    # Ejecutar una vez
+    resultados = session.exec(query).all()
+
+    total = len(resultados)
+
+    # Paginar manualmente
+    items = resultados[offset: offset + limit]
+
+    return CategoriaPaginatedResponse(
+        total=total,
+        items=items
     )
-    return session.exec(query).all()
+
+
 
 
 def obtener_categoria_por_id(session: Session, categoria_id: int) -> Categoria:
@@ -60,7 +87,7 @@ def actualizar_categoria(session: Session, categoria_id: int, data: CategoriaUpd
     cambios = data.model_dump(exclude_unset=True)
 
     categoria.sqlmodel_update(cambios)
-    categoria.updated_at = datetime.now(timezone.utc)
+    categoria.updated_at = datetime.now(UTC)
 
     session.add(categoria)
     session.commit()
@@ -83,6 +110,6 @@ def eliminar_categoria(session: Session, categoria_id: int) -> None:
             detail="No se puede eliminar la categoría porque tiene productos asociados",
         )
 
-    categoria.deleted_at = datetime.now(timezone.utc)
+    categoria.deleted_at = datetime.now(UTC)
     session.add(categoria)
     session.commit()

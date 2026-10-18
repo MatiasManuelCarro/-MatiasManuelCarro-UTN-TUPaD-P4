@@ -1,9 +1,9 @@
 from app.categoria.router import router as categoria_router
-from app.core.database import create_db_and_tables
+from app.core.database import SessionDep, create_db_and_tables
 from app.producto.router import router as producto_router
-from app.producto_categoria.router import router as producto_categoria_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 app = FastAPI()
 
@@ -25,4 +25,12 @@ app.add_middleware(
 # Routers del dominio Catálogo
 app.include_router(categoria_router)
 app.include_router(producto_router)
-app.include_router(producto_categoria_router)
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+@app.get("/health/db")
+def health_db(session: SessionDep):
+    session.exec(text("SELECT 1"))
+    return {"status": "ok"}

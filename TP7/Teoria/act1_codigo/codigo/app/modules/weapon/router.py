@@ -1,13 +1,11 @@
-from typing import Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
 from app.core.database import get_session
 from app.modules.weapon import service
 from app.modules.weapon.schemas import (
-    WeaponPaginatedResponse,
     WeaponCreate,
+    WeaponPaginatedResponse,
     WeaponRead,
     WeaponUpdate,
 )
@@ -16,7 +14,7 @@ router = APIRouter(prefix="/weapons", tags=["weapons"])
 
 
 @router.post("/", response_model=WeaponRead, status_code=201)
-def create_weapon(weapon: WeaponCreate, session: Session = Depends(get_session)):
+def create_weapon(weapon: WeaponCreate, session: Session = Depends(get_session)):  # noqa: B008
     return service.create_weapon(session, weapon)
 
 @router.get("/", response_model=WeaponPaginatedResponse)
@@ -24,7 +22,7 @@ def list_weapons(
     offset: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     name: str | None = None,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session),  # noqa: B008
 ):
     """
     Endpoint de listado de armas con soporte para:
@@ -83,7 +81,7 @@ def list_weapons(
 
 
 @router.get("/{weapon_id}", response_model=WeaponRead)
-def get_weapon(weapon_id: int, session: Session = Depends(get_session)):
+def get_weapon(weapon_id: int, session: Session = Depends(get_session)):  # noqa: B008
     weapon = service.get_weapon(session, weapon_id)
 
     if not weapon:
@@ -94,7 +92,7 @@ def get_weapon(weapon_id: int, session: Session = Depends(get_session)):
 
 @router.patch("/{weapon_id}", response_model=WeaponRead)
 def update_weapon(
-    weapon_id: int, data: WeaponUpdate, session: Session = Depends(get_session)
+    weapon_id: int, data: WeaponUpdate, session: Session = Depends(get_session)  # noqa: B008
 ):
     weapon = service.update_weapon(session, weapon_id, data)
 
@@ -105,6 +103,6 @@ def update_weapon(
 
 
 @router.delete("/{weapon_id}", status_code=204)
-def delete_weapon(weapon_id: int, session: Session = Depends(get_session)):
+def delete_weapon(weapon_id: int, session: Session = Depends(get_session)):  # noqa: B008
     if not service.delete_weapon(session, weapon_id):
         raise HTTPException(status_code=404, detail="Weapon not found")

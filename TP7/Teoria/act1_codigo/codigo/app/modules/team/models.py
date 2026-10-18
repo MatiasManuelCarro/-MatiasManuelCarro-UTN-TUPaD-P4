@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -21,18 +21,18 @@ class Team(SQLModel, table=True):
 
     __tablename__ = "team"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     headquarters: str
 
     # ── Relación 1:N ─────────────────────────────────────────────
     # back_populates='team' conecta con Hero.team
     # SQLModel carga la lista cuando se hace selectinload(Team.heroes)
-    heroes: List["Hero"] = Relationship(back_populates="team")
+    heroes: list["Hero"] = Relationship(back_populates="team")
 
     # ── Relación N:M via HeroTeamLink ────────────────────────────
     # back_populates='teams' conecta con Hero.teams
-    hero_links: List["Hero"] = Relationship(
+    hero_links: list["Hero"] = Relationship(
         back_populates="teams",
         link_model=HeroTeamLink,
     )

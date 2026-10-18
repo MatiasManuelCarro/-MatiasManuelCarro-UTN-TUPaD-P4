@@ -1,0 +1,68 @@
+### Crear categoría
+POST http://127.0.0.1:8000/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Electrónica"
+}
+
+### Listar categorías
+GET http://127.0.0.1:8000/categorias
+
+### Crear producto
+POST  http://127.0.0.1:8000/productos
+Content-Type: application/json
+
+{
+  "nombre": "Notebook Lenovo",
+  "descripcion": "Laptop 15 pulgadas",
+  "precio_base": 500000,
+  "disponible": true
+}
+### Listar productos
+GET http://127.0.0.1:8000/productos
+
+### Asociar producto con categoría
+POST http://127.0.0.1:8000/producto-categoria
+Content-Type: application/json
+
+{
+  "producto_id": 1,
+  "categoria_id": 1
+}
+
+### Listar asociaciones
+GET http://127.0.0.1:8000/producto-categoria
+
+
+### Intentar asociar un producto que NO existe
+POST http://127.0.0.1:8000/producto-categoria
+Content-Type: application/json
+
+{
+  "producto_id": 999,
+  "categoria_id": 1,
+  "es_principal": false
+}
+
+
+### Intentar asociar una categoría que NO existe
+POST http://127.0.0.1:8000/producto-categoria
+Content-Type: application/json
+
+{
+  "producto_id": 1,
+  "categoria_id": 999,
+  "es_principal": false
+}
+
+
+### Intentar crear una relación que ya existe
+POST http://127.0.0.1:8000/producto-categoria
+Content-Type: application/json
+
+{
+  "producto_id": 1,
+  "categoria_id": 1,
+  "es_principal": false
+}

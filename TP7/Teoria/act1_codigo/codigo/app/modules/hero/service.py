@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
@@ -17,7 +15,7 @@ def create_hero(session: Session, data: HeroCreate) -> Hero:
     return hero
 
 
-def get_heroes(session: Session) -> List[Hero]:
+def get_heroes(session: Session) -> list[Hero]:
     stmt = select(Hero).options(
         selectinload(Hero.weapon),
         selectinload(Hero.team),
@@ -26,7 +24,7 @@ def get_heroes(session: Session) -> List[Hero]:
     return list(session.exec(stmt).all())
 
 
-def get_hero(session: Session, hero_id: int) -> Optional[Hero]:
+def get_hero(session: Session, hero_id: int) -> Hero | None:
     stmt = (
         select(Hero)
         .where(Hero.id == hero_id)
@@ -41,7 +39,7 @@ def get_hero(session: Session, hero_id: int) -> Optional[Hero]:
 
 def update_hero(
     session: Session, hero_id: int, data: HeroUpdate
-) -> Optional[Hero]:
+) -> Hero | None:
     hero = session.get(Hero, hero_id)
     if not hero:
         return None
@@ -66,7 +64,7 @@ def delete_hero(session: Session, hero_id: int) -> bool:
 # ─── Operaciones N:M  Hero ↔ Team ─────────────────────────────────────────
 def add_hero_to_team(
     session: Session, hero_id: int, team_id: int
-) -> Optional[Hero]:
+) -> Hero | None:
     """Agrega un Hero a un Team via la tabla HeroTeamLink (N:M)."""
     hero = session.get(Hero, hero_id)
     team = session.get(Team, team_id)
@@ -92,7 +90,7 @@ def add_hero_to_team(
 
 def remove_hero_from_team(
     session: Session, hero_id: int, team_id: int
-) -> Optional[Hero]:
+) -> Hero | None:
     """Elimina el enlace N:M entre un Hero y un Team."""
     link = session.exec(
         select(HeroTeamLink).where(
@@ -109,7 +107,7 @@ def remove_hero_from_team(
     return get_hero(session, hero_id)
 
 
-def get_hero_teams(session: Session, hero_id: int) -> List[Team]:
+def get_hero_teams(session: Session, hero_id: int) -> list[Team]:
     """Retorna todos los Teams a los que pertenece un Hero (N:M)."""
     hero = get_hero(session, hero_id)
     if not hero:

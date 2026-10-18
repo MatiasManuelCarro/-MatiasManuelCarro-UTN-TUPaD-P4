@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from sqlmodel import SQLModel
 
 from app.modules.weapon.schemas import WeaponRead
@@ -9,28 +7,28 @@ from app.modules.weapon.schemas import WeaponRead
 class HeroBase(SQLModel):
     name: str
     secret_name: str
-    age: Optional[int] = None
+    age: int | None = None
 
 
 # ─── Request schemas ───────────────────────────────────────────────────────
 class HeroCreate(HeroBase):
-    team_id: Optional[int] = None      # 1:N  – asignar equipo principal
-    weapon_id: Optional[int] = None    # 1:1  – asignar arma
+    team_id: int | None = None      # 1:N  – asignar equipo principal
+    weapon_id: int | None = None    # 1:1  – asignar arma
 
 
 class HeroUpdate(SQLModel):
-    name: Optional[str] = None
-    secret_name: Optional[str] = None
-    age: Optional[int] = None
-    team_id: Optional[int] = None
-    weapon_id: Optional[int] = None
+    name: str | None = None
+    secret_name: str | None = None
+    age: int | None = None
+    team_id: int | None = None
+    weapon_id: int | None = None
 
 
 # ─── Response schemas ──────────────────────────────────────────────────────
 class HeroRead(HeroBase):
     id: int
-    team_id: Optional[int] = None
-    weapon_id: Optional[int] = None
+    team_id: int | None = None
+    weapon_id: int | None = None
 
 
 class TeamBasicRead(SQLModel):
@@ -42,9 +40,9 @@ class TeamBasicRead(SQLModel):
 
 class HeroReadFull(HeroRead):
     """Hero con todas sus relaciones anidadas."""
-    weapon: Optional[WeaponRead] = None
-    team: Optional[TeamBasicRead] = None
-    teams: List[TeamBasicRead] = []
+    weapon: WeaponRead | None = None
+    team: TeamBasicRead | None = None
+    teams: list[TeamBasicRead] = []
 
 
 # ─── Operaciones N:M ──────────────────────────────────────────────────────

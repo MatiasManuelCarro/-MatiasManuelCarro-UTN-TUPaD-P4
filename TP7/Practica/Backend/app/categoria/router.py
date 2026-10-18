@@ -1,4 +1,9 @@
-from app.categoria.schema import CategoriaCreate, CategoriaPublic, CategoriaUpdate
+from app.categoria.schema import (
+    CategoriaCreate,
+    CategoriaPaginatedResponse,
+    CategoriaPublic,
+    CategoriaUpdate,
+)
 from app.categoria.service import (
     actualizar_categoria,
     crear_categoria,
@@ -17,13 +22,16 @@ def alta_categoria(data: CategoriaCreate, session: SessionDep):
     return crear_categoria(session, data)
 
 
-@router.get("/", response_model=list[CategoriaPublic])
+@router.get("/", response_model=CategoriaPaginatedResponse)
 def obtener_categorias(
     session: SessionDep,
-    skip: int = Query(0, ge=0),
+    offset: int = Query(0, ge=0),
     limit: int = Query(10, le=50),
+    nombre: str | None = Query(None),
+    incluir_inactivos: bool = Query(False),
 ):
-    return listar_categorias(session, skip, limit)
+    return listar_categorias(session, offset, limit, nombre, incluir_inactivos)
+
 
 
 @router.get("/{categoria_id}", response_model=CategoriaPublic)
@@ -31,7 +39,13 @@ def detalle_categoria(session: SessionDep, categoria_id: int = Path(..., gt=0)):
     return obtener_categoria_por_id(session, categoria_id)
 
 
-@router.patch("/{categoria_id}", response_model=CategoriaPublic)
+@router.get("/{categoria_id}/productos", response_model=list[int])
+def productos_de_categoria(session: SessionDep, categoria_id: int = Path(..., gt=0)):
+    categoria = obtener_categoria_por_id(session, categoria_id)
+    return [p.id for p in categoria.productos]
+
+
+@router.put("/{categoria_id}", response_model=CategoriaPublic)
 def modificar_categoria(
     categoria_id: int = Path(..., gt=0),
     data: CategoriaUpdate = None,

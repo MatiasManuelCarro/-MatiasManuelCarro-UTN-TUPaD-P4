@@ -1,6 +1,4 @@
-from typing import List, Optional, Tuple
-
-from sqlmodel import Session, select, func
+from sqlmodel import Session, func, select
 
 from app.modules.weapon.models import Weapon
 from app.modules.weapon.schemas import WeaponCreate, WeaponUpdate
@@ -18,8 +16,8 @@ def get_weapons(
     session: Session,
     offset: int = 0,
     limit: int = 100,
-    name: Optional[str] = None,
-) -> Tuple[int, List[Weapon]]:
+    name: str | None = None,
+) -> tuple[int, list[Weapon]]:
     """
     Obtiene un listado paginado de armas desde la base de datos.
 
@@ -91,13 +89,13 @@ def get_weapons(
     return total, list(results)
 
 
-def get_weapon(session: Session, weapon_id: int) -> Optional[Weapon]:
+def get_weapon(session: Session, weapon_id: int) -> Weapon | None:
     return session.get(Weapon, weapon_id)
 
 
 def update_weapon(
     session: Session, weapon_id: int, data: WeaponUpdate
-) -> Optional[Weapon]:
+) -> Weapon | None:
     weapon = session.get(Weapon, weapon_id)
     if not weapon:
         return None

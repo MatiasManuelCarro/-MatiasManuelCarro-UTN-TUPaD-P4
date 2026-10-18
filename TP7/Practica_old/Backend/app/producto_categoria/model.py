@@ -1,0 +1,18 @@
+from datetime import UTC, datetime
+
+from sqlalchemy import Boolean, Column, DateTime
+from sqlmodel import Field, SQLModel
+
+
+class ProductoCategoria(SQLModel, table=True):
+    producto_id: int = Field(primary_key=True, foreign_key="producto.id")
+    categoria_id: int = Field(primary_key=True, foreign_key="categoria.id")
+
+    es_principal: bool = Field(
+        default=False,
+        sa_column=Column(Boolean, nullable=False, default=False)
+    )
+
+    created_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    )

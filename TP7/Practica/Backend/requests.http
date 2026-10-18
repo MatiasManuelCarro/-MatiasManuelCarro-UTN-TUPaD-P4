@@ -1,68 +1,107 @@
+
+### ============================
+### HEALTH CHECK
+### ============================
+
+GET http://127.0.0.1:8000/health
+
+###
+GET http://127.0.0.1:8000/health/db
+
+
+### ============================
+### CATEGORÍAS
+### ============================
+
 ### Crear categoría
 POST http://127.0.0.1:8000/categorias
 Content-Type: application/json
 
 {
-  "nombre": "Electrónica"
+  "nombre": "Electrónica",
+  "descripcion": "Dispositivos y tecnología"
 }
 
-### Listar categorías
-GET http://127.0.0.1:8000/categorias
+### Crear categoría
+POST http://127.0.0.1:8000/categorias
+Content-Type: application/json
 
-### Crear producto
-POST  http://127.0.0.1:8000/productos
+{
+  "nombre": "Notebooks",
+  "descripcion": "Notebooks AMD e Intel"
+}
+
+
+###
+### Listar categorías (paginado + filtros)
+GET http://127.0.0.1:8000/categorias?offset=0&limit=10&nombre=elec&incluir_inactivos=false
+
+###
+### Obtener categoría por ID
+GET http://127.0.0.1:8000/categorias/1
+
+###
+### Actualizar categoría (PUT obligatorio)
+PUT http://127.0.0.1:8000/categorias/1
+Content-Type: application/json
+
+{
+  "nombre": "Electrónica y Audio",
+  "descripcion": "Tecnología y sonido"
+}
+
+###
+### Eliminar categoría (soft delete)
+DELETE http://127.0.0.1:8000/categorias/1
+
+
+### ============================
+### RELACIÓN N:M — CONSULTA
+### ============================
+
+### Productos de una categoría
+GET http://127.0.0.1:8000/categorias/1/productos
+
+### Categorías de un producto
+GET http://127.0.0.1:8000/productos/1/categorias
+
+
+### ============================
+### PRODUCTOS
+### ============================
+
+### Crear producto con categorías
+POST http://127.0.0.1:8000/productos
 Content-Type: application/json
 
 {
   "nombre": "Notebook Lenovo",
-  "descripcion": "Laptop 15 pulgadas",
-  "precio_base": 500000,
-  "disponible": true
+  "descripcion": "Ryzen 5, 16GB RAM",
+  "precio_base": 850000,
+  "imagenes_url": ["https://example.com/notebook.jpg"],
+  "disponible": true,
+  "categorias": [1]
 }
-### Listar productos
-GET http://127.0.0.1:8000/productos
 
-### Asociar producto con categoría
-POST http://127.0.0.1:8000/producto-categoria
+###
+### Listar productos (paginado + filtros)
+GET http://127.0.0.1:8000/productos?offset=0&limit=10&nombre=note&incluir_inactivos=false
+
+###
+### Obtener producto por ID
+GET http://127.0.0.1:8000/productos/1
+
+###
+### Actualizar producto (PUT obligatorio)
+PUT http://127.0.0.1:8000/productos/1
 Content-Type: application/json
 
 {
-  "producto_id": 1,
-  "categoria_id": 1
+  "nombre": "Notebook Lenovo Pro",
+  "precio_base": 920000,
+  "categorias": [1, 2]
 }
 
-### Listar asociaciones
-GET http://127.0.0.1:8000/producto-categoria
-
-
-### Intentar asociar un producto que NO existe
-POST http://127.0.0.1:8000/producto-categoria
-Content-Type: application/json
-
-{
-  "producto_id": 999,
-  "categoria_id": 1,
-  "es_principal": false
-}
-
-
-### Intentar asociar una categoría que NO existe
-POST http://127.0.0.1:8000/producto-categoria
-Content-Type: application/json
-
-{
-  "producto_id": 1,
-  "categoria_id": 999,
-  "es_principal": false
-}
-
-
-### Intentar crear una relación que ya existe
-POST http://127.0.0.1:8000/producto-categoria
-Content-Type: application/json
-
-{
-  "producto_id": 1,
-  "categoria_id": 1,
-  "es_principal": false
-}
+###
+### Eliminar producto (soft delete)
+DELETE http://127.0.0.1:8000/productos/1

@@ -2,11 +2,13 @@ from sqlmodel import Field, SQLModel
 
 
 class ProductoCreate(SQLModel):
-    nombre: str = Field(min_length=2)
+    nombre: str = Field(min_length=1)
     descripcion: str | None = None
     precio_base: float = Field(ge=0)
     imagenes_url: list[str] | None = None
     disponible: bool = True
+    # asociacion N:M a categoria o categorias
+    categorias: list[int] = []
 
 
 class ProductoUpdate(SQLModel):
@@ -15,6 +17,9 @@ class ProductoUpdate(SQLModel):
     precio_base: float | None = Field(default=None, ge=0)
     imagenes_url: list[str] | None = None
     disponible: bool | None = None
+    
+    # ASociar categorias al actualizar el producto
+    categorias: list[int] | None = None
 
 
 class ProductoPublic(SQLModel):
@@ -24,6 +29,13 @@ class ProductoPublic(SQLModel):
     precio_base: float
     imagenes_url: list[str] | None
     disponible: bool
+    
+    # Lista de IDs de categorías
+    categorias: list[int]
 
     class Config:
         orm_mode = True
+
+class ProductoPaginatedResponse(SQLModel):
+    total: int
+    items: list[ProductoPublic]

@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
@@ -15,7 +13,7 @@ def create_team(session: Session, data: TeamCreate) -> Team:
     return team
 
 
-def get_teams(session: Session) -> List[Team]:
+def get_teams(session: Session) -> list[Team]:
     stmt = select(Team).options(
         selectinload(Team.heroes),
         selectinload(Team.hero_links),
@@ -23,7 +21,7 @@ def get_teams(session: Session) -> List[Team]:
     return list(session.exec(stmt).all())
 
 
-def get_team(session: Session, team_id: int) -> Optional[Team]:
+def get_team(session: Session, team_id: int) -> Team | None:
     stmt = (
         select(Team)
         .where(Team.id == team_id)
@@ -37,7 +35,7 @@ def get_team(session: Session, team_id: int) -> Optional[Team]:
 
 def update_team(
     session: Session, team_id: int, data: TeamUpdate
-) -> Optional[Team]:
+) -> Team | None:
     team = session.get(Team, team_id)
     if not team:
         return None

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field, Relationship, SQLModel
@@ -54,24 +54,23 @@ class Hero(SQLModel, table=True):
 
     __tablename__ = "hero"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     secret_name: str
-    age: Optional[int] = Field(default=None, index=True)
+    age: int | None = Field(default=None, index=True)
 
     # ── Relación 1:1 con Weapon ───────────────────────────────────
     # La FK vive aquí: weapon_id → weapon.id
-    weapon_id: Optional[int] = Field(default=None, foreign_key="weapon.id")
+    weapon_id: int | None = Field(default=None, foreign_key="weapon.id")
     weapon: Optional["Weapon"] = Relationship(back_populates="hero")
 
     # ── Relación 1:N con Team (FK en Hero, lado N) ────────────────
     # Varios Heroes pueden pertenecer al mismo Team
-    team_id: Optional[int] = Field(default=None, foreign_key="team.id")
+    team_id: int | None = Field(default=None, foreign_key="team.id")
     team: Optional["Team"] = Relationship(back_populates="heroes")
-
     # ── Relación N:M con Team via HeroTeamLink ────────────────────
     # Un Hero puede estar en múltiples Teams y viceversa
-    teams: List["Team"] = Relationship(
+    teams: list["Team"] = Relationship(
         back_populates="hero_links",
         link_model=HeroTeamLink,
     )

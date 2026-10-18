@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from app.producto_categoria.model import ProductoCategoria
@@ -13,7 +13,7 @@ class Producto(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
     nombre: str = Field(
-        min_length=2,
+        min_length=1,
         max_length=150,
         sa_column=Column(String(150), nullable=False)
     )
@@ -42,10 +42,10 @@ class Producto(SQLModel, table=True):
     )
 
     created_at: datetime = Field(
-        sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+        sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     )
     updated_at: datetime = Field(
-        sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+        sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     )
     deleted_at: datetime | None = Field(
         default=None,

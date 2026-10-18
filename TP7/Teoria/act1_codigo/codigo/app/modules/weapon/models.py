@@ -15,9 +15,9 @@ class Weapon(SQLModel, table=True):
 
     __tablename__ = "weapon"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
-    description: Optional[str] = None
+    description: str | None = None
 
     # Lado inverso 1:1 → un Weapon pertenece a un solo Hero
     hero: Optional["Hero"] = Relationship(back_populates="weapon")

@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from sqlmodel import SQLModel
+from sqlmodel import Field, SQLModel
 
 
 class CategoriaCreate(SQLModel):
-    nombre: str
-    descripcion: str = "0"
+    nombre: str = Field(min_length=1)
+    descripcion: str = ""
 
 
 class CategoriaUpdate(SQLModel):
@@ -22,3 +22,7 @@ class CategoriaPublic(SQLModel):
 
     class Config:
         orm_mode = True
+
+class CategoriaPaginatedResponse(SQLModel):
+    total: int
+    items: list[CategoriaPublic]

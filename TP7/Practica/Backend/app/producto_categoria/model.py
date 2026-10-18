@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, Column, DateTime
 from sqlmodel import Field, SQLModel
@@ -14,5 +14,12 @@ class ProductoCategoria(SQLModel, table=True):
     )
 
     created_at: datetime = Field(
-        sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+        sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    )
+    updated_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    )
+    deleted_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True)
     )
