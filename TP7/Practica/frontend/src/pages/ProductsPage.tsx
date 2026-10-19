@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "../api/productos";
-import type { ProductoPaginatedResponse } from "../types/producto";
+import { getProducts } from "../api/Productos";
+import type { ProductoPaginatedResponse } from "../types/Producto";
 
 function ProductsPage() {
   const { data, isLoading, isError } = useQuery<ProductoPaginatedResponse>({
@@ -9,12 +9,14 @@ function ProductsPage() {
   });
 
   if (isLoading) return <p>Cargando...</p>;
-  if (isError || !data) return <p>Error al cargar productos</p>;
+  if (isError) return <p>Error al cargar productos</p>;
+  if (!data || data.items.length === 0) {
+    return <p>No hay productos para mostrar</p>;
+  }
 
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Productos</h1>
-
       <ul className="space-y-2">
         {data.items.map((prod: any) => (
           <li key={prod.id} className="p-3 bg-slate-800 rounded">

@@ -1,4 +1,4 @@
-import type { ProductoPaginatedResponse } from "../types/producto";
+import type { ProductoPaginatedResponse } from "../types/Producto";
 
 export const getProducts = async (): Promise<ProductoPaginatedResponse> => {
     const res = await fetch("http://127.0.0.1:8000/productos?offset=0&limit=10");
