@@ -2,14 +2,46 @@ import { useEffect, useState } from "react";
 import { BtnPrimary } from "../components/Base/BtnPrimary";
 import { BtnSecondary } from "../components/Base/BtnSecondary";
 import { Panel } from "../components/Panel";
-import IngresoForm from "../components/Operativo/IngresoForm";
+import ControlIngreso from "../components/Operativo/ControlIngreso";
 import RestockForm from "../components/Operativo/RestockForm";
 import EgresoForm from "../components/Operativo/EgresoForm";
 import ObservacionesForm from "../components/Operativo/ObservacionesForm";
 import { API_URL } from "../services/api";
 
+const insumosPrueba = [
+  {
+    id: 1,
+    nombre: "Adrenalina 1mg",
+    categoria: "FARMACOLOGICOS",
+    puntoControl: 20,
+    esCritico: false,
+  },
+  {
+    id: 2,
+    nombre: "Atropina 1mg",
+    categoria: "FARMACOLOGICOS",
+    puntoControl: 5,
+    esCritico: false,
+  },
+  {
+    id: 3,
+    nombre: "Gasas Estériles",
+    categoria: "CURACION",
+    puntoControl: 30,
+    esCritico: false,
+  },
+  {
+    id: 4,
+    nombre: "Tubo grande de oxígeno",
+    categoria: "OXIGENO",
+    puntoControl: 60,
+    esCritico: true,
+  },
+];
+
 export default function OperativoEnfermero() {
   const [turnoId, setTurnoId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${API_URL}/turnos/activos`)
@@ -32,43 +64,81 @@ export default function OperativoEnfermero() {
       .catch((error) => {
         console.error("ERROR AL CARGAR TURNO:", error);
         setTurnoId(null);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-fondo p-6 max-w-4xl mx-auto">
+        <h1 className="font-barlow text-3xl text-petro">
+          Mi turno
+        </h1>
+
+        <p className="font-plex mt-4">
+          Cargando turno...
+        </p>
+      </div>
+    );
+  }
 
   if (!turnoId) {
     return (
       <div className="min-h-screen bg-fondo p-6 max-w-4xl mx-auto">
-        <h1 className="font-barlow text-3xl text-petro">Mi turno</h1>
-        <p className="font-plex mt-4">Cargando turno...</p>
+        <h1 className="font-barlow text-3xl text-petro">
+          Mi turno
+        </h1>
+
+        <p className="font-plex mt-4">
+          No hay un turno activo.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-fondo p-6 space-y-6 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-fondo p-6">
+      <div className="mx-auto max-w-4xl space-y-6">
 
-      <h1 className="font-barlow text-3xl text-petro">Mi turno</h1>
+        <div>
+          <h1 className="font-barlow text-3xl text-petro">
+            Mi turno
+          </h1>
 
-      <Panel title="Control de ingreso">
-        <IngresoForm turnoId={turnoId} />
-      </Panel>
+          <p className="font-plex text-sm text-petro/60 mt-1">
+            Turno #{turnoId}
+          </p>
+        </div>
 
-      <Panel title="Reposiciones">
-        <RestockForm turnoId={turnoId} />
-      </Panel>
+        {/* BORRADOR DEL NUEVO CONTROL DE INGRESO */}
+        <Panel title="Control de ingreso">
+          <ControlIngreso insumos={insumosPrueba} />
+        </Panel>
 
-      <Panel title="Control de egreso">
-        <EgresoForm turnoId={turnoId} />
-      </Panel>
+        <Panel title="Reposiciones">
+          <RestockForm turnoId={turnoId} />
+        </Panel>
 
-      <Panel title="Observaciones">
-        <ObservacionesForm turnoId={turnoId} />
-      </Panel>
+        <Panel title="Control de egreso">
+          <EgresoForm turnoId={turnoId} />
+        </Panel>
 
-      <div className="flex gap-4">
-        <BtnPrimary>Finalizar turno</BtnPrimary>
-        <BtnSecondary>Cancelar turno</BtnSecondary>
+        <Panel title="Observaciones">
+          <ObservacionesForm turnoId={turnoId} />
+        </Panel>
+
+        <div className="flex gap-4">
+          <BtnPrimary>
+            Finalizar turno
+          </BtnPrimary>
+
+          <BtnSecondary>
+            Cancelar turno
+          </BtnSecondary>
+        </div>
+
       </div>
     </div>
   );
