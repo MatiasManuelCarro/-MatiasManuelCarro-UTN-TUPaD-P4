@@ -35,6 +35,8 @@ const insumosPrueba = [
     nombre: "Tubo grande de oxígeno",
     categoria: "OXIGENO",
     puntoControl: 60,
+    capacidadMaxima: 200,
+    unidad: "bar",
     esCritico: true,
   },
 ];
