@@ -1,69 +1,124 @@
-const BASE = "http://localhost:8000/v1/turnos";
+import { API_URL } from "./api";
+import type { Turno, TurnoRequest } from "../interfaces/Turno";
 
-// Listar todos los turnos
-export const listarTurnos = async () => {
+const BASE = `${API_URL}/turnos`;
+
+async function procesarRespuesta<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    let mensaje = `Error HTTP ${res.status}`;
+
+    try {
+      const error = await res.json();
+
+      mensaje =
+        error.detalles?.join(", ") ??
+        error.message ??
+        error.error ??
+        mensaje;
+    } catch {
+      const texto = await res.text();
+
+      if (texto) {
+        mensaje = texto;
+      }
+    }
+
+    throw new Error(mensaje);
+  }
+
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  return res.json();
+}
+
+export const listarTurnos = async (): Promise<Turno[]> => {
   const res = await fetch(BASE);
-  return res.json();
+
+  return procesarRespuesta<Turno[]>(res);
 };
 
-// Obtener un turno por ID
-export const getTurno = async (id: number) => {
+export const getTurno = async (id: number): Promise<Turno> => {
   const res = await fetch(`${BASE}/${id}`);
-  return res.json();
+
+  return procesarRespuesta<Turno>(res);
 };
 
-// Crear turno
-export const crearTurno = async (data: object) => {
+export const crearTurno = async (
+  data: TurnoRequest
+): Promise<Turno> => {
   const res = await fetch(BASE, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
-  return res.json();
+
+  return procesarRespuesta<Turno>(res);
 };
 
-// Actualizar turno (estado, observaciones, etc.)
-export const actualizarTurno = async (id: number, data: object) => {
+export const actualizarTurno = async (
+  id: number,
+  data: Partial<TurnoRequest>
+): Promise<Turno> => {
   const res = await fetch(`${BASE}/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
-  return res.json();
+
+  return procesarRespuesta<Turno>(res);
 };
 
-// Turnos activos (PROGRAMADO o EN_CURSO)
-export const turnosActivos = async () => {
+export const turnosActivos = async (): Promise<Turno[]> => {
   const res = await fetch(`${BASE}/activos`);
-  return res.json();
+
+  return procesarRespuesta<Turno[]>(res);
 };
 
-// Iniciar turno (control ingreso)
-export const iniciarTurno = async (data: object) => {
+export const iniciarTurno = async (
+  data: object
+): Promise<Turno> => {
   const res = await fetch(`${BASE}/ingreso`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
-  return res.json();
+
+  return procesarRespuesta<Turno>(res);
 };
 
-// Finalizar turno (control egreso)
-export const finalizarTurno = async (data: object) => {
+export const finalizarTurno = async (
+  data: object
+): Promise<Turno> => {
   const res = await fetch(`${BASE}/egreso`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
-  return res.json();
+
+  return procesarRespuesta<Turno>(res);
 };
 
-// Cancelar turno
-export const cancelarTurno = async (id: number, observaciones: string) => {
+export const cancelarTurno = async (
+  id: number,
+  observaciones: string
+): Promise<Turno> => {
   const res = await fetch(`${BASE}/${id}/cancelar`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ observaciones }),
   });
-  return res.json();
+
+  return procesarRespuesta<Turno>(res);
 };

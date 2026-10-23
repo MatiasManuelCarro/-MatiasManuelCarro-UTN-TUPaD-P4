@@ -1,5 +1,8 @@
+import { API_URL } from "./api";
+
 export async function listarEnfermeros() {
-    const res = await fetch("http://localhost:8000/v1/usuarios");
+    const res = await fetch(`${API_URL}/usuarios`);
+
     if (!res.ok) {
         throw new Error("Error al listar enfermeros");
     }
@@ -10,7 +13,8 @@ export async function listarEnfermeros() {
 }
 
 export async function listarEnfermerosActivos() {
-    const res = await fetch("http://localhost:8000/v1/usuarios");
+    const res = await fetch(`${API_URL}/usuarios`);
+
     if (!res.ok) {
         throw new Error("Error al listar enfermeros activos");
     }
@@ -18,6 +22,6 @@ export async function listarEnfermerosActivos() {
     const usuarios = await res.json();
 
     return usuarios.filter(
-        (u: any) => u.rol === "ENFERMERO" && u.activo === true
+        (u: any) => u.rol === "ENFERMERO" && u.activo === true,
     );
 }

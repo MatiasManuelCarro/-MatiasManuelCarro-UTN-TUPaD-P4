@@ -6,26 +6,32 @@ import IngresoForm from "../components/Operativo/IngresoForm";
 import RestockForm from "../components/Operativo/RestockForm";
 import EgresoForm from "../components/Operativo/EgresoForm";
 import ObservacionesForm from "../components/Operativo/ObservacionesForm";
+import { API_URL } from "../services/api";
 
 export default function OperativoEnfermero() {
   const [turnoId, setTurnoId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/v1/turnos/activos")
-      .then((res) => res.json())
-      .then((turnos) => {
-        console.log("TURNOS ACTIVOS:", turnos); // debug mínimo
+    fetch(`${API_URL}/turnos/activos`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Error al obtener los turnos activos");
+        }
 
-        if (turnos.length > 0) {
+        return res.json();
+      })
+      .then((turnos) => {
+        console.log("TURNOS ACTIVOS:", turnos);
+
+        if (Array.isArray(turnos) && turnos.length > 0) {
           setTurnoId(turnos[0].id);
         } else {
-          // fallback quirúrgico
-          setTurnoId(1);
+          setTurnoId(null);
         }
       })
-      .catch(() => {
-        // fallback si el backend falla
-        setTurnoId(1);
+      .catch((error) => {
+        console.error("ERROR AL CARGAR TURNO:", error);
+        setTurnoId(null);
       });
   }, []);
 

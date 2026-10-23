@@ -1,120 +1,40 @@
-// import { useEffect, useState } from "react";
-
-// export default function AdminAmbulancias() {
-//   const [ambulancias, setAmbulancias] = useState<any[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     fetch("http://localhost:8000/ambulancias")
-//       .then((res) => {
-//         if (!res.ok) throw new Error("Error en el servidor");
-//         return res.json();
-//       })
-//       .then((data) => {
-//         console.log("AMBULANCIAS:", data);
-
-//         if (Array.isArray(data)) {
-//           setAmbulancias(data);
-//         } else {
-//           setError("Formato inválido en backend");
-//         }
-//       })
-//       .catch((err) => {
-//         console.log("ERROR FETCH:", err);
-//         setError("No se pudo cargar ambulancias");
-//       })
-//       .finally(() => setLoading(false));
-//   }, []);
-
-//   if (loading) {
-//     return <div className="p-10 text-petro">Cargando ambulancias...</div>;
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="p-10">
-//         <div className="bg-coral text-white p-4 rounded font-plex">
-//           {error}
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-fondo p-10 font-plex text-petro">
-//       <h1 className="text-3xl font-barlow mb-8">Dashboard de Ambulancias</h1>
-
-//       {ambulancias.length === 0 && (
-//         <p className="text-azul">No hay ambulancias registradas.</p>
-//       )}
-
-//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//         {ambulancias.map((a) => (
-//           <div
-//             key={a.id}
-//             className="bg-blanco p-6 rounded-lg shadow border border-fondo"
-//           >
-//             <h2 className="text-xl font-barlow mb-2">
-//               Ambulancia #{a.id}
-//             </h2>
-
-//             <p className="text-sm text-petro mb-2">
-//               Patente: <span className="font-bold">{a.patente}</span>
-//             </p>
-
-//             <EstadoBadge disponible={a.disponible} />
-
-//             <div className="mt-4">
-//               <button className="bg-turquesa text-white px-4 py-2 rounded hover:bg-petro transition">
-//                 Ver detalles
-//               </button>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// function EstadoBadge({ disponible }: { disponible: boolean }) {
-//   const estado = disponible ? "Disponible" : "No disponible";
-//   const color = disponible ? "bg-verde" : "bg-coral";
-
-//   return (
-//     <span
-//       className={`${color} text-white px-3 py-1 rounded font-barlow text-sm`}
-//     >
-//       {estado}
-//     </span>
-//   );
-// }
-
-
+import { listarInsumos } from "../services/insumos";
+import type { Insumo } from "../interfaces/Insumo";
 import { useEffect, useState } from "react";
+import { listarAmbulancias } from "../services/ambulancias";
 
 export default function AdminAmbulancias() {
   const [ambulancias, setAmbulancias] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [insumos, setInsumos] = useState<Insumo[]>([]);
 
-  useEffect(() => {
-    fetch("http://localhost:8000/ambulancias")
-      .then((res) => {
-        if (!res.ok) throw new Error("Error en el servidor");
-        return res.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setAmbulancias(data);
-        } else {
-          setError("Formato inválido en backend");
-        }
-      })
-      .catch(() => setError("No se pudo cargar ambulancias"))
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  async function cargarDatos() {
+    setLoading(true);
+    setError("");
 
+    try {
+      const [ambulanciasData, insumosData] = await Promise.all([
+        listarAmbulancias(),
+        listarInsumos(),
+      ]);
+
+      setAmbulancias(ambulanciasData);
+      setInsumos(insumosData);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudieron cargar los datos"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  cargarDatos();
+}, []);
   if (loading) {
     return <div className="p-10 text-petro animate-pulse">Cargando ambulancias...</div>;
   }
