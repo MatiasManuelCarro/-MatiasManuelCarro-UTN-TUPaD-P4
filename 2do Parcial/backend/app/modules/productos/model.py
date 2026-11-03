@@ -6,7 +6,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.modules.categorias.model import Categoria
-    from app.modules.unidades_medida.unidad_medida import UnidadMedida
+    from app.modules.unidades_medida.model import UnidadMedida
 
 
 class ProductoCategoria(SQLModel, table=True):
