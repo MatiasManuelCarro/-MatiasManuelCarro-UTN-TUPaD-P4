@@ -14,6 +14,8 @@ class TipoUnidad(str, Enum):
 
 
 class UnidadMedida(SQLModel, table=True):
+    #fija el nombre de la tabla
+    __tablename__ = "unidad_medida"
     id: int | None = Field(default=None, primary_key=True)
     nombre: str = Field(nullable=False, unique=True)
     simbolo: str = Field(nullable=False, unique=True)

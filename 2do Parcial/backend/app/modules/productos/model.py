@@ -2,11 +2,12 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
+from app.modules.unidades_medida.model import UnidadMedida
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.modules.categorias.model import Categoria
-    from app.modules.unidades_medida.model import UnidadMedida
+
 
 
 class ProductoCategoria(SQLModel, table=True):

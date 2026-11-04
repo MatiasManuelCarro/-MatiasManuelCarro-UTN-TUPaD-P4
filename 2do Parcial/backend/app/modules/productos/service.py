@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from app.modules.categorias.model import Categoria
 from app.modules.productos.model import Producto, ProductoCategoria
@@ -38,7 +38,7 @@ def crear_producto(session: Session, data: ProductoCreate) -> ProductoPublic:
 
     # RN-10
     if (
-        unidad.tipo == TipoUnidad.contable
+        unidad.tipo == TipoUnidad.CONTABLE
         and data.stock_cantidad != data.stock_cantidad.to_integral_value()
     ):
         raise HTTPException(
@@ -142,7 +142,7 @@ def actualizar_producto(
 
     # RN-10
     if (
-        unidad.tipo == TipoUnidad.contable
+        unidad.tipo == TipoUnidad.CONTABLE
         and data.stock_cantidad != data.stock_cantidad.to_integral_value()
     ):
         raise HTTPException(
@@ -191,7 +191,7 @@ def desactivar_producto(session: Session, producto_id: int) -> Producto:
         )
 
     producto.activo = False
-    producto.anulado_at = datetime.now()
+    producto.anulado_at = datetime.now(UTC)
 
     session.add(producto)
     session.commit()

@@ -1,0 +1,219 @@
+@baseUrl = http://127.0.0.1:8000/api/v1
+
+
+###############################################################################
+# SETUP - CREAR PRODUCTO
+###############################################################################
+
+### Crear producto para las pruebas de relaciones
+# @name crearProductoRelacion
+POST {{baseUrl}}/productos/
+Content-Type: application/json
+
+{
+    "nombre": "Sorrentinos",
+    "descripcion": "Sorrentinos de jamon y queso",
+    "precio_base": 5200.00,
+    "unidad_venta_id": 1,
+    "stock_cantidad": 15.000,
+    "disponible": true
+}
+
+
+###############################################################################
+# CATEGORIAS - ALTA
+###############################################################################
+
+### Crear primera categoria
+# @name crearCategoriaPastas
+POST {{baseUrl}}/categorias/
+Content-Type: application/json
+
+{
+    "nombre": "Pastas",
+    "descripcion": "Productos de pastas"
+}
+
+
+### Crear segunda categoria
+# @name crearCategoriaPromociones
+POST {{baseUrl}}/categorias/
+Content-Type: application/json
+
+{
+    "nombre": "Promociones",
+    "descripcion": "Productos en promocion"
+}
+
+
+###############################################################################
+# RN-02 - NOMBRE DE CATEGORIA REPETIDO
+###############################################################################
+
+### Crear categoria con nombre repetido
+# Esperado: 409 Conflict
+POST {{baseUrl}}/categorias/
+Content-Type: application/json
+
+{
+    "nombre": "Pastas",
+    "descripcion": "Otra categoria con el mismo nombre"
+}
+
+
+###############################################################################
+# RN-07 / RN-09 - PRIMERA CLASIFICACION
+###############################################################################
+
+### Clasificar producto en Pastas como principal
+# Esperado: 201 Created
+POST {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
+Content-Type: application/json
+
+{
+    "categoria_id": {{crearCategoriaPastas.response.body.$.id}},
+    "es_principal": true
+}
+
+
+###############################################################################
+# GET - CATEGORIAS DEL PRODUCTO
+###############################################################################
+
+### Ver categorias del producto
+# Esperado: Pastas con es_principal = true
+GET {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
+
+
+###############################################################################
+# RN-09 - SEGUNDA CATEGORIA PRINCIPAL
+###############################################################################
+
+### Clasificar en Promociones como nueva principal
+# Esperado: 201 Created
+POST {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
+Content-Type: application/json
+
+{
+    "categoria_id": {{crearCategoriaPromociones.response.body.$.id}},
+    "es_principal": true
+}
+
+
+###############################################################################
+# RN-09 - COMPROBAR CAMBIO DE PRINCIPAL
+###############################################################################
+
+### Verificar que solamente quede una categoria principal
+# Esperado:
+# Pastas       -> es_principal = false
+# Promociones  -> es_principal = true
+GET {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
+
+
+###############################################################################
+# RN-07 - CLASIFICACION DUPLICADA
+###############################################################################
+
+### Intentar clasificar nuevamente en Pastas
+# Esperado: 409 Conflict
+POST {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
+Content-Type: application/json
+
+{
+    "categoria_id": {{crearCategoriaPastas.response.body.$.id}},
+    "es_principal": false
+}
+
+
+###############################################################################
+# FILTRO categoria_id
+###############################################################################
+
+### Listar productos pertenecientes a Pastas
+# Esperado: debe aparecer Sorrentinos
+GET {{baseUrl}}/productos/?categoria_id={{crearCategoriaPastas.response.body.$.id}}
+
+
+###############################################################################
+# RN-06 - ANULAR CATEGORIA
+###############################################################################
+
+### Anular categoria Pastas
+# Esperado: 204 No Content
+DELETE {{baseUrl}}/categorias/{{crearCategoriaPastas.response.body.$.id}}
+
+
+###############################################################################
+# RN-06 - PRODUCTO DEBE SEGUIR ACTIVO
+###############################################################################
+
+### Consultar producto despues de anular Pastas
+# Esperado: 200 OK
+# El producto sigue existiendo y activo
+GET {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}
+
+
+###############################################################################
+# RN-08 - NO CLASIFICAR EN CATEGORIA ANULADA
+###############################################################################
+
+### Crear otro producto para intentar clasificarlo en Pastas anulada
+# @name crearProductoSecundario
+POST {{baseUrl}}/productos/
+Content-Type: application/json
+
+{
+    "nombre": "Tallarines",
+    "descripcion": "Tallarines frescos",
+    "precio_base": 4000.00,
+    "unidad_venta_id": 1,
+    "stock_cantidad": 8.000,
+    "disponible": true
+}
+
+
+### Intentar clasificar en categoria anulada
+# Esperado: 409 Conflict
+POST {{baseUrl}}/productos/{{crearProductoSecundario.response.body.$.id}}/categorias
+Content-Type: application/json
+
+{
+    "categoria_id": {{crearCategoriaPastas.response.body.$.id}},
+    "es_principal": false
+}
+
+
+###############################################################################
+# RN-08 - NO CLASIFICAR PRODUCTO ANULADO
+###############################################################################
+
+### Anular producto secundario
+# Esperado: 204 No Content
+DELETE {{baseUrl}}/productos/{{crearProductoSecundario.response.body.$.id}}
+
+
+### Intentar clasificar producto anulado
+# Esperado: 409 Conflict
+POST {{baseUrl}}/productos/{{crearProductoSecundario.response.body.$.id}}/categorias
+Content-Type: application/json
+
+{
+    "categoria_id": {{crearCategoriaPromociones.response.body.$.id}},
+    "es_principal": false
+}
+
+
+###############################################################################
+# RN-03 - CATEGORIA INEXISTENTE
+###############################################################################
+
+### Intentar clasificar usando categoria inexistente
+# Esperado: 404 Not Found
+POST {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
+Content-Type: application/json
+
+{
+    "categoria_id": 999999,
+    "es_principal": false
+}

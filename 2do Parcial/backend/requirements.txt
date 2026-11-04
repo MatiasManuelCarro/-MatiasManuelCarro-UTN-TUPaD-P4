@@ -6,4 +6,4 @@ python-dotenv
 # Database
 sqlmodel
 sqlalchemy
-psycopg2-binary
+psycopg[binary]

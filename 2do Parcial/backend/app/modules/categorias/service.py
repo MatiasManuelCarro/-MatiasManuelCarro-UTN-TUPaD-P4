@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from app.modules.categorias.model import Categoria
 from app.modules.categorias.schema import (
@@ -128,7 +128,8 @@ def desactivar_categoria(
     categoria_id: int
 ) -> Categoria:
     
-    # RN-03 - RN-04 No puede consultar una categoria inactiva - no se puede desactivar si ya esta inactiva
+    # RN-03: la categoria debe existir
+    # RN-04: no se puede anular una categoria ya anulada
     
     categoria = obtener_categorias_por_id(session, categoria_id)
     
@@ -139,7 +140,7 @@ def desactivar_categoria(
         )
     
     categoria.activo = False
-    categoria.anulado_at = datetime.now()
+    categoria.anulado_at = datetime.now(UTC)
     
     session.add(categoria)
     session.commit()
