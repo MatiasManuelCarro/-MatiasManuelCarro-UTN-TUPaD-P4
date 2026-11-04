@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import create_db
 from app.modules.categorias.router import router as categoria_router
 from app.modules.productos.router import router as producto_router
+from app.modules.unidades_medida.router import router as unidad_medida_router
 
 
 def create_app() -> FastAPI:
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
 
     app.include_router(producto_router)
     app.include_router(categoria_router)
+    app.include_router(unidad_medida_router)
 
     return app
 

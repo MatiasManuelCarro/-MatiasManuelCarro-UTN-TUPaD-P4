@@ -25,7 +25,7 @@ def crear_producto(session: Session, data: ProductoCreate) -> ProductoPublic:
             detail="Unidad de medida no encontrada",
         )
 
-    #RN-03: Validacion de nombre único en productos activos
+    # RN-02: Validacion de nombre unico en productos activos
     existe = session.exec(
         select(Producto).where(Producto.nombre == data.nombre, Producto.activo == True)
     ).first()
@@ -196,6 +196,7 @@ def desactivar_producto(session: Session, producto_id: int) -> Producto:
     session.add(producto)
     session.commit()
     session.refresh(producto)
+    
     return producto
 
 

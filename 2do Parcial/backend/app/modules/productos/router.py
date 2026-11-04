@@ -22,24 +22,27 @@ from fastapi import APIRouter, Path, Query, status
 
 router = APIRouter(prefix="/api/v1/productos", tags=["Productos"])
 
-
-
+# * POST /api/v1/productos
 @router.post("/", response_model=ProductoPublic, status_code=status.HTTP_201_CREATED)
 def alta_producto(producto: ProductoCreate, session: SessionDep):
     return crear_producto(session, producto)
 
+# * GET /api/v1/productos
 @router.get("/", response_model=list[ProductoPublic], status_code=status.HTTP_200_OK)
 def obtener_productos(
     session: SessionDep,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=50)] = 10,
-    activo: bool | None = None, # Por defecto trae solo activos
+    activo: bool | None = None,  # Por defecto trae solo activos
     disponible: bool | None = None,
     categoria_id: int | None = None,
     search: str | None = None,
 ):
-    return listar_productos(session, skip, limit, activo, disponible, categoria_id, search)
+    return listar_productos(
+        session, skip, limit, activo, disponible, categoria_id, search
+    )
 
+# * GET /api/v1/productos/{id}
 @router.get("/{id}", response_model=ProductoPublic, status_code=status.HTTP_200_OK)
 def obtener(
     session: SessionDep,
@@ -57,6 +60,7 @@ def obtener(
         hay_stock=producto.stock_cantidad > 0,
     )
 
+# * PUT /api/v1/productos/{id}
 @router.put("/{id}", response_model=ProductoPublic, status_code=status.HTTP_200_OK)
 def actualizar(
     data: ProductoUpdate,
@@ -65,17 +69,23 @@ def actualizar(
 ):
     return actualizar_producto(session=session, producto_id=id, data=data)
 
-
+# * DELETE /api/v1/productos/{id}
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def desactivar(
     session: SessionDep,
     id: int = Path(..., gt=0),
 ):
     desactivar_producto(session=session, producto_id=id)
-    
-# --- Endpoints de Relaciones N:N ---
 
-@router.post("/{id}/categorias", response_model=ClasificacionPublic, status_code=status.HTTP_201_CREATED)
+
+# * Endpoints de Relaciones N:N
+
+# * POST /api/v1/productos/{id}/categorias
+@router.post(
+    "/{id}/categorias",
+    response_model=ClasificacionPublic,
+    status_code=status.HTTP_201_CREATED,
+)
 def clasificar(
     data: ClasificacionCreate,
     session: SessionDep,
@@ -88,7 +98,12 @@ def clasificar(
         es_principal=data.es_principal,
     )
 
-@router.get("/{id}/categorias", response_model=list[CategoriaProductoPublic], status_code=status.HTTP_200_OK)
+
+@router.get(
+    "/{id}/categorias",
+    response_model=list[CategoriaProductoPublic],
+    status_code=status.HTTP_200_OK,
+)
 def listar_categorias(
     session: SessionDep,
     id: int = Path(..., gt=0),

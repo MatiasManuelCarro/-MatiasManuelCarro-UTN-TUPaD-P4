@@ -27,14 +27,6 @@ class ProductoCreate(ProductoBase):
     pass
 
 
-# class ProductoUpdate(SQLModel):
-#     nombre: Annotated[str ,Field(default=None, min_length=3, max_length=100)]
-#     descripcion: str | None = Field(default=None, min_length=3, max_length=255)
-#     precio_base: Annotated [Decimal | None, Field(default=None, ge=0, decimal_places=2)]
-#     unidad_venta_id: int
-#     stock_cantidad: Annotated [Decimal, Field(default=None, ge=0, decimal_places=3)]
-#     disponible: bool | None = Field(default=True)
-
 class ProductoUpdate(ProductoBase):
     pass
 
