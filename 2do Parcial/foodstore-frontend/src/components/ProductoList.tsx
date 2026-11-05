@@ -5,14 +5,14 @@ interface ProductoListProps {
     productos: Producto[];
     // onEditar: (producto: Producto) => void;
     onDisponibilidad: (producto: Producto) => void;
-    // onAnular: (producto: Producto) => void;
+    onAnular: (producto: Producto) => void;
 }
 
 export function ProductoList({
     productos,
     // onEditar,
     onDisponibilidad,
-    // onAnular,
+    onAnular,
 }: ProductoListProps) {
     return (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -22,7 +22,7 @@ export function ProductoList({
                     producto={producto}
                     // onEditar={onEditar}
                     onDisponibilidad={onDisponibilidad}
-                    // onAnular={onAnular}
+                    onAnular={onAnular}
                 />
             ))}
         </div>

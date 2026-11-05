@@ -47,3 +47,12 @@ export async function actualizarProducto(
 
     return response.json()
 }
+
+export async function anularProducto(id: number): Promise<void>{
+    const response = await fetch(`${API_URL}/productos/${id}`,{
+    })
+
+    if (!response.ok ){
+        throw new Error("No se pudo anular el producto")
+}
+}

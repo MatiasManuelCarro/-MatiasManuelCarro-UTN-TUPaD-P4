@@ -11,13 +11,14 @@ import type { Producto } from "../types/producto";
 interface ProductoCardProps {
     producto: Producto
     onDisponibilidad: (producto: Producto) => void
+    onAnular: (producto: Producto) => void
 }
 
 export function ProductoCard({
     producto,
     // onEditar,
     onDisponibilidad,
-    // onAnular,
+    onAnular,
 }: ProductoCardProps) {
     return (
         <article className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-6">
@@ -72,13 +73,13 @@ export function ProductoCard({
                 >
                     Disponibilidad
                 </button>
-                {/* <button
+                <button
                     type="button"
                     onClick={() => onAnular(producto)}
                     className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                 >
                     Anular
-                </button> */}
+                </button>
             </div>
         </article>
     );

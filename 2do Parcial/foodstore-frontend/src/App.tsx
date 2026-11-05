@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { actualizarProducto, getProductos, getUnidades } from "./api";
+import { actualizarProducto,anularProducto, getProductos, getUnidades } from "./api";
 import type { Producto } from "./types/producto";
 import type { UnidadMedida } from "./types/unidadMedida";
 import { Navbar } from "./components/Navbar"
@@ -49,6 +49,16 @@ function App() {
         })
     }
 
+    const handleAnular = (producto: Producto) =>{
+        anularProducto(producto.id).then(() =>{
+            const productosActualizados = productos.filter(
+                (productoActual) => productoActual.id !== producto.id
+            )
+
+            setProductos(productosActualizados)
+        })
+    }
+
     if (loading) {
         return (
             <main className="min-h-screen bg-gray-50 p-8 text-gray-900">
@@ -89,6 +99,7 @@ function App() {
                     <ProductoList
                         productos={productos}
                         onDisponibilidad={handleDisponibilidad}
+                        onAnular={handleAnular}
                     />
                 </section>
 
