@@ -7,16 +7,45 @@ import type { UnidadMedida } from "./types/unidadMedida";
 function App() {
     const [productos, setProductos] = useState<Producto[]>([]);
     const [unidades, setUnidades] = useState<UnidadMedida[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        getProductos().then((data) => {
-            setProductos(data);
-        });
+        setLoading(true);
+        setError(null);
 
-        getUnidades().then((data) => {
-            setUnidades(data);
-        });
+        Promise.all([getProductos(), getUnidades()])
+            .then(([productosData, unidadesData]) => {
+                setProductos(productosData);
+                setUnidades(unidadesData);
+            })
+            .catch(() => {
+                setError("No se pudieron cargar los datos de productos");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
+
+    if (loading){
+        return(
+            <main className="min-h-screen bg-gray-50 p-8 text-gray-900">
+                <p className="text-base text-gray-600">
+                    Cargando productos...
+                </p>
+            </main>
+        )
+    }
+
+    if(error){
+        return(
+            <main className="min-h-screen bg-gray-50 p-8 text-gray-900">
+                <p className="text-base text-red-600">
+                    {error}
+                </p>
+            </main>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -38,15 +67,12 @@ function App() {
                 </section>
 
                 <section className="flex flex-col gap-4">
-                    <h2 className="text-2xl font-semibold">
-                        Unidades de medida
-                    </h2>
+                    <h2 className="text-2xl font-semibold">Unidades de medida</h2>
 
                     <pre className="overflow-auto rounded-lg bg-white p-4 text-sm">
                         {JSON.stringify(unidades, null, 2)}
                     </pre>
                 </section>
-
             </main>
         </div>
     );
