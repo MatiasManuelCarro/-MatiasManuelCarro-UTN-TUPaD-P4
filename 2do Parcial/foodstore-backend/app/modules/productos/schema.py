@@ -37,7 +37,7 @@ class ProductoPublic(ProductoBase):
     categorias: list[CategoriaPublic]
     hay_stock: bool
 
-# Schema para clasficiacion
+# Schema para clasificacion
 class ClasificacionCreate(BaseModel):
     categoria_id: int
     es_principal: bool

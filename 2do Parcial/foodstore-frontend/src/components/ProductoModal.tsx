@@ -31,9 +31,18 @@ export function ProductoModal({ unidades, producto, onCerrar, onProductoCreado, 
     });
 
     const [mensaje, setMensaje] = useState("");
+    const [error, setError] = useState("")
+
+    const formularioIncompleto =
+        form.nombre.trim().length < 3 ||
+        form.precio_base === "" ||
+        form.unidad_venta_id === ""
+
 
     const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
+        // Limpia el mensaje de error
+        setError("")
 
         const datosFormulario = {
             ...form,
@@ -49,6 +58,8 @@ export function ProductoModal({ unidades, producto, onCerrar, onProductoCreado, 
             actualizarProducto(productoModificado).then((ProductoActualizado) => {
                 onProductoActualizado(ProductoActualizado)
                 onCerrar()
+            }).catch((error: Error) => {
+                setError(error.message)
             })
 
             return
@@ -75,13 +86,17 @@ export function ProductoModal({ unidades, producto, onCerrar, onProductoCreado, 
 
             setTimeout(() => {
                 setMensaje("");
-            }, 5000);
-        });
+                onCerrar()
+            }, 3000)
+        })
+            .catch((error: Error) => {
+                setError(error.message)
+            })
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-lg rounded-lg bg-white p-6">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 p-4" onClick={onCerrar}>
+            <div className="w-full max-w-lg rounded-lg bg-white p-6" onClick={(event) => event.stopPropagation()} >
                 <div className="flex items-center justify-between gap-4">
                     <h2 className="text-xl mb-4 font-semibold text-gray-900">
                         {producto ? "Editar Producto" : "Nuevo Producto"}
@@ -218,10 +233,12 @@ export function ProductoModal({ unidades, producto, onCerrar, onProductoCreado, 
                     </div>
 
                     {/* Boton crear */}
+
                     <div className="mt-4 flex justify-end">
                         <button
                             type="submit"
-                            className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:cursor-pointer hover:bg-slate-700"
+                            disabled={formularioIncompleto}
+                            className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:cursor-pointer hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
                         >
                             {producto ? "Guardar cambios" : "Crear producto"}
                         </button>
@@ -231,6 +248,14 @@ export function ProductoModal({ unidades, producto, onCerrar, onProductoCreado, 
                         <div className="mt-4 flex min-h-16 items-center justify-center rounded-lg border border-green-300 bg-green-50 px-4">
                             <p className="m-0 text-center text-sm font-semibold leading-none text-green-700">
                                 {mensaje}
+                            </p>
+                        </div>
+                    )}
+
+                    {error && (
+                        <div className="mt-4 flex min-h-16 items-center justify-center rounded-lg border border-red-300 bg-red-50 px-4">
+                            <p className="m-0 text-center text-sm font-semibold leading-none text-red-700">
+                                {error}
                             </p>
                         </div>
                     )}

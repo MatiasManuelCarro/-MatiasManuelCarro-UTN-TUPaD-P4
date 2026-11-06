@@ -72,7 +72,7 @@ function App() {
         setProductos([...productos, producto]);
     };
 
-    
+
     const handleEditar = (producto: Producto) => {
         setProductoSeleccionado(producto);
         setModalAbierto(true)
@@ -106,15 +106,7 @@ function App() {
         );
     }
 
-    if (productos.length === 0) {
-        return (
-            <main className="min-h-screen bg-gray-50 p-8 text-gray-900">
-                <p className="text-base text-gray-600">
-                    No hay productos para mostrar.
-                </p>
-            </main>
-        );
-    }
+
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -135,21 +127,24 @@ function App() {
                             Nuevo Producto
                         </button>
                     </div>
-                    <ProductoList
-                        productos={productos}
-                        onEditar={handleEditar}
-                        onDisponibilidad={handleDisponibilidad}
-                        onAnular={handleAnular}
-                    />
+
+
+                    {productos.length === 0 ? (
+                        <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
+                            <p className="text-sm text-gray-600">
+                                No hay productos para mostrar.
+                            </p>
+                        </div>
+                    ) : (
+                        <ProductoList
+                            productos={productos}
+                            onEditar={handleEditar}
+                            onDisponibilidad={handleDisponibilidad}
+                            onAnular={handleAnular}
+                        />
+                    )}
                 </section>
 
-                <section className="flex flex-col gap-4">
-                    <h2 className="text-2xl font-semibold">Unidades de medida</h2>
-
-                    <pre className="overflow-auto rounded-lg bg-white p-4 text-sm">
-                        {JSON.stringify(unidades, null, 2)}
-                    </pre>
-                </section>
             </main>
 
             {modalAbierto && (

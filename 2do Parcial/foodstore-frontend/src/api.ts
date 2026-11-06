@@ -4,11 +4,18 @@ import type { UnidadMedida } from "./types/unidadMedida";
 
 const API_URL = "http://127.0.0.1:8000/api/v1"
 
+async function obtenerError(response: Response): Promise<string> {
+    const data = await response.json()
+
+    return data.detail
+}
+
+
 export async function getProductos(): Promise<Producto[]> {
     const response = await fetch(`${API_URL}/productos/`)
 
     if (!response.ok) {
-        throw new Error("No se pudieron cargar los productos")
+        throw new Error(await obtenerError(response))
     }
 
     return response.json()
@@ -18,7 +25,7 @@ export async function getUnidades(): Promise<UnidadMedida[]> {
     const response = await fetch(`${API_URL}/unidades-medida`)
 
     if (!response.ok) {
-        throw new Error("No se pudieron cargar las unidades de medida")
+        throw new Error(await obtenerError(response))
     }
 
     return response.json()
@@ -27,7 +34,7 @@ export async function getUnidades(): Promise<UnidadMedida[]> {
 export async function crearProducto(
     producto: ProductoNuevo,
 ): Promise<Producto> {
-    const response = await fetch(`${API_URL}/productos/`,{
+    const response = await fetch(`${API_URL}/productos/`, {
         method: "POST",
         headers: {
             "content-Type": "application/json",
@@ -35,8 +42,8 @@ export async function crearProducto(
         body: JSON.stringify(producto),
     });
 
-    if(!response.ok){
-        throw new Error("No se pudo crear el producto");
+    if (!response.ok) {
+        throw new Error(await obtenerError(response))
     }
 
     return response.json();
@@ -61,17 +68,18 @@ export async function actualizarProducto(
     })
 
     if (!response.ok) {
-        throw new Error("No se pudo actualizar el producto")
+        throw new Error(await obtenerError(response))
     }
 
     return response.json()
 }
 
-export async function anularProducto(id: number): Promise<void>{
-    const response = await fetch(`${API_URL}/productos/${id}`,{
+export async function anularProducto(id: number): Promise<void> {
+    const response = await fetch(`${API_URL}/productos/${id}`, {
+        method: "DELETE",
     })
 
-    if (!response.ok ){
-        throw new Error("No se pudo anular el producto")
-}
+    if (!response.ok) {
+        throw new Error(await obtenerError(response))
+    }
 }

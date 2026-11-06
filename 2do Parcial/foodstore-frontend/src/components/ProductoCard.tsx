@@ -1,12 +1,4 @@
 import type { Producto } from "../types/producto";
-// import { actualizarProducto, getProductos, getUnidades } from "../api";
-
-// interface ProductoCardProps {
-//     producto: Producto;
-//     onEditar: (producto: Producto) => void;
-//     onDisponibilidad: (producto: Producto) => void;
-//     onAnular: (producto: Producto) => void;
-// }
 
 interface ProductoCardProps {
     producto: Producto;
@@ -45,9 +37,18 @@ export function ProductoCard({
                 </span>
             </div>
 
+            <p>
+                <span className="font-medium">
+                    Precio:
+                </span>{" "}
+                $ {producto.precio_base} / {producto.unidad_venta.simbolo}
+            </p>
+
             <div className="grid gap-2 text-sm text-gray-700">
                 <p>
-                    <span className="font-medium">stock:</span> {producto.stock_cantidad}{" "}
+                    <span className="font-medium">
+                        stock:                      
+                    </span> {producto.stock_cantidad}{" "}
                     {producto.unidad_venta.simbolo}
                 </p>
             </div>
