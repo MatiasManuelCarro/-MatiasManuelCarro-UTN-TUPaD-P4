@@ -45,7 +45,7 @@ Modificar usuario, contraseña, host o puerto si la configuración local de Post
 
 ## Instalación
 
-Desde la carpeta `backend`, crear un entorno virtual:
+Desde la carpeta `foodstore-backend`, crear un entorno virtual:
 
 ```powershell
 python -m venv .venv
@@ -65,7 +65,7 @@ pip install -r requirements.txt
 
 ## Ejecución
 
-Desde la carpeta `backend`:
+Desde la carpeta `foodstore-backend`:
 
 ```powershell
 fastapi dev app/main.py
@@ -202,13 +202,13 @@ De esta manera los registros conservan su información histórica.
 Los archivos de prueba se encuentran en:
 
 ```text
-app/tests/
+foodstore-backend/tests/
 ```
 
 ### Productos
 
 ```text
-app/tests/productos.http
+foodstore-backend/tests/productos.http
 ```
 
 Incluye pruebas de:
@@ -233,7 +233,7 @@ Incluye pruebas de:
 ### Relaciones
 
 ```text
-app/tests/relaciones.http
+foodstore-backend/tests/relaciones.http
 ```
 
 Incluye pruebas de:
@@ -253,18 +253,25 @@ Incluye pruebas de:
 ## Estructura principal
 
 ```text
-app/
-├── core/
-│   ├── database.py
-│   └── seed.py
-├── modules/
-│   ├── categorias/
-│   ├── productos/
-│   └── unidades_medida/
+foodstore-backend/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── database.py
+│   │   └── seed.py
+│   └── modules/
+│       ├── unidades_medida/
+│       ├── categorias/
+│       └── productos/
 ├── tests/
 │   ├── productos.http
 │   └── relaciones.http
-└── main.py
+├── requirements.txt
+├── run.py
+└── README.md
+
 ```
 
 ### Desarrolado por Matias Manuel Carro

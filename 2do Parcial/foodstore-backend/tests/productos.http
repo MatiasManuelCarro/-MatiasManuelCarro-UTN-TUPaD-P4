@@ -6,6 +6,7 @@
 ###############################################################################
 
 ### POST valido - Crear producto con stock
+# Esperado: 201 Created
 # @name crearProducto
 POST {{baseUrl}}/productos/
 Content-Type: application/json
@@ -25,51 +26,106 @@ Content-Type: application/json
 ###############################################################################
 
 ### GET - Listar productos activos
+# Esperado: 200 OK
 GET {{baseUrl}}/productos/
 
 
 ###############################################################################
-# GET POR ID
+# GET - PRODUCTO POR ID
 ###############################################################################
 
 ### GET - Obtener producto existente
+# Esperado: 200 OK
 GET {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
 
 
 ###############################################################################
-# FILTRO SEARCH
+# FILTROS DEL LISTADO
 ###############################################################################
 
 ### GET - Buscar productos por nombre
+# Esperado: Ravioles
 GET {{baseUrl}}/productos/?search=Ravio
 
-
-###############################################################################
-# FILTRO DISPONIBLE
-###############################################################################
 
 ### GET - Productos disponibles
 GET {{baseUrl}}/productos/?disponible=true
 
 
-###############################################################################
-# FILTRO ACTIVO
-###############################################################################
-
 ### GET - Productos activos
 GET {{baseUrl}}/productos/?activo=true
 
-
-###############################################################################
-# PAGINACION
-###############################################################################
 
 ### GET - Paginacion
 GET {{baseUrl}}/productos/?skip=0&limit=10
 
 
 ###############################################################################
-# RN-02 - NOMBRE REPETIDO ENTRE PRODUCTOS ACTIVOS
+# RN-01 - VALIDACIONES DE PRODUCTO
+###############################################################################
+
+### POST - Nombre menor a 3 caracteres
+# Esperado: 422 Unprocessable Entity
+POST {{baseUrl}}/productos/
+Content-Type: application/json
+
+{
+    "nombre": "AB",
+    "descripcion": "Prueba de validacion",
+    "precio_base": 1000.00,
+    "unidad_venta_id": 1,
+    "stock_cantidad": 5.000,
+    "disponible": true
+}
+
+
+### POST - Precio negativo
+# Esperado: 422 Unprocessable Entity
+POST {{baseUrl}}/productos/
+Content-Type: application/json
+
+{
+    "nombre": "Producto precio negativo",
+    "descripcion": "Prueba de validacion",
+    "precio_base": -100.00,
+    "unidad_venta_id": 1,
+    "stock_cantidad": 5.000,
+    "disponible": true
+}
+
+
+### POST - Stock negativo
+# Esperado: 422 Unprocessable Entity
+POST {{baseUrl}}/productos/
+Content-Type: application/json
+
+{
+    "nombre": "Producto stock negativo",
+    "descripcion": "Prueba de validacion",
+    "precio_base": 1000.00,
+    "unidad_venta_id": 1,
+    "stock_cantidad": -1.000,
+    "disponible": true
+}
+
+
+### PUT - Stock negativo
+# Esperado: 422 Unprocessable Entity
+PUT {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
+Content-Type: application/json
+
+{
+    "nombre": "Ravioles",
+    "descripcion": "Prueba RN-01 en actualizacion",
+    "precio_base": 4800.00,
+    "unidad_venta_id": 1,
+    "stock_cantidad": -1.000,
+    "disponible": true
+}
+
+
+###############################################################################
+# RN-02 - NOMBRE UNICO ENTRE PRODUCTOS ACTIVOS
 ###############################################################################
 
 ### POST - Nombre repetido
@@ -88,7 +144,7 @@ Content-Type: application/json
 
 
 ###############################################################################
-# RN-03 - ID INEXISTENTE
+# RN-03 - RECURSOS INEXISTENTES
 ###############################################################################
 
 ### GET - Producto inexistente
@@ -96,17 +152,33 @@ Content-Type: application/json
 GET {{baseUrl}}/productos/999999
 
 
-###############################################################################
-# RN-03 - UNIDAD DE VENTA INEXISTENTE
-###############################################################################
+### PUT - Producto inexistente
+# Esperado: 404 Not Found
+PUT {{baseUrl}}/productos/999999
+Content-Type: application/json
 
-### POST - Unidad inexistente
+{
+    "nombre": "Producto inexistente",
+    "descripcion": "Prueba RN-03",
+    "precio_base": 1000.00,
+    "unidad_venta_id": 1,
+    "stock_cantidad": 5.000,
+    "disponible": true
+}
+
+
+### DELETE - Producto inexistente
+# Esperado: 404 Not Found
+DELETE {{baseUrl}}/productos/999999
+
+
+### POST - Unidad de venta inexistente
 # Esperado: 404 Not Found
 POST {{baseUrl}}/productos/
 Content-Type: application/json
 
 {
-    "nombre": "Producto CON unidad inexistente",
+    "nombre": "Producto con unidad inexistente",
     "descripcion": "Prueba RN-03",
     "precio_base": 1000.00,
     "unidad_venta_id": 999999,
@@ -115,65 +187,23 @@ Content-Type: application/json
 }
 
 
-###############################################################################
-# RN-01 - STOCK NEGATIVO
-###############################################################################
-
-### POST - Stock negativo
-# Esperado: 422 Unprocessable Entity
-POST {{baseUrl}}/productos/
+### PUT - Unidad de venta inexistente
+# Esperado: 404 Not Found
+PUT {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
 Content-Type: application/json
 
 {
-    "nombre": "Producto stock negativo",
-    "descripcion": "Prueba de validacion",
-    "precio_base": 1000.00,
-    "unidad_venta_id": 1,
-    "stock_cantidad": -1.000,
+    "nombre": "Ravioles",
+    "descripcion": "Prueba RN-03 al actualizar",
+    "precio_base": 4800.00,
+    "unidad_venta_id": 999999,
+    "stock_cantidad": 10.000,
     "disponible": true
 }
 
 
 ###############################################################################
-# RN-01 - PRECIO NEGATIVO
-###############################################################################
-
-### POST - Precio negativo
-# Esperado: 422 Unprocessable Entity
-POST {{baseUrl}}/productos/
-Content-Type: application/json
-
-{
-    "nombre": "Producto precio negativo",
-    "descripcion": "Prueba de validacion",
-    "precio_base": -100.00,
-    "unidad_venta_id": 1,
-    "stock_cantidad": 5.000,
-    "disponible": true
-}
-
-
-###############################################################################
-# RN-01 - NOMBRE MENOR A 3 CARACTERES
-###############################################################################
-
-### POST - Nombre demasiado corto
-# Esperado: 422 Unprocessable Entity
-POST {{baseUrl}}/productos/
-Content-Type: application/json
-
-{
-    "nombre": "AB",
-    "descripcion": "Prueba de validacion",
-    "precio_base": 1000.00,
-    "unidad_venta_id": 1,
-    "stock_cantidad": 5.000,
-    "disponible": true
-}
-
-
-###############################################################################
-# RN-10 - STOCK DECIMAL EN UNIDAD CONTABLE
+# RN-10 - STOCK EN UNIDADES CONTABLES
 ###############################################################################
 
 ### POST - Pieza con stock decimal
@@ -192,10 +222,6 @@ Content-Type: application/json
 }
 
 
-###############################################################################
-# RN-10 - STOCK ENTERO EN UNIDAD CONTABLE
-###############################################################################
-
 ### POST - Pieza con stock entero
 # Esperado: 201 Created
 # @name crearProductoContable
@@ -212,8 +238,42 @@ Content-Type: application/json
 }
 
 
+### PUT - Cambiar producto a pieza con stock decimal
+# Esperado: 422 Unprocessable Entity
+PUT {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
+Content-Type: application/json
+
+{
+    "nombre": "Ravioles",
+    "descripcion": "Prueba RN-10 en actualizacion",
+    "precio_base": 4800.00,
+    "unidad_venta_id": 5,
+    "stock_cantidad": 10.500,
+    "disponible": true
+}
+
+
 ###############################################################################
-# RN-11 - HAY STOCK TRUE
+# RN-02 - NOMBRE REPETIDO AL ACTUALIZAR
+###############################################################################
+
+### PUT - Intentar actualizar Empanada con nombre Ravioles
+# Esperado: 409 Conflict
+PUT {{baseUrl}}/productos/{{crearProductoContable.response.body.$.id}}
+Content-Type: application/json
+
+{
+    "nombre": "Ravioles",
+    "descripcion": "Intento de nombre repetido",
+    "precio_base": 1500.00,
+    "unidad_venta_id": 5,
+    "stock_cantidad": 10,
+    "disponible": true
+}
+
+
+###############################################################################
+# RN-11 - HAY_STOCK
 ###############################################################################
 
 ### GET - Verificar hay_stock con stock mayor a 0
@@ -221,11 +281,7 @@ Content-Type: application/json
 GET {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
 
 
-###############################################################################
-# PUT - ACTUALIZAR PRODUCTO Y LLEVAR STOCK A 0
-###############################################################################
-
-### PUT - Reemplazo completo con stock en 0
+### PUT - Actualizar producto y llevar stock a 0
 # Esperado: 200 OK y hay_stock = false
 PUT {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
 Content-Type: application/json
@@ -240,21 +296,17 @@ Content-Type: application/json
 }
 
 
-###############################################################################
-# RN-11 - HAY STOCK FALSE
-###############################################################################
-
 ### GET - Verificar hay_stock despues de llevar stock a 0
 # Esperado: stock_cantidad = 0 y hay_stock = false
 GET {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
 
 
 ###############################################################################
-# RN-12 - DISPONIBLE INDEPENDIENTE DEL STOCK
+# RN-12 - DISPONIBLE, ACTIVO Y STOCK SON INDEPENDIENTES
 ###############################################################################
 
 ### PUT - Pausar venta manteniendo stock en 0
-# Esperado: disponible = false, activo sin modificarse
+# Esperado: 200 OK y disponible = false
 PUT {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
 Content-Type: application/json
 
@@ -268,11 +320,8 @@ Content-Type: application/json
 }
 
 
-###############################################################################
-# FILTRO DISPONIBLE FALSE
-###############################################################################
-
-### GET - Buscar productos con venta pausada
+### GET - Productos con venta pausada
+# Esperado: Ravioles debe aparecer
 GET {{baseUrl}}/productos/?disponible=false
 
 
@@ -286,26 +335,19 @@ DELETE {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
 
 
 ###############################################################################
-# LISTADO POR DEFECTO DESPUES DEL DELETE
+# VERIFICACIONES DESPUES DE LA BAJA
 ###############################################################################
 
-### GET - El producto anulado no debe aparecer en listado por defecto
+### GET - El producto anulado no aparece en el listado por defecto
 GET {{baseUrl}}/productos/
 
 
-###############################################################################
-# FILTRO ACTIVO FALSE
-###############################################################################
-
-### GET - El producto anulado debe aparecer
+### GET - Listar productos anulados
+# Esperado: Ravioles debe aparecer
 GET {{baseUrl}}/productos/?activo=false
 
 
-###############################################################################
-# GET POR ID DE PRODUCTO ANULADO
-###############################################################################
-
-### GET - Un producto anulado sigue existiendo y puede consultarse por ID
+### GET - Producto anulado por ID
 # Esperado: 200 OK
 GET {{baseUrl}}/productos/{{crearProducto.response.body.$.id}}
 
@@ -340,11 +382,9 @@ Content-Type: application/json
 
 ###############################################################################
 # FILTRO CATEGORIA_ID
-#
-# Este escenario necesita primero clasificar un producto en una categoria.
-# La preparacion de esa relacion se demuestra en relaciones.http.
 ###############################################################################
 
 ### GET - Filtrar productos por categoria
-# Reemplazar 1 por el ID de una categoria utilizada en relaciones.http
+# La preparación de la relación se demuestra en relaciones.http.
+# Reemplazar 1 por el ID de la categoria utilizada en relaciones.http.
 GET {{baseUrl}}/productos/?categoria_id=1

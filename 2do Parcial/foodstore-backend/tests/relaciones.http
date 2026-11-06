@@ -6,6 +6,7 @@
 ###############################################################################
 
 ### Crear producto para las pruebas de relaciones
+# Esperado: 201 Created
 # @name crearProductoRelacion
 POST {{baseUrl}}/productos/
 Content-Type: application/json
@@ -25,6 +26,7 @@ Content-Type: application/json
 ###############################################################################
 
 ### Crear primera categoria
+# Esperado: 201 Created
 # @name crearCategoriaPastas
 POST {{baseUrl}}/categorias/
 Content-Type: application/json
@@ -36,6 +38,7 @@ Content-Type: application/json
 
 
 ### Crear segunda categoria
+# Esperado: 201 Created
 # @name crearCategoriaPromociones
 POST {{baseUrl}}/categorias/
 Content-Type: application/json
@@ -47,10 +50,53 @@ Content-Type: application/json
 
 
 ###############################################################################
+# CATEGORIAS - LISTADO
+###############################################################################
+
+### GET - Listar categorias activas
+# Esperado: 200 OK
+# Deben aparecer Pastas y Promociones
+GET {{baseUrl}}/categorias/
+
+
+###############################################################################
+# CATEGORIAS - GET POR ID
+###############################################################################
+
+### GET - Obtener categoria existente
+# Esperado: 200 OK
+GET {{baseUrl}}/categorias/{{crearCategoriaPastas.response.body.$.id}}
+
+
+###############################################################################
+# CATEGORIAS - FILTRO SEARCH
+###############################################################################
+
+### GET - Buscar categoria por nombre
+# Esperado: debe aparecer Pastas
+GET {{baseUrl}}/categorias/?search=Past
+
+
+###############################################################################
+# RN-01 - NOMBRE DE CATEGORIA MENOR A 3 CARACTERES
+###############################################################################
+
+### POST - Nombre demasiado corto
+# Esperado: 422 Unprocessable Entity
+POST {{baseUrl}}/categorias/
+Content-Type: application/json
+
+{
+    "nombre": "AB",
+    "descripcion": "Categoria invalida"
+}
+
+
+###############################################################################
 # RN-02 - NOMBRE DE CATEGORIA REPETIDO
 ###############################################################################
 
-### Crear categoria con nombre repetido
+### POST - Crear categoria con nombre repetido
 # Esperado: 409 Conflict
 POST {{baseUrl}}/categorias/
 Content-Type: application/json
@@ -59,6 +105,61 @@ Content-Type: application/json
     "nombre": "Pastas",
     "descripcion": "Otra categoria con el mismo nombre"
 }
+
+
+###############################################################################
+# CATEGORIAS - ACTUALIZACION
+###############################################################################
+
+### PUT - Actualizar categoria Promociones
+# Esperado: 200 OK
+PUT {{baseUrl}}/categorias/{{crearCategoriaPromociones.response.body.$.id}}
+Content-Type: application/json
+
+{
+    "nombre": "Ofertas",
+    "descripcion": "Productos en oferta"
+}
+
+
+###############################################################################
+# RN-02 - NOMBRE REPETIDO AL ACTUALIZAR CATEGORIA
+###############################################################################
+
+### PUT - Intentar renombrar Ofertas como Pastas
+# Esperado: 409 Conflict
+PUT {{baseUrl}}/categorias/{{crearCategoriaPromociones.response.body.$.id}}
+Content-Type: application/json
+
+{
+    "nombre": "Pastas",
+    "descripcion": "Intento de nombre repetido"
+}
+
+
+###############################################################################
+# RN-03 - CATEGORIA INEXISTENTE
+###############################################################################
+
+### GET - Categoria inexistente
+# Esperado: 404 Not Found
+GET {{baseUrl}}/categorias/999999
+
+
+### PUT - Categoria inexistente
+# Esperado: 404 Not Found
+PUT {{baseUrl}}/categorias/999999
+Content-Type: application/json
+
+{
+    "nombre": "Categoria inexistente",
+    "descripcion": "Prueba RN-03"
+}
+
+
+### DELETE - Categoria inexistente
+# Esperado: 404 Not Found
+DELETE {{baseUrl}}/categorias/999999
 
 
 ###############################################################################
@@ -81,15 +182,16 @@ Content-Type: application/json
 ###############################################################################
 
 ### Ver categorias del producto
-# Esperado: Pastas con es_principal = true
+# Esperado:
+# Pastas -> es_principal = true
 GET {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
 
 
 ###############################################################################
-# RN-09 - SEGUNDA CATEGORIA PRINCIPAL
+# RN-09 - CAMBIO DE CATEGORIA PRINCIPAL
 ###############################################################################
 
-### Clasificar en Promociones como nueva principal
+### Clasificar en Ofertas como nueva principal
 # Esperado: 201 Created
 POST {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
 Content-Type: application/json
@@ -100,14 +202,10 @@ Content-Type: application/json
 }
 
 
-###############################################################################
-# RN-09 - COMPROBAR CAMBIO DE PRINCIPAL
-###############################################################################
-
 ### Verificar que solamente quede una categoria principal
 # Esperado:
-# Pastas       -> es_principal = false
-# Promociones  -> es_principal = true
+# Pastas  -> es_principal = false
+# Ofertas -> es_principal = true
 GET {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}/categorias
 
 
@@ -131,7 +229,7 @@ Content-Type: application/json
 ###############################################################################
 
 ### Listar productos pertenecientes a Pastas
-# Esperado: debe aparecer Sorrentinos
+# Esperado: debe aparecer Sorrentinos una sola vez
 GET {{baseUrl}}/productos/?categoria_id={{crearCategoriaPastas.response.body.$.id}}
 
 
@@ -139,26 +237,60 @@ GET {{baseUrl}}/productos/?categoria_id={{crearCategoriaPastas.response.body.$.i
 # RN-06 - ANULAR CATEGORIA
 ###############################################################################
 
-### Anular categoria Pastas
+### DELETE - Anular categoria Pastas
 # Esperado: 204 No Content
 DELETE {{baseUrl}}/categorias/{{crearCategoriaPastas.response.body.$.id}}
 
 
 ###############################################################################
-# RN-06 - PRODUCTO DEBE SEGUIR ACTIVO
+# CATEGORIAS - FILTRO ACTIVO FALSE
+###############################################################################
+
+### GET - Listar categorias anuladas
+# Esperado: debe aparecer Pastas
+GET {{baseUrl}}/categorias/?activo=false
+
+
+###############################################################################
+# RN-06 - ANULAR CATEGORIA NO ANULA PRODUCTO
 ###############################################################################
 
 ### Consultar producto despues de anular Pastas
 # Esperado: 200 OK
-# El producto sigue existiendo y activo
+# El producto Sorrentinos sigue existiendo
 GET {{baseUrl}}/productos/{{crearProductoRelacion.response.body.$.id}}
+
+
+###############################################################################
+# RN-04 - ANULAR CATEGORIA DOS VECES
+###############################################################################
+
+### DELETE - Intentar anular nuevamente Pastas
+# Esperado: 409 Conflict
+DELETE {{baseUrl}}/categorias/{{crearCategoriaPastas.response.body.$.id}}
+
+
+###############################################################################
+# RN-05 - MODIFICAR CATEGORIA ANULADA
+###############################################################################
+
+### PUT - Intentar modificar Pastas despues de anularla
+# Esperado: 409 Conflict
+PUT {{baseUrl}}/categorias/{{crearCategoriaPastas.response.body.$.id}}
+Content-Type: application/json
+
+{
+    "nombre": "Pastas modificadas",
+    "descripcion": "No deberia modificarse"
+}
 
 
 ###############################################################################
 # RN-08 - NO CLASIFICAR EN CATEGORIA ANULADA
 ###############################################################################
 
-### Crear otro producto para intentar clasificarlo en Pastas anulada
+### Crear producto secundario
+# Esperado: 201 Created
 # @name crearProductoSecundario
 POST {{baseUrl}}/productos/
 Content-Type: application/json
@@ -173,7 +305,7 @@ Content-Type: application/json
 }
 
 
-### Intentar clasificar en categoria anulada
+### Intentar clasificar producto activo en categoria Pastas anulada
 # Esperado: 409 Conflict
 POST {{baseUrl}}/productos/{{crearProductoSecundario.response.body.$.id}}/categorias
 Content-Type: application/json
@@ -188,12 +320,12 @@ Content-Type: application/json
 # RN-08 - NO CLASIFICAR PRODUCTO ANULADO
 ###############################################################################
 
-### Anular producto secundario
+### DELETE - Anular producto secundario
 # Esperado: 204 No Content
 DELETE {{baseUrl}}/productos/{{crearProductoSecundario.response.body.$.id}}
 
 
-### Intentar clasificar producto anulado
+### Intentar clasificar producto anulado en categoria activa
 # Esperado: 409 Conflict
 POST {{baseUrl}}/productos/{{crearProductoSecundario.response.body.$.id}}/categorias
 Content-Type: application/json
@@ -205,7 +337,7 @@ Content-Type: application/json
 
 
 ###############################################################################
-# RN-03 - CATEGORIA INEXISTENTE
+# RN-03 - CATEGORIA INEXISTENTE AL CLASIFICAR
 ###############################################################################
 
 ### Intentar clasificar usando categoria inexistente
