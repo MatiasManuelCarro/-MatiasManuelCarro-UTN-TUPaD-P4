@@ -6,12 +6,14 @@ import type { UnidadMedida } from "./types/unidadMedida";
 import { Navbar } from "./components/Navbar"
 import { Footer } from "./components/Footer"
 import { ProductoList } from "./components/ProductoList";
+import { ProductoModal } from "./components/ProductoModal";
 
 function App() {
     const [productos, setProductos] = useState<Producto[]>([]);
     const [unidades, setUnidades] = useState<UnidadMedida[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [modalAbierto, setModalAbierto] = useState(false)
 
     useEffect(() => {
         setLoading(true);
@@ -94,8 +96,15 @@ function App() {
             <Navbar />
             <main className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8">
                 <section className="flex flex-col gap-4">
+                <div>
                     <h2 className="text-2xl font-semibold">Productos</h2>
 
+                    <button type="button" onClick={()=> setModalAbierto(true)} 
+                    className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-bold text-white hover:bg-slate-600 hover:shadow-2xs active:translate-y-0.25"
+                    >
+                        Nuevo Producto
+                    </button>
+                </div>
                     <ProductoList
                         productos={productos}
                         onDisponibilidad={handleDisponibilidad}
@@ -111,6 +120,13 @@ function App() {
                     </pre>
                 </section>
             </main>
+
+            {modalAbierto &&(
+                <ProductoModal unidades={unidades}
+            onCerrar={() => setModalAbierto(false)}
+            />
+            )}
+
             <Footer />
         </div>
     );
