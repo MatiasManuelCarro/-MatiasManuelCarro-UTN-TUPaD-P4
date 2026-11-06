@@ -14,3 +14,13 @@ export interface Producto{
     categorias: Categoria[]
     hay_stock: boolean    
 }
+
+export interface ProductoNuevo {
+    nombre: string;
+    descripcion: string;
+    precio_base: number;
+    unidad_venta_id: number;
+    stock_cantidad: number;
+    disponible: boolean;
+}
+

@@ -61,6 +61,10 @@ function App() {
         })
     }
 
+    const handleProductoCreado = (producto: Producto) => {
+        setProductos([...productos, producto])
+    }
+
     if (loading) {
         return (
             <main className="min-h-screen bg-gray-50 p-8 text-gray-900">
@@ -124,6 +128,7 @@ function App() {
             {modalAbierto &&(
                 <ProductoModal unidades={unidades}
             onCerrar={() => setModalAbierto(false)}
+            onProductoCreado={handleProductoCreado}
             />
             )}
 

@@ -1,5 +1,6 @@
-import type { Producto } from "./types/producto";
+import type { Producto, ProductoNuevo } from "./types/producto";
 import type { UnidadMedida } from "./types/unidadMedida";
+
 
 const API_URL = "http://127.0.0.1:8000/api/v1"
 
@@ -21,6 +22,24 @@ export async function getUnidades(): Promise<UnidadMedida[]> {
     }
 
     return response.json()
+}
+
+export async function crearProducto(
+    producto: ProductoNuevo,
+): Promise<Producto> {
+    const response = await fetch(`${API_URL}/productos/`,{
+        method: "POST",
+        headers: {
+            "content-Type": "application/json",
+        },
+        body: JSON.stringify(producto),
+    });
+
+    if(!response.ok){
+        throw new Error("No se pudo crear el producto");
+    }
+
+    return response.json();
 }
 
 export async function actualizarProducto(
