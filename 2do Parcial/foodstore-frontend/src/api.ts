@@ -12,7 +12,7 @@ async function obtenerError(response: Response): Promise<string> {
 
 
 export async function getProductos(): Promise<Producto[]> {
-    const response = await fetch(`${API_URL}/productos/`)
+    const response = await fetch(`${API_URL}/productos/?limit=50`)
 
     if (!response.ok) {
         throw new Error(await obtenerError(response))
