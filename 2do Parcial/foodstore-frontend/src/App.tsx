@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 
-import { actualizarProducto,anularProducto, getProductos, getUnidades } from "./api";
+import {
+    actualizarProducto,
+    anularProducto,
+    getProductos,
+    getUnidades,
+} from "./api";
 import type { Producto } from "./types/producto";
 import type { UnidadMedida } from "./types/unidadMedida";
-import { Navbar } from "./components/Navbar"
-import { Footer } from "./components/Footer"
+import { Navbar } from "./components/Navbar";
+import { Footer } from "./components/Footer";
 import { ProductoList } from "./components/ProductoList";
 import { ProductoModal } from "./components/ProductoModal";
 
@@ -13,7 +18,9 @@ function App() {
     const [unidades, setUnidades] = useState<UnidadMedida[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [modalAbierto, setModalAbierto] = useState(false)
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const [productoSeleccionado, setProductoSeleccionado] =
+        useState<Producto | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -35,54 +42,68 @@ function App() {
     const handleDisponibilidad = (producto: Producto) => {
         const productoModificado = {
             ...producto,
-            disponible: !producto.disponible
-        }
+            disponible: !producto.disponible,
+        };
 
         actualizarProducto(productoModificado).then((productoActualizado) => {
             const productosActualizados = productos.map((productoActual) => {
                 if (productoActual.id === productoActualizado.id) {
-                    return productoActualizado
+                    return productoActualizado;
                 }
 
-                return productoActual
-            })
+                return productoActual;
+            });
 
-            setProductos(productosActualizados)
-        })
-    }
+            setProductos(productosActualizados);
+        });
+    };
 
-    const handleAnular = (producto: Producto) =>{
-        anularProducto(producto.id).then(() =>{
+    const handleAnular = (producto: Producto) => {
+        anularProducto(producto.id).then(() => {
             const productosActualizados = productos.filter(
-                (productoActual) => productoActual.id !== producto.id
-            )
+                (productoActual) => productoActual.id !== producto.id,
+            );
 
-            setProductos(productosActualizados)
-        })
-    }
+            setProductos(productosActualizados);
+        });
+    };
 
     const handleProductoCreado = (producto: Producto) => {
-        setProductos([...productos, producto])
+        setProductos([...productos, producto]);
+    };
+
+    
+    const handleEditar = (producto: Producto) => {
+        setProductoSeleccionado(producto);
+        setModalAbierto(true)
+    };
+
+    const handleProductoActualizado = (productoActualizado: Producto) => {
+        const productosActualizados = productos.map((producto) => {
+            if (producto.id === productoActualizado.id) {
+                return productoActualizado
+            }
+
+            return producto
+        })
+
+        setProductos(productosActualizados)
     }
 
     if (loading) {
         return (
             <main className="min-h-screen bg-gray-50 p-8 text-gray-900">
-                <p className="text-base text-gray-600">
-                    Cargando productos...
-                </p>
+                <p className="text-base text-gray-600">Cargando productos...</p>
             </main>
-        )
+        );
     }
 
     if (error) {
         return (
             <main className="min-h-screen bg-gray-50 p-8 text-gray-900">
-                <p className="text-base text-red-600">
-                    {error}
-                </p>
+                <p className="text-base text-red-600">{error}</p>
             </main>
-        )
+        );
     }
 
     if (productos.length === 0) {
@@ -92,7 +113,7 @@ function App() {
                     No hay productos para mostrar.
                 </p>
             </main>
-        )
+        );
     }
 
     return (
@@ -100,17 +121,23 @@ function App() {
             <Navbar />
             <main className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8">
                 <section className="flex flex-col gap-4">
-                <div>
-                    <h2 className="text-2xl font-semibold">Productos</h2>
+                    <div>
+                        <h2 className="text-2xl font-semibold">Productos</h2>
 
-                    <button type="button" onClick={()=> setModalAbierto(true)} 
-                    className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-bold text-white hover:bg-slate-600 hover:shadow-2xs active:translate-y-0.25"
-                    >
-                        Nuevo Producto
-                    </button>
-                </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setProductoSeleccionado(null);
+                                setModalAbierto(true);
+                            }}
+                            className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-bold text-white hover:bg-slate-600 hover:shadow-2xs active:translate-y-px"
+                        >
+                            Nuevo Producto
+                        </button>
+                    </div>
                     <ProductoList
                         productos={productos}
+                        onEditar={handleEditar}
                         onDisponibilidad={handleDisponibilidad}
                         onAnular={handleAnular}
                     />
@@ -125,11 +152,14 @@ function App() {
                 </section>
             </main>
 
-            {modalAbierto &&(
-                <ProductoModal unidades={unidades}
-            onCerrar={() => setModalAbierto(false)}
-            onProductoCreado={handleProductoCreado}
-            />
+            {modalAbierto && (
+                <ProductoModal
+                    unidades={unidades}
+                    producto={productoSeleccionado}
+                    onCerrar={() => setModalAbierto(false)}
+                    onProductoCreado={handleProductoCreado}
+                    onProductoActualizado={handleProductoActualizado}
+                />
             )}
 
             <Footer />

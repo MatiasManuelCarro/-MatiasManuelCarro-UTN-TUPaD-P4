@@ -9,14 +9,15 @@ import type { Producto } from "../types/producto";
 // }
 
 interface ProductoCardProps {
-    producto: Producto
-    onDisponibilidad: (producto: Producto) => void
-    onAnular: (producto: Producto) => void
+    producto: Producto;
+    onEditar: (producto: Producto) => void;
+    onDisponibilidad: (producto: Producto) => void;
+    onAnular: (producto: Producto) => void;
 }
 
 export function ProductoCard({
     producto,
-    // onEditar,
+    onEditar,
     onDisponibilidad,
     onAnular,
 }: ProductoCardProps) {
@@ -66,6 +67,14 @@ export function ProductoCard({
             {/* Botones */}
 
             <div className="my-auto flex flex-wrap gap-2 pt-2">
+                <button
+                    type="button"
+                    onClick={() => onEditar(producto)}
+                    className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-600"
+                >
+                    Editar
+                </button>
+
                 <button
                     type="button"
                     onClick={() => onDisponibilidad(producto)}

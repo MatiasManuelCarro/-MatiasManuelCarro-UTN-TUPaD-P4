@@ -3,14 +3,14 @@ import type { Producto } from "../types/producto";
 
 interface ProductoListProps {
     productos: Producto[];
-    // onEditar: (producto: Producto) => void;
+    onEditar: (producto: Producto) => void;
     onDisponibilidad: (producto: Producto) => void;
     onAnular: (producto: Producto) => void;
 }
 
 export function ProductoList({
     productos,
-    // onEditar,
+    onEditar,
     onDisponibilidad,
     onAnular,
 }: ProductoListProps) {
@@ -20,7 +20,7 @@ export function ProductoList({
                 <ProductoCard
                     key={producto.id}
                     producto={producto}
-                    // onEditar={onEditar}
+                    onEditar={onEditar}
                     onDisponibilidad={onDisponibilidad}
                     onAnular={onAnular}
                 />

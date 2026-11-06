@@ -1,13 +1,16 @@
 import type { UnidadMedida } from "../types/unidadMedida";
 import { useState } from "react";
 import type { SubmitEvent } from "react";
-import { crearProducto } from "../api";
+import { actualizarProducto, crearProducto } from "../api"
 import type { Producto } from "../types/producto"
+
 
 interface ProductoModalProps {
     unidades: UnidadMedida[];
+    producto: Producto | null
     onCerrar: () => void;
     onProductoCreado: (producto: Producto) => void
+    onProductoActualizado: (producto: Producto) => void
 }
 
 const fieldClassName = "flex items-center gap-4 px-2 py-2";
@@ -17,14 +20,14 @@ const labelClassName = "w-20 text-sm font-semibold text-gray-800";
 const inputClassName =
     "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-slate-700 focus:ring-2 focus:ring-blue-100";
 
-export function ProductoModal({ unidades, onCerrar, onProductoCreado}: ProductoModalProps) {
+export function ProductoModal({ unidades, producto, onCerrar, onProductoCreado, onProductoActualizado }: ProductoModalProps) {
     const [form, setForm] = useState({
-        nombre: "",
-        descripcion: "",
-        precio_base: "",
-        unidad_venta_id: "",
-        stock_cantidad: "",
-        disponible: true,
+        nombre: producto?.nombre ?? "",
+        descripcion: producto?.descripcion ?? "",
+        precio_base: producto?.precio_base ?? "",
+        unidad_venta_id: producto ? String(producto.unidad_venta_id) : "",
+        stock_cantidad: producto?.stock_cantidad ?? "",
+        disponible: producto?.disponible ?? true,
     });
 
     const [mensaje, setMensaje] = useState("");
@@ -32,16 +35,33 @@ export function ProductoModal({ unidades, onCerrar, onProductoCreado}: ProductoM
     const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        const producto = {
+        const datosFormulario = {
             ...form,
-            precio_base: Number(form.precio_base),
             unidad_venta_id: Number(form.unidad_venta_id),
-            stock_cantidad: Number(form.stock_cantidad),
         };
 
-        crearProducto(producto).then((productoCreado) => {
+        if (producto) {
+            const productoModificado = {
+                ...producto,
+                ...datosFormulario
+            }
+
+            actualizarProducto(productoModificado).then((ProductoActualizado) => {
+                onProductoActualizado(ProductoActualizado)
+                onCerrar()
+            })
+
+            return
+
+        }
+
+        crearProducto({
+            ...datosFormulario,
+            precio_base: Number(datosFormulario.precio_base),
+            stock_cantidad: Number(datosFormulario.stock_cantidad),
+        }).then((productoCreado) => {
             onProductoCreado(productoCreado)
-            
+
             setMensaje("Producto creado correctamente");
 
             setForm({
@@ -64,7 +84,7 @@ export function ProductoModal({ unidades, onCerrar, onProductoCreado}: ProductoM
             <div className="w-full max-w-lg rounded-lg bg-white p-6">
                 <div className="flex items-center justify-between gap-4">
                     <h2 className="text-xl mb-4 font-semibold text-gray-900">
-                        Nuevo Producto
+                        {producto ? "Editar Producto" : "Nuevo Producto"}
                     </h2>
 
                     <button
@@ -132,7 +152,7 @@ export function ProductoModal({ unidades, onCerrar, onProductoCreado}: ProductoM
                             name="precio_base"
                             type="number"
                             min="0"
-                            step="1"
+                            step="0.01"
                             value={form.precio_base}
                             onChange={(event) => {
                                 setForm({
@@ -156,7 +176,7 @@ export function ProductoModal({ unidades, onCerrar, onProductoCreado}: ProductoM
                             name="stock_cantidad"
                             type="number"
                             min="0"
-                            step="1"
+                            step="any"
                             value={form.stock_cantidad}
                             onChange={(event) => {
                                 setForm({
@@ -203,7 +223,7 @@ export function ProductoModal({ unidades, onCerrar, onProductoCreado}: ProductoM
                             type="submit"
                             className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:cursor-pointer hover:bg-slate-700"
                         >
-                            Crear producto
+                            {producto ? "Guardar cambios" : "Crear producto"}
                         </button>
                     </div>
 
